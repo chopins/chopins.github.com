@@ -1,8 +1,8 @@
-#!/usr/bin/env php$
-<?php$
-while(true) {$
-    echo '>>> ';$
-    $line  = fgets(STDIN);$
-    eval("\$_TOKEN__=$line;");$                                                                                                               
-    var_dump($_TOKEN__);$
-}$ 
+#!/usr/bin/env php
+<?php
+while(true) {
+    echo '>>> ';
+    $line  = fgets(STDIN);
+    eval("\$_TOKEN__=$line;");                                                                                                              
+    var_dump($_TOKEN__);
+}
