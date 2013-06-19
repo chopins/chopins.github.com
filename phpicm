@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ "$#" -eq 2 ] && [ -d "$2" ] ;then
+PHPBIN_DIR=$2
+elif [ -d '/opt/php/bin' ]; then
+PHPBIN_DIR='/opt/php/bin/'
+PHPINI='/opt/php/lib/php.ini'
+elif [ -d '/usr/local/php/bin' ]; then
+PHPBIN_DIR='usr/local/php/bin/'
+PHPINI='/usr/local/php/php.ini'
+elif [ -e '/usr/bin/phpize' ];then
+PHPBIN_DIR='/usr/bin/'
+PHPINI='/etc/php.ini'
+else
+  echo 'Not Found PHP'
+exit
+fi
+echo "Found phpize in ${PHPBIN_DIR}phpize"
+echo "Found php-config in ${PHPBIN_DIR}php-config"
+
+if [ ! -e "${PHPBIN_DIR}php-fpm" ] ; then
+	echo "Found PHP-FPM in ${PHPBIN_DIR}php-fpm"
+else
+	echo "Not Found PHP-FPM"
+fi
+
+${PHPBIN_DIR}phpize && ./configure --with-php-config=${PHPBIN_DIR}php-config $1 && make && make install
+N=`ls ./modules`
+echo 'Write extension='$N' to php.ini'
+make clean && /opt/php/bin/phpize --clean && echo 'extension='$N >>${PHPINI}
+echo 'Restart php-fpm'
+killall -s USR2 php-fpm
+
