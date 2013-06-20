@@ -1,8 +1,27 @@
 #!/usr/bin/env php
 <?php
-while(true) {
-    echo '>>> ';
-    $line  = fgets(STDIN);
-    eval("\$_TOKEN__=$line;");                                                                                                              
+$readline = false;
+if (!extension_loaded('readline')) {
+    if (@dl('readline.' . PHP_SHLIB_SUFFIX)) {
+        $readline = true;
+    }
+} else {
+   $readline = true;
+}
+function gets() {
+    global $readline;
+    if ($readline) {
+        $line = readline('>>> ');
+    readline_add_history($line);
+	return $line;
+    } else {
+        echo '>>> ';
+        return fgets(STDIN);
+    }
+}
+
+while (true) {
+    $line = gets();
+    eval("\$_TOKEN__=$line;");
     var_dump($_TOKEN__);
 }
