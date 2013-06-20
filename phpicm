@@ -12,7 +12,7 @@ elif [ -e '/usr/bin/phpize' ];then
 PHPBIN_DIR='/usr/bin/'
 PHPINI='/etc/php.ini'
 else
-  echo 'Not Found PHP'
+	echo 'Not Found PHP'
 exit
 fi
 echo "Found phpize in ${PHPBIN_DIR}phpize"
@@ -22,12 +22,45 @@ if [ ! -e "${PHPBIN_DIR}php-fpm" ] ; then
 	echo "Found PHP-FPM in ${PHPBIN_DIR}php-fpm"
 else
 	echo "Not Found PHP-FPM"
+exit
 fi
 
-${PHPBIN_DIR}phpize && ./configure --with-php-config=${PHPBIN_DIR}php-config $1 && make && make install
+${PHPBIN_DIR}phpize
+
+if [ $? -gt 0 ];then
+exit $?
+fi
+
+./configure --with-php-config=${PHPBIN_DIR}php-config $1
+
+if [ $? -gt 0 ];then
+exit $?
+fi
+ 
+make 
+ 
+if [ $? -gt 0 ];then
+exit $?
+fi
+
+make install
+
+if [ $? -gt 0 ];then
+exit $?
+fi
+
 N=`ls ./modules`
+
+if [ $? -gt 0 ];then
+exit $?
+fi
+
 echo 'Write extension='$N' to php.ini'
 make clean && /opt/php/bin/phpize --clean && echo 'extension='$N >>${PHPINI}
-echo 'Restart php-fpm'
+echo 'Restart php-fpm: '
 killall -s USR2 php-fpm
+
+if [ $? -gt 0 ];then
+echo 'Failure'
+fi
 
