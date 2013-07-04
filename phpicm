@@ -1,30 +1,74 @@
 #!/bin/bash
 
+USER=`whoami`
+
+if [ $USER != 'root' ];then
+echo 'must use root exec this script'
+exit
+
+fi
+
+get_php_ini() {
+
+for i in $@;
+do
+case $i in
+    --with-config-file-path=*)
+	value=`echo "$i" | sed -e 's/--with-config-file-path=//'`
+    echo $value
+	break;
+    ;;
+    --with-config-file-scan-dir=*)
+	value=`echo "$i" | sed -e 's/--with-config-file-scan-dir=//'`
+    echo "$value/php.ini"
+	break;
+    ;;
+    *)
+    ;;
+esac
+
+done
+}
+
 if [ "$#" -eq 2 ] && [ -d "$2" ] ;then
 PHPBIN_DIR=$2
-elif [ -d '/opt/php/bin' ]; then
+elif [ -e '/opt/php/bin/phpize' ]; then
 PHPBIN_DIR='/opt/php/bin/'
-PHPINI='/opt/php/lib/php.ini'
-elif [ -d '/usr/local/php/bin' ]; then
+elif [ -e '/usr/local/php/bin/phpize' ]; then
 PHPBIN_DIR='usr/local/php/bin/'
-PHPINI='/usr/local/php/php.ini'
 elif [ -e '/usr/bin/phpize' ];then
 PHPBIN_DIR='/usr/bin/'
-PHPINI='/etc/php.ini'
 else
 	echo 'Not Found PHP'
 exit
 fi
-echo "Found phpize in ${PHPBIN_DIR}phpize"
-echo "Found php-config in ${PHPBIN_DIR}php-config"
 
-if [ ! -e "${PHPBIN_DIR}php-fpm" ] ; then
-	echo "Found PHP-FPM in ${PHPBIN_DIR}php-fpm"
+echo "Found phpize in ${PHPBIN_DIR}phpize"
+if [ -e "${PHPBIN_DIR}/php-config" ];then
+echo "Found php-config in ${PHPBIN_DIR}php-config"
 else
-	echo "Not Found PHP-FPM"
-exit
+echo "Not Found php-config in ${PHPBIN_DIR}php-config"
+fi
+PHPCONFIG=`${PHPBIN_DIR}/php-config --configure-options`
+PHPINI=`get_php_ini ${PHPCONFIG}`
+if [ "$PHPINI" == "" ];then
+PHPPRE=`${PHPBIN_DIR}/php-config --prefix`
+PHPINI=`${PHPPRE}/lib/php.ini`
 fi
 
+if [ ! -e "$PHPINI" ];then
+	echo "Not Found php.ini"
+else
+	echo "Found php.ini in ${PHPINI}"
+fi
+PHPFPM=0
+if [ ! -e "${PHPBIN_DIR}php-fpm" ] ; then
+	echo "Found PHP-FPM in ${PHPBIN_DIR}php-fpm"
+PHPFPM=1
+else
+	echo "Not Found PHP-FPM"
+PHPFPM=0
+fi
 ${PHPBIN_DIR}phpize
 
 if [ $? -gt 0 ];then
@@ -55,12 +99,19 @@ if [ $? -gt 0 ];then
 exit $?
 fi
 
-echo 'Write extension='$N' to php.ini'
-make clean && /opt/php/bin/phpize --clean && echo 'extension='$N >>${PHPINI}
-echo 'Restart php-fpm: '
-killall -s USR2 php-fpm
-
-if [ $? -gt 0 ];then
-echo 'Failure'
+$exists = `cat ${PHPINI}|grep ^extension=${N}`
+if [ $exists -eq '' ];then
+	echo 'Write extension='$N' to php.ini'
+	echo 'extension='$N >>${PHPINI} 
+else 
+	echo "extension config exists"
 fi
 
+make clean && /opt/php/bin/phpize --clean 
+if [ $PHPFPM -eq 1 ];then
+	echo 'Restart php-fpm: '
+	killall -s USR2 php-fpm
+	if [ $? -gt 0 ];then
+	echo 'Failure'
+	fi
+fi
