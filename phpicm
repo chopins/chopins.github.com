@@ -99,8 +99,9 @@ if [ $? -gt 0 ];then
 exit $?
 fi
 
-$exists = `cat ${PHPINI}|grep ^extension=${N}`
-if [ $exists -eq '' ];then
+echo $PHPINI
+exists=`cat ${PHPINI}|grep extension=${N}`
+if [ $? -eq 1 ];then
 	echo 'Write extension='$N' to php.ini'
 	echo 'extension='$N >>${PHPINI} 
 else 
@@ -115,3 +116,4 @@ if [ $PHPFPM -eq 1 ];then
 	echo 'Failure'
 	fi
 fi
+
