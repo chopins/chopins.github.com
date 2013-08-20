@@ -9,8 +9,8 @@
 
 var style = document.createElement('style');
 style.type = 'text/css';
-style.innerHTML = '.article-item-list .title {color:#000000;} h2.article-title{font-size:15px;} .cat-nav-list .count{font-color:#333333;}';
-document.body.appendChild(style);
+style.innerHTML = '.article-item-list .title {color:#000000;} h2.article-title{font-size:15px;} .cat-nav-list .count{font-color:#333333;} .icon-right {height: 25px;width: 25px;line-height: 25px;text-align: center;} .cat-nav-list .expand-cat{left: 5px;top: 0px;}';
+document.getElementsByTagName('head')[0].appendChild(style);
 var app = document.getElementById('app');
 app.addEventListener('click',function(e) {
 var clickElement = e.target;
@@ -27,4 +27,4 @@ var header = clickElement.parentNode;
         span[span.length-1].click();
     }
 }
-}, false);
+}, false)
