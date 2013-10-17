@@ -15,13 +15,13 @@
     </header>
     <nav>
         <ul>
-            <li class="active"><a href="#overview">Overview</a></li>
+            <li><a href="#overview">Overview</a></li>
             <li><a href="#features">Features</a></li>
             <li><a href="#usage">Usage</a></li>
             <li><a href="#requirements">Requirements</a></li>
             <li><a href="http://toknot.com/LICENSE.txt">License</a></li>
             <li><a href="http://toknot.com/toknot">Documentation</a></li>
-            <li><a href="http://toknot.com/blog">Blog</a></li>
+            <li class="active"><a href="http://toknot.com/blog">Blog</a></li>
 <!--
 
 -->
@@ -60,7 +60,7 @@
     channel=7
     ssid=MyAP
     ```
-    
+
 3. 取消NetworkManager对WiFi的托管，否则hostapd无法启动网卡，取消方法见https://wiki.archlinux.org/index.php/Software_Access_Point#NetworkManager_is_interfering
 4. 打开防火墙配置，命令为firewall-config， 开启 伪装(Masquerading)
 5. 将无线网卡ip配置成网关ip,比如`ifconfig wlan0 192.168.1.1`
