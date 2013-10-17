@@ -61,9 +61,9 @@ channel=7
 ssid=MyAP
 ```
 
-3. 取消NetworkManager对WiFi的托管，否则hostapd无法启动网卡，取消方法见https://wiki.archlinux.org/index.php/Software_Access_Point#NetworkManager_is_interfering
+3. 取消NetworkManager对WiFi的托管，否则hostapd无法启动网卡，[取消方法见](https://wiki.archlinux.org/index.php/Software_Access_Point#NetworkManager_is_interfering)
 4. 打开防火墙配置，命令为firewall-config， 开启 伪装(Masquerading)
-5. 将无线网卡ip配置成网关ip,比如`ifconfig wlan0 192.168.1.1`
+5. 将无线网卡ip配置成网关ip,比如 `ifconfig wlan0 192.168.1.1`
 6. 设置需要连接该热点的设备为静态IP，比如 192.168.1.2
 7. 可以安装DHCP服务器实现动态获取IP，方法见google
 8. 然后systemctl enable hostapd
