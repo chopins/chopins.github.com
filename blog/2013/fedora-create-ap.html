@@ -74,8 +74,7 @@
         <script type="text/javascript">
             var converter = new Showdown.converter();
             var text = document.getElementById('content').innerHTML;
-            alert(text);
-            converter.makeHtml(text);
+            document.getElementById('content').innerHTML = converter.makeHtml(text);
         </script>
     </section>
         <footer>
