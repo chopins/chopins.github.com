@@ -5,8 +5,10 @@ svn查看指定用户更新记录
 `svn log -rhead:12344 -v|sed -n '/username/,/-----$/ p'`
 
 ==Fedora 18创建 AP 模式热点方法==
+
 1. 安装hostapd, yum安装即可
 2. 配置hostapd,编辑/etc/hostapd/hostapd.conf,如下
+
 ```
 ctrl_interface=/var/run/hostapd
 ctrl_interface_group=wheel
