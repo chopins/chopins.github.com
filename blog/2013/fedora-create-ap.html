@@ -29,8 +29,7 @@
     </nav>
  <section>
         <h2>Fedora 18创建 AP 模式热点方法</h2>
-        <div>
-            <p>
+        <div id="content">
                 ##Fedora 18创建 AP 模式热点方法##
 
 1. 安装hostapd, yum安装即可
@@ -70,8 +69,12 @@
 7. 可以安装DHCP服务器实现动态获取IP，方法见google
 8. 然后systemctl enable hostapd
 9, 在/etc/rc.d/rc.local(没有创建，并设置为可执行)中添加命令 `ifconfig wlan0 192.168.1.1` 实现开机启动
-            </p>
+
         </div>
+        <script type="text/javascript">
+            var converter = new Showdown.converter();
+            document.getElementById('content').innerHMTL = converter.makeHtml(document.getElementById('content').innerHMTL);
+        </script>
     </section>
         <footer>
         <p>
