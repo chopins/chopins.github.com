@@ -73,7 +73,7 @@
         </div>
         <script type="text/javascript">
             var converter = new Showdown.converter();
-            var text = document.getElementById('content');
+            var text = document.getElementById('content').innerHTML;
             alert(text);
             converter.makeHtml(text);
         </script>
