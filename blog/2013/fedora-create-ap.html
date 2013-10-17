@@ -73,7 +73,9 @@
         </div>
         <script type="text/javascript">
             var converter = new Showdown.converter();
-            document.getElementById('content').innerHMTL = converter.makeHtml(document.getElementById('content').innerHMTL);
+            var text = document.getElementById('content').innerHMTL;
+            alert(text);
+            converter.makeHtml(text);
         </script>
     </section>
         <footer>
