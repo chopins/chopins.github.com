@@ -18,5 +18,5 @@ firefox 禁止页面 __屏蔽鼠标选择与鼠标导航__ 脚本
 // ==/UserScript==
 
 document.body.onselectstart = true;
-document.body.style = '-moz-user-select: text !important';
+document.body.style = '-moz-user-select: text !important';  
 ```
