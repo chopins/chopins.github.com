@@ -8,15 +8,15 @@ firefox nightly 版本在浏览器选项中去掉了 __禁用或替换上下文�
 
 firefox 禁止页面 __屏蔽鼠标选择与鼠标导航__ 脚本
 
-    ```js
-    // ==UserScript==
-    // @name        PageProhibitSelect
-    // @namespace   disable.page.prohibit.user.select
-    // @include     http://*/*
-    // @version     1
-    // @grant       none
-    // ==/UserScript==
+```js
+// ==UserScript==
+// @name        PageProhibitSelect
+// @namespace   disable.page.prohibit.user.select
+// @include     http://*/*
+// @version     1
+// @grant       none
+// ==/UserScript==
 
-    document.body.onselectstart = true;
-    document.body.style = '-moz-user-select: text !important';
-    ```
+document.body.onselectstart = true;
+document.body.style = '-moz-user-select: text !important';
+```
