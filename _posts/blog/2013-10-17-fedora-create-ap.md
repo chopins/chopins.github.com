@@ -5,35 +5,32 @@ title: Fedora 18创建 AP 模式热点方法
 
 1. 安装hostapd, yum安装即可
 2. 配置hostapd,编辑/etc/hostapd/hostapd.conf,如下
-    
 
-    ctrl_interface=/var/run/hostapd
-    ctrl_interface_group=wheel
+        ctrl_interface=/var/run/hostapd
+        ctrl_interface_group=wheel
 
-    # Some usable default settings...
-    macaddr_acl=0
-    auth_algs=1
-    ignore_broadcast_ssid=0
+        # Some usable default settings...
+        macaddr_acl=0
+        auth_algs=1
+        ignore_broadcast_ssid=0
 
-    # Uncomment these for base WPA & WPA2 support with a pre-shared key
-    wpa=3
-    wpa_key_mgmt=WPA-PSK
-    wpa_pairwise=CCMP
-    rsn_pairwise=CCMP
+        # Uncomment these for base WPA & WPA2 support with a pre-shared key
+        wpa=3
+        wpa_key_mgmt=WPA-PSK
+        wpa_pairwise=CCMP
+        rsn_pairwise=CCMP
 
-    # DO NOT FORGET TO SET A WPA PASSPHRASE!!
-    wpa_passphrase=12345678
+        # DO NOT FORGET TO SET A WPA PASSPHRASE!!
+        wpa_passphrase=12345678
 
-    # Most modern wireless drivers in the kernel need driver=nl80211
-    driver=nl80211
+        # Most modern wireless drivers in the kernel need driver=nl80211
+        driver=nl80211
 
-    # Customize these for your local configuration...
-    interface=wlan0
-    hw_mode=g
-    channel=7
-    ssid=MyAP
-
-
+        # Customize these for your local configuration...
+        interface=wlan0
+        hw_mode=g
+        channel=7
+        ssid=MyAP
 
 3. 取消NetworkManager对WiFi的托管，否则hostapd无法启动网卡，[取消方法见](https://wiki.archlinux.org/index.php/Software_Access_Point#NetworkManager_is_interfering)
 4. 打开防火墙配置，命令为firewall-config， 开启 伪装(Masquerading)
