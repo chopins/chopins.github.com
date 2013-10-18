@@ -6,7 +6,7 @@ title: Fedora 18创建 AP 模式热点方法
 1. 安装hostapd, yum安装即可
 2. 配置hostapd,编辑/etc/hostapd/hostapd.conf,如下
 
-        ```conf
+```conf
         ctrl_interface=/var/run/hostapd
         ctrl_interface_group=wheel
 
@@ -32,7 +32,7 @@ title: Fedora 18创建 AP 模式热点方法
         hw_mode=g
         channel=7
         ssid=MyAP
-        ```
+```
 
 3. 取消NetworkManager对WiFi的托管，否则hostapd无法启动网卡，[取消方法见](https://wiki.archlinux.org/index.php/Software_Access_Point#NetworkManager_is_interfering)
 4. 打开防火墙配置，命令为firewall-config， 开启 伪装(Masquerading)
