@@ -4,9 +4,9 @@ title: Firefox 鼠标相关功能设置
 ---
 
 firefox nightly 版本在浏览器选项中去掉了 __禁用或替换上下文菜单__ 修改功能，
-只能年在`about:config`中修改`dom.event.contextmenu.enabled`项来实现
+只能在 `about:config` 中修改 `dom.event.contextmenu.enabled` 项来实现
 
-firefox 禁止页面 “屏蔽鼠标选择与鼠标导航” 脚本
+firefox 禁止页面 __屏蔽鼠标选择与鼠标导航__ 脚本
 
     // ==UserScript==
     // @name        PageProhibitSelect
