@@ -3,8 +3,8 @@ layout: blog_contents
 title: Fedora 18创建 AP 模式热点方法
 ---
 
-*. 安装hostapd, yum安装即可
-*. 配置hostapd,编辑/etc/hostapd/hostapd.conf,如下
++  安装hostapd, yum安装即可
++  配置hostapd,编辑/etc/hostapd/hostapd.conf,如下
 
 ```conf
 ctrl_interface=/var/run/hostapd
@@ -34,10 +34,10 @@ channel=7
 ssid=MyAP
 ```
 
-*. 取消NetworkManager对WiFi的托管，否则hostapd无法启动网卡，[取消方法见](https://wiki.archlinux.org/index.php/Software_Access_Point#NetworkManager_is_interfering)
-*. 打开防火墙配置，命令为firewall-config， 开启 伪装(Masquerading)
-*. 将无线网卡ip配置成网关ip,比如 `ifconfig wlan0 192.168.1.1`
-*. 设置需要连接该热点的设备为静态IP，比如 192.168.1.2
-*. 可以安装DHCP服务器实现动态获取IP，方法见google
-*. 然后systemctl enable hostapd
-*, 在/etc/rc.d/rc.local(没有创建，并设置为可执行)中添加命令 `ifconfig wlan0 192.168.1.1` 实现开机启动
++  取消NetworkManager对WiFi的托管，否则hostapd无法启动网卡，[取消方法见](https://wiki.archlinux.org/index.php/Software_Access_Point#NetworkManager_is_interfering)
++  打开防火墙配置，命令为firewall-config， 开启 伪装(Masquerading)
++  将无线网卡ip配置成网关ip,比如 `ifconfig wlan0 192.168.1.1`
++  设置需要连接该热点的设备为静态IP，比如 192.168.1.2
++  可以安装DHCP服务器实现动态获取IP，方法见google
++  然后systemctl enable hostapd
++  在/etc/rc.d/rc.local(没有创建，并设置为可执行)中添加命令 `ifconfig wlan0 192.168.1.1` 实现开机启动
