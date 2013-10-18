@@ -105,12 +105,10 @@ header h1{line-height:40px;}
 }
 pre {
     background-color: #F5F5F5;
-    border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 4px 4px 4px 4px;
     display: block;
     font-size: 14.8px;
     line-height: 24px;
-    margin: 0 0 12px;
     padding: 11.5px;
     white-space: pre-wrap;
     word-break: break-all;
