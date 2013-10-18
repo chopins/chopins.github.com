@@ -2,5 +2,5 @@ baseurl: /
 auto: true
 markdown: rdiscount
 pygments: true
-permalink: /:blog/:year/:month/:day/:title
+permalink: /:categories/:year/:month/:day/:title
 
