@@ -109,7 +109,8 @@ pre {
     display: block;
     font-size: 14.8px;
     line-height: 24px;
-    padding: 11.5px;
+    margin:0;
+    padding: 0;
     white-space: pre-wrap;
     word-break: break-all;
     word-wrap: break-word;
