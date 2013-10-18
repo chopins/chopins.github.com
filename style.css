@@ -115,6 +115,7 @@ pre {
     word-break: break-all;
     word-wrap: break-word;
 }
+.highlight {padding: 0;}
 pre code {border: none;}
 code {background-color: #F5F5F5;border: 1px solid rgba(0, 0, 0, 0.15);}
 a {text-decoration: none;color: #0099cc;}
