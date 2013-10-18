@@ -1,3 +1,6 @@
+---
+
+---
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
@@ -33,9 +36,9 @@
 
                    <li><a href="2013/fedora-create-ap.html">Fedora 18创建 AP 模式热点方法</a></li>
                    <li><a href="2013/firefox-mouse.html">Firefox 鼠标选项相关</a></li>
-                   { % for post in site.posts %}
+                   {% for post in site.posts %}
                    <li><a href="{{post.url}}">[{{ post.date | date:  "%Y-%m-%d"  }}] -- {{ post.title }}<</a></li>
-                   { % endfor %}
+                   {% endfor %}
 	    </ul></p>
         </div>
     </section>
