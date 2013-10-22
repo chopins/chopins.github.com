@@ -16,9 +16,11 @@
              <ul>
                  <li><a href="/blog">全部</a></li>
                 {% for category in site.categories %}
-                <li><a href="/categories/{{ category | first }}/" title="view all
+                {% if category[0] != "category" %}
+                <li><a href="/category/{{ category | first }}" title="view all
                        posts">{{ category | first }}</a>
                 </li>
+                {% endif %}
                 {% endfor %}
             </ul>
         </header>
