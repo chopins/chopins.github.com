@@ -14,6 +14,7 @@
         <header>
             <h1><a href="http://toknot.com/blog.html">Szopen's Blog</a></h1>
              <ul>
+                 <li><a href="/blog">全部</a></li>
                 {% for category in site.categories %}
                 <li><a href="/categories/{{ category | first }}/" title="view all
                        posts">{{ category | first }}</a>
@@ -21,20 +22,7 @@
                 {% endfor %}
             </ul>
         </header>
-        <nav>
-            <ul>
-                <li><a href="http://toknot.com/#overview">Overview</a></li>
-                <li><a href="http://toknot.com/#features">Features</a></li>
-                <li><a href="http://toknot.com/#usage">Usage</a></li>
-                <li><a href="http://toknot.com/#requirements">Requirements</a></li>
-                <li><a href="http://toknot.com/LICENSE.txt">License</a></li>
-                <li><a href="http://toknot.com/toknot">Documentation</a></li>
-                <li class="active"><a href="http://toknot.com/blog.html">Blog</a></li>
-                <!--
-                
-                -->
-            </ul>
-        </nav>
+        {% include themes/nav.html %}
         <section>
             <h2>{{page.title}}</h2>
            
