@@ -8,7 +8,7 @@ body {
     padding: 40px 10px 16px;
     max-width: 780px;
     min-width: 360px;
-    background-color: #E6EDF6;
+    background-color: #EEEEEE;
     color: #444444;
     font-family: 'Trebuchet MS','Geneva CE',lucida,sans-serif;
     font-size: 16px;
@@ -63,7 +63,7 @@ nav ul li.active a, nav ul li.active a:hover {
 section div {
     padding: 10px 20px;
     background: #ffffff;
-    border-radius: 10px;
+   
     border: solid 1px #bcd7f9;
 }
 
