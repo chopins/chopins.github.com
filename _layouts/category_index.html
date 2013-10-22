@@ -34,12 +34,15 @@
                          <ul>
                         {% for post in category[1] %}
                         <li><a href="{{ BASE_PATH }}{{post.url}}">{{post.title}}</a>
+                            <small>{{ post.date | date:  "%Y-%m-%d"  }}</small>
                         </li>
                         {% endfor %}</ul>
                         {% else %}
+                        <ul>
                             {% for post in category[1] %}
                                 {% if page.pagename == category[0] %}
                                 <li><a href="{{ BASE_PATH }}{{post.url}}">{{post.title}}</a>
+                                    <small>{{ post.date | date:  "%Y-%m-%d"  }}</small>
                                 </li>
                                 {% endif %}
                             {% endfor %}</ul>

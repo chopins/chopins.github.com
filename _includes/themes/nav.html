@@ -1,8 +1,8 @@
 <nav>
         <ul>
-            <li {% if page.pagename == "index" %} class="active" {% endif %}><a href="/#overview">Overview</a></li>
+            <li {% if page.pagename == "index" %} class="active" {% endif %}><a href="/">Toknot</a></li>
             <li><a href="/#features">Features</a></li>
-            <li {% if page.pagename != "tutorials" %} class="active" {% endif %}><a href="/category/tutorials/">Usage</a></li>
+            <li {% if page.pagename == "tutorials" %} class="active" {% endif %}><a href="/category/tutorials/">Usage</a></li>
             <li><a href="/#requirements">Requirements</a></li>
             <li><a href="http://toknot.com/LICENSE.txt">License</a></li>
             <li><a href="http://toknot.com/toknot">Class Reference</a></li>
