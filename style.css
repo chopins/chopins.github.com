@@ -63,7 +63,7 @@ nav ul li.active a, nav ul li.active a:hover {
 section div {
     padding: 10px 20px;
     background: #ffffff;
-   
+
     border: solid 1px #bcd7f9;
 }
 
@@ -117,5 +117,5 @@ pre {
 }
 .highlight {padding: 0;}
 pre code {border: none;}
-code {background-color: #F5F5F5;border: 1px solid rgba(0, 0, 0, 0.15);padding:2px;}
+code {background-color: #000000;border: 1px solid rgba(0, 0, 0, 0.15);padding:2px 5px;border-radius: 3px; margin: 0 3px;color: #FFFFFF;}
 a {text-decoration: none;color: #0099cc;}
