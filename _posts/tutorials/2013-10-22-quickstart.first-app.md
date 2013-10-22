@@ -49,7 +49,7 @@ categories: tutorials
 
 ----------------
 5.进入`/home/MyApp/Controller`文件夹，修改Index.php
-用户控制器的构造函数将会接收到了一个FMAI类的实例，这个类提供框架各个组件的标准访问方法，该类所拥有的方法可以建框架类参考http://toknot.com/toknot/class-Toknot.Control.FMAI.html
+用户控制器的构造函数将会接收到了一个FMAI类的实例，这个类提供框架各个组件的标准访问方法，该类所拥有的方法见框架类参考[FMAI](http://toknot.com/toknot/class-Toknot.Control.FMAI.html)
 
 如果web服务器已经配置，你可以通过访问`http://localhost/`看到打印了 'hello world' 的页面
 
