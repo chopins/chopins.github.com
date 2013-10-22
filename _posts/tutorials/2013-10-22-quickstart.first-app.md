@@ -88,10 +88,10 @@ $app->run('\MyApp',dirname(__DIR__),'\Index',Router::ROUTER_GET_QUERY);
 
 在 nginx 下可以通过如下配置来实现 PATH 模式
 
-```conf
+```
 server {
     listen 80;
-    server_name shop;
+    server_name myapp;
 
     #set applcation site path
     set $appPath /home/MyApp;
@@ -109,50 +109,52 @@ server {
     }
 }
 ```
+
    通过上面的配置后，就可以使用如下的方法访问上面的几个地址
-`http://localhost/Index`
-`http://localhost/User/Login`
-`http://localhost/User`
+`http://localhost/Index`    
+`http://localhost/User/Login`    
+`http://localhost/User`     
 
 对于其他服务器，可以使用rewrite方式，将访问重写到`index.php`上
 
 ---------------
 
 7.对于PHP应用通常是需要链接数据库和使用模板的，下面改造了`/home/MyApp/Controller/Index.php`文件
-    http://localhost/Index 将被映射到 `/home/MyApp/Controller/Index.php` 的 `Index` 控制器上，当GET方法请求时调用`Index::GET()`,POST方法请求时调用`Index::POST()`
+  `http://localhost/Index` 将被映射到 `/home/MyApp/Controller/Index.php` 的 `Index` 控制器上，当GET方法请求时调用`Index::GET()`,POST方法请求时调用`Index::POST()`
+
 ```php
 namespace MyApp\Controller;
 use MyApp\MyAppBase;
 class Index extends  MyAppBase{
 
-        //支持HTTP GET 请求的方法
-      public function GET() {
-          //连接数据库，将返回一个数据库对象实例, 类文档见
-          //http://toknot.com/toknot/class-Toknot.Db.DatabaseObject.html
-          $shopDatabase = $this->AR->connect();
+    //支持HTTP GET 请求的方法
+    public function GET() {
+        //连接数据库，将返回一个数据库对象实例, 类文档见
+        //http://toknot.com/toknot/class-Toknot.Db.DatabaseObject.html
+        $shopDatabase = $this->AR->connect();
 
-          //查询tableName 表主键等于 1 的记录
-          //$shopDatabase->tableName  是一个数据库表对象实例，类文档见
-          //http://toknot.com/toknot/class-Toknot.Db.DbTableObject.html
-          $record = $shopDatabase->tableName->findByPK(1);
+        //查询tableName 表主键等于 1 的记录
+        //$shopDatabase->tableName  是一个数据库表对象实例，类文档见
+        //http://toknot.com/toknot/class-Toknot.Db.DbTableObject.html
+        $record = $shopDatabase->tableName->findByPK(1);
 
-          print 'hello world';
+        print 'hello world';
 
-          //渲染模板index.html, 模板实例与构造函数的中的实例是同一个
-          $this->FMAI->display('index');
-        }
+        //渲染模板index.html, 模板实例与构造函数的中的实例是同一个
+        $this->FMAI->display('index');
+    }
 
-        //支持HTTP POST 请求的方法
-      public function POST() {
-      }
+    //支持HTTP POST 请求的方法
+    public function POST() {
+    }
 
-        //支持HTTP PUT 请求的方法
-      public function PUT() {
-        }
+      //支持HTTP PUT 请求的方法
+    public function PUT() {
+    }
 
-      //CLI 模式下运行一改控制器，将会调用本方法
-      public function CLI() {
-      }
+    //CLI 模式下运行一改控制器，将会调用本方法
+    public function CLI() {
+    }
 }
 ```
 
