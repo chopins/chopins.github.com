@@ -28,7 +28,7 @@ defaultPrintCacheThreshold = 2
 ```
 
 ####在控制器的方法中调用模板和申明模板变量如下：
-```php
+```
 class index {
    protected static $FMAI = null;
 
@@ -92,7 +92,7 @@ __注意模板中的字符串变量其实是 [Toknot\Di\StringObject](http://tok
 __注意模板中的数组变量其实是 [Toknot\Di\ArrayObject](http://toknot.com/toknot/class-Toknot.Di.ArrayObject.html) 对象实例__
 
 ####一个完整的模板例子如下:
-```HTML
+```
 {inc header}
 <ul class="nav-tree-ul" id="left-nav-tree">
 {foreach $navList as $key=>$nav}
