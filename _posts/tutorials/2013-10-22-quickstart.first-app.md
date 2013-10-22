@@ -66,15 +66,16 @@ categories: tutorials
 --------------
 6.配置Web服务器
 PHP 5.4.0 以上的开放环境只需要执行如下命令即可:
+
 ```
 $ cd /home/MyApp/WebRoot
 $ php -S localhost:8000 index.php -t static/
 ```
 
 Web服务器普通配置情况下，可以通过类似下面的方式访问控制器:
-   `http://localhost/index.php?c=Index`
-   `http://localhost/index.php?c=User.Login`
-   `http://localhost/index.php?c=User`
+   `http://localhost/index.php?c=Index`   
+   `http://localhost/index.php?c=User.Login`   
+   `http://localhost/index.php?c=User`   
 但是在入口文件的代码应当是下面这样:
 ```php
 use Toknot\Control\Application;
@@ -151,8 +152,10 @@ class Index extends  MyAppBase{
       }
 }
 ```
+
    从上面的代码我们可以看到我们增加了一个`MyApp\MyAppBase`类，这个类主要作为应用的基本类，帮助完成一些控制器都需要初始化的东西，
    现在在`/home/MyApp/`下面创建`MyAppBase.php`文件，输入如下代码：
+
 ```php
 namespace MyApp\MyAppBase;
 class MyAppBase
@@ -182,6 +185,7 @@ class MyAppBase
       }
 }
 ```
+
 上面的代码中只有一个构造函数，你也可以添加一些其他方法。
 在构造函数中，首先是加载应用自己的配置文件，然后创建了一个数据库映射实例，在使用数据库配置后，我们就可以在控制器中调用数据库连接实例，然后进行相关的数据操作
 构造函数最后初始化了模板渲染相关的配置，以便控制器中能使用模板，并且输出页面
@@ -229,7 +233,9 @@ $encoding = $config->Localization->encoding;
 9.创建模板文件
    在`/home/MyApp/View`下面创建 index.html, 模板文件语法见模板相关文档
    对于`/home/MyApp/View`的子文件夹下的文件使用类似下面的方法来调用：
+
 ```php
 $this->FMAI->display('User/index'); //使用/home/MyApp/View/User/index.html
 ```
+
    框架不会自动根据当前控制器命名空间进行访问
