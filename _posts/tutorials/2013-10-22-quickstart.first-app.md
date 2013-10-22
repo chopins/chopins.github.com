@@ -77,6 +77,7 @@ Web服务器普通配置情况下，可以通过类似下面的方式访问控�
    `http://localhost/index.php?c=User.Login`   
    `http://localhost/index.php?c=User`   
 但是在入口文件的代码应当是下面这样:
+
 ```php
 use Toknot\Control\Application;
 use Toknot\Control\Router;
@@ -84,7 +85,9 @@ require_once '/home/Toknot/Control/Application.php';
 $app = new Application;
 $app->run('\MyApp',dirname(__DIR__),'\Index',Router::ROUTER_GET_QUERY);
 ```
+
 在 nginx 下可以通过如下配置来实现 PATH 模式
+
 ```conf
 server {
     listen 80;
