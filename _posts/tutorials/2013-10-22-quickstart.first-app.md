@@ -9,18 +9,18 @@ categories: tutorials
     `/home/Toknot`
 
 该文件夹下目录结构如下:
-```
-Config              默认配置文件和配置文件夹加载类
-Control             框架控制中心
-Db                  数据库相关
-Di                  框架内部数据类型
-Exception           异常类
-Http                HTTP协议相关
-Process             进程管理相关
-Tool                工具类
-User                用户组件
-View                页面渲染相关
-```
+
+    Config              默认配置文件和配置文件夹加载类
+    Control             框架控制中心
+    Db                  数据库相关
+    Di                  框架内部数据类型
+    Exception           异常类
+    Http                HTTP协议相关
+    Process             进程管理相关
+    Tool                工具类
+    User                用户组件
+    View                页面渲染相关
+
 --------------------
 2.创建一个应用程序使用如下命令
 `php /home/Toknot/Tool/CreateApp.php`
@@ -28,18 +28,18 @@ View                页面渲染相关
   该脚本会创建应用程序基本目录结构,并且会创建一些简单的示例代码,
   如果你创建的是后台管理程序,该脚本还会创建后台页面框架结构,你只需要完成每一项管理功能即可
   创建后的目录结构如下:
-```
-Config                  配置文件所在文件夹
-Controller              业务控制器目录
-Data                    数据文件或者临时数据目录
-View                    页面显示模板文件目录
-WebRoot                 HTTP Web 根目录
-{$AppName}Base.php      应用程序基础类,{$AppName}为应用名字
-```
+
+    Config                  配置文件所在文件夹
+    Controller              业务控制器目录
+    Data                    数据文件或者临时数据目录
+    View                    页面显示模板文件目录
+    WebRoot                 HTTP Web 根目录
+    {$AppName}Base.php      应用程序基础类,{$AppName}为应用名字
+
 --------------------
 3.应用创建成功后需要修改配置
-  应用的所有配置配置信息都位于 Config/config.ini
-  Admin应用的管理项配置位于  Config/managelist.ini
+    应用的所有配置配置信息都位于 Config/config.ini
+    Admin应用的管理项配置位于  Config/managelist.ini
 这两个文件在运行CreateApp.php时将会被自动创建,只需要修改项目选项即可
 
 -----------------
@@ -55,14 +55,14 @@ WebRoot                 HTTP Web 根目录
 
 如果我们构造一个HTML form表单, 并且以 POST 方式提交到`http://localhost/`， 将会看到打印了 'This POST method request' 的页面, 这因为框架路由器将会根据不同请求HTTP方法映射到不同的控制器方法上。
 框架对控制器的规定如下：
-```
-1. 类名首字目大写
-2. 类必须是在一个命名空间类，且命名空间名必须与类文件所在文件夹相同
-3. 类提供用户HTTP访问的方法名必须大写，且只能为GET,POST,PUT,HEAD等HTTP协议中定义的请求方法的名字，
-   他们分别会在用户以同名方法请求时被调用
-4. 非第3条定义的方法，路由器不会调用
-5. 命名空间下的Index控制器类将会作为该空间下默认调用的控制器，这类似于web服务器配置index.html等文件
-```
+
+    1. 类名首字目大写
+    2. 类必须是在一个命名空间类，且命名空间名必须与类文件所在文件夹相同
+    3. 类提供用户HTTP访问的方法名必须大写，且只能为GET,POST,PUT,HEAD等HTTP协议中定义的请求方法的名字，
+       他们分别会在用户以同名方法请求时被调用
+    4. 非第3条定义的方法，路由器不会调用
+    5. 命名空间下的Index控制器类将会作为该空间下默认调用的控制器，这类似于web服务器配置index.html等文件
+
 --------------
 6.配置Web服务器
 PHP 5.4.0 以上的开放环境只需要执行如下命令即可:
