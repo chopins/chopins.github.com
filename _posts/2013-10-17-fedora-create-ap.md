@@ -4,10 +4,11 @@ title: Fedora 18创建 AP 模式热点方法
 categories: blog
 ---
 
+
 +  安装hostapd, yum安装即可
 +  配置hostapd,编辑/etc/hostapd/hostapd.conf,如下
 
-```conf
+```
 ctrl_interface=/var/run/hostapd
 ctrl_interface_group=wheel
 
