@@ -1,6 +1,7 @@
 ---
 layout: blog_contents
 title: Fedora 18创建 AP 模式热点方法
+categories: blog
 ---
 
 +  安装hostapd, yum安装即可

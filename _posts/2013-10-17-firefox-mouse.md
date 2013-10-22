@@ -1,6 +1,7 @@
 ---
 layout: blog_contents
 title: Firefox 鼠标相关功能设置
+categories: blog
 ---
 
 firefox nightly 版本在浏览器选项中去掉了 __禁用或替换上下文菜单__ 修改功能，

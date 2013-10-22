@@ -1,9 +1,10 @@
 ---
 layout: blog_contents
 title: 给下载的多页PHP HTML文档增加搜索功能
+categories: blog
 ---
 
-php 搜索程序[下载](http://toknot.com/php-document-search.php)
+php 搜索程序[下载](http://toknot.com/download/php-document-search.php)
 本脚本支持函数名，类名及方法名搜索
 
 + 首先配置服务器重写，nginx 类似这样 `rewrite ^(.+)/?$ /index.php;` 其中`index.php`为本程序文件名
