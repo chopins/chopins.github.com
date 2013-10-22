@@ -4,6 +4,7 @@ title: 给下载的多页PHP HTML文档增加搜索功能
 categories: blog
 ---
 
+
 php 搜索程序[下载](http://toknot.com/download/php-document-search.php)
 本脚本支持函数名，类名及方法名搜索
 
