@@ -26,5 +26,5 @@ categories: blog
 > 
 >* andrew m contributed these instructions
 
-[原文地址](http://appdb.winehq.org/objectManager.php?sClass=version&iId=28875&iTestingId=80577)
+[原文地址](http://appdb.winehq.org/objectManager.php?sClass=version&iId=28875&iTestingId=80577)  
 就是运行 winecfg, 在函数库中，先添加dbghelp， 然后点击编辑，将这个库停用，即可完成安装，并运行
