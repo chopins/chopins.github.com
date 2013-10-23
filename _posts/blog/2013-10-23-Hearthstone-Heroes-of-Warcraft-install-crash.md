@@ -6,12 +6,12 @@ categories: blog
 
 以下是winehq.org上的解决方法:
 
->The downloader will crash when downloading Blizzard games. In order to fix this, the dbghelp lib >>>>> needs to be disabled through winecfg.
+>The downloader will crash when downloading Blizzard games. In order to fix this, the dbghelp lib  needs to be disabled through winecfg.
 > 
->General Instructions
+>General Instructions  
 > 
->   Add the dbghelp lib as override
->   Then set this lib to disable
+>   Add the dbghelp lib as override  
+>   Then set this lib to disable  
 > 
 >Detailed Instructions *
 > 
