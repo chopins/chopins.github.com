@@ -5,7 +5,7 @@ chdir(__DIR__);
 if (empty($file) || $file == '/') {
     include __DIR__ . '/index.html';
 } else {
-    if(strcasecmp($file, '_SERVER')) {
+    if(strcasecmp($file, '_SERVER') === 0) {
         return include 'reserved.variables.server.html';
     }
     $file  = strtolower(str_replace(array('/', '_', '.php'), array('', '-', ''), $file));
