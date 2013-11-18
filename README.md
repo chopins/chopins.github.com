@@ -15,6 +15,9 @@ SVN 查询脚本, 根据用户名查询指定日期或版本号以后该用户�
 firefox nightly 版本在浏览器选项中去掉了“禁用或替换上下文菜单”修改功能，
 只能年在about:config中修改dom.event.contextmenu.enabled项来实现
 
+终端提示字符：
+`PS1="\[\033[1;32m\][\u@\h:\w]\$ \[\033[0m\]"`
+
 firefox 禁止页面 “屏蔽鼠标选择与鼠标导航” 脚本
 ```javascript
 // ==UserScript==
