@@ -1,0 +1,107 @@
+#!/bin/env python
+
+import os,sys,readline,getpass
+
+try:
+    import MySQLdb
+except:
+    print "import MySQLdb Error, use pip or easy_instll install MySQL-python\n"
+    sys._exit(1)
+
+class PyMySQLClient:
+    def __init__(self):
+        self.host = None
+        self.user = None
+        self.password = None
+        self.dbname = None
+        self.bind_auto_complete()
+        self.oprate_argv()
+        self.command()
+        
+    def auto_complete(self,text, state):
+        print text
+        return 0
+
+    def usage(self):
+        print '''Usage: pymysql [OPTION]
+    Option:
+     --help                 Show the help message
+     -h,--host ARG          MySQL server address
+     -u,--username ARG      MySQL server username
+     -p,--password ARG      MySQL server password of username
+              '''
+              
+    def bind_auto_complete(self):
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(self.auto_complete)
+
+    def oprate_argv(self):
+        if len(sys.argv) == 1:
+            self.host = raw_input("Enter Host: ")
+            self.user = raw_input("Enter Username: ")   
+            self.password = getpass.getpass("Enter Password: ")
+        else:
+            i = 0
+            while True:
+                arg = sys.argv[i]
+                argc = len(sys.argv)
+                if arg == '--help':
+                    self.usage()
+                    exit();
+
+                if arg == '-h' or arg == '--host':
+                    if argc > i+1:
+                        self.host = sys.argv[i+1]
+
+                if arg == '-h' or arg == '--user':
+                    if argc > i+1:
+                        self.user = sys.argv[i+1]
+
+                if arg == '-p' or arg == '--password':
+                    if argc > i+1:
+                        self.password = sys.argv[i+1]
+                
+                i = i + 1
+        
+            if host is None:
+                self.host = 'localhost'
+
+            if user is None:
+                self.user = getpass.getuser()
+        
+            if password is None:
+                self.password = getpass.getpass("Enter Password: ")    
+     
+    def command(self):
+        try:
+            self.conn = MySQLdb.connect(self.host, self.user, self.password)
+        except MySQLdb.Error,e:
+            try:
+                print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+                exit(0)
+            except IndexError:
+                print "MySQL Error: %s" % str(e)
+                exit(0)
+            
+        while True:
+            u_input = raw_input("%s@MySQL [%s]:"%(self.user,self.dbname)).lower();
+            if u_input == "help":
+                self.showHelp()
+            
+            if u_input == "exit":
+                exit(0)
+    
+    def showHelp(self):
+        if self.dbname == None:
+            print '''Command:
+   SHOW DATABASES
+   SHOW USERS
+   USE database
+ '''
+        else:
+            print '''Command:
+    SHOW TABLES
+ '''
+        
+if __name__ == "__main__":
+    pymc = PyMySQLClient()
