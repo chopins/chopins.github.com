@@ -6,7 +6,7 @@ try:
     import MySQLdb
 except:
     print "import MySQLdb Error, use pip or easy_instll install MySQL-python\n"
-    sys._exit(1)
+    exit(1)
 
 class PyMySQLClient:
     def __init__(self):
@@ -29,6 +29,7 @@ class PyMySQLClient:
      -h,--host ARG          MySQL server address
      -u,--username ARG      MySQL server username
      -p,--password ARG      MySQL server password of username
+     -d,--dbname ARG        MySQL server dbname
               '''
               
     def bind_auto_complete(self):
@@ -37,39 +38,52 @@ class PyMySQLClient:
 
     def oprate_argv(self):
         if len(sys.argv) == 1:
-            self.host = raw_input("Enter Host: ")
-            self.user = raw_input("Enter Username: ")   
+            self.host = raw_input("Enter Host(default:localhost): ")
+            default_user = getpass.getuser()
+            self.user = raw_input("Enter Username(default:%s): "%default_user)   
             self.password = getpass.getpass("Enter Password: ")
         else:
             i = 0
-            while True:
+            argc = len(sys.argv) - 1
+            while i < argc:
                 arg = sys.argv[i]
-                argc = len(sys.argv)
                 if arg == '--help':
                     self.usage()
                     exit();
 
                 if arg == '-h' or arg == '--host':
-                    if argc > i+1:
+                    try:
                         self.host = sys.argv[i+1]
+                    except IndexError:
+                        pass
 
-                if arg == '-h' or arg == '--user':
-                    if argc > i+1:
+                if arg == '-u' or arg == '--user':
+                    try:
                         self.user = sys.argv[i+1]
+                    except IndexError:
+                        pass
 
                 if arg == '-p' or arg == '--password':
-                    if argc > i+1:
+                    try:
                         self.password = sys.argv[i+1]
+                    except IndexError:
+                        pass
                 
+                if arg == '-d' or arg == '--dbname':
+                    try:
+                        self.dbname = sys.argv[i+1]
+                    except IndexError:
+                        pass
+
                 i = i + 1
         
-            if host is None:
+            if self.host is None:
                 self.host = 'localhost'
 
-            if user is None:
+            if self.user is None:
                 self.user = getpass.getuser()
         
-            if password is None:
+            if self.password is None:
                 self.password = getpass.getpass("Enter Password: ")    
      
     def command(self):
@@ -82,14 +96,78 @@ class PyMySQLClient:
             except IndexError:
                 print "MySQL Error: %s" % str(e)
                 exit(0)
-            
+        self.conn.autocommit(1)
+        if self.dbname != None:
+            try:
+                self.conn.select_db(self.dbname)
+            except MySQLdb.Error,e:
+                self.dbname = None
+                try:
+                    print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+                except IndexError:
+                    print "MySQL Error: %s" % str(e)
+        header_line = "+----------------+"
+        hllen = len(header_line)
         while True:
-            u_input = raw_input("%s@MySQL [%s]:"%(self.user,self.dbname)).lower();
+            u_input = raw_input("%s@MySQL [%s]:"%(self.user,self.dbname)).lower().strip();
+            
+            if u_input == "":
+                continue
             if u_input == "help":
                 self.showHelp()
             
-            if u_input == "exit":
+            elif u_input == "exit":
                 exit(0)
+            else:
+                try:
+                    self.conn.query(u_input)
+                    res = self.conn.use_result()
+                    sql_part = u_input.split(" ")
+                    
+                    if sql_part[0].lower() == "use":
+                        self.conn.query("SELECT DATABASE() AS db")
+                        self.dbname = self.conn.use_result().fetch_row()[0][0]
+                        print "Database changed"
+                        continue
+                    
+                    if isinstance(res,MySQLdb.result):
+                        res_num = res.num_rows()
+                        line = 0
+                        
+                        while True:
+                                row = res.fetch_row(how=1)
+                                if row:
+                                    for v in row:
+                                        if line == 0:
+                                            for field in v:
+                                                print header_line
+                                            for field in v:
+                                                print "| %s |" % field
+                                            for field in v:
+                                                print header_line
+                                            for fi in v:
+                                                appendspace = " "*(hllen - len(str(v[fi])) - 4)
+                                                print "| %s %s|" % (v[fi],appendspace)
+                                        else:
+                                            for fi in v:
+                                                appendspace = " "*(hllen - len(str(v[fi])) - 4)
+                                                print "| %s %s|" % (v[fi],appendspace)
+                                                
+                                    line = line + 1
+                                else:
+                                    break
+                        if line == 0:
+                            print "Empty set"
+                        else:
+                            print header_line
+                            print "%d row in set" % line
+                    else:
+                        print self.conn.affected_rows()
+                except MySQLdb.Error,e:
+                    try:
+                        print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+                    except IndexError:
+                        print "MySQL Error: %s" % str(e)
     
     def showHelp(self):
         if self.dbname == None:
