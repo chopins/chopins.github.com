@@ -1,0 +1,167 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="toknot.js"></script>
+        <style>
+            #cursor-box {position: absolute;cursor: text;}
+            #cursor {border-left: 2px solid;position: absolute;width: 0px;font-size: 0px;cursor: text;}
+            #edit {cursor: text;font-size:0.8em;border: 1px solid #CCC;}
+            #enter-area {position: absolute;}
+            #enter-area-box {overflow: hidden; position: absolute; width: 1px; height: 0px; top: 0px; left: 106px;}
+            .edit-line-box {display:block;position: relative;}
+            .edit-line-wrap-box {display: block;position: absolute;}
+            .edit-line-content {display: inline-block;position: relative;}
+        </style>
+    </head>
+    <body>
+        <div id="edit"></div>
+        <div id="test-event" style="float:right;position: absolute;top:20px;left:550px;">Test Event
+        </div>
+        <div id="enter-area-box">
+        <textarea id="enter-area"></textarea></div>
+        <div id="cursor-box">
+            <div id="cursor"></div></div>
+        <script type="text/javascript">
+            TK.ready(function() {
+                var ED_LAST_LINE = null, ED = TK.$('edit'), ED_CLS = {};
+                var CB = TK.$('cursor-box'), CUR = TK.$('cursor'),ENA = TK.$('enter-area');
+                var CUR_STOP = 0, opacityValue = 100 , ST = null,ENAB = TK.$('enter-area-box');
+                var CUR_NODE = null, ACT_NODE = null,CURH = 15;
+                ED_CLS.l = 'edit-line-box';
+                ED_CLS.lw = 'edit-line-wrap-box';
+                ED_CLS.lc = 'edit-line-content';
+                function insertNewLine(e) {
+                    if(CUR_STOP) return;
+                    var nl = TK.createNode('div');
+                    nl.setClass(ED_CLS.l);
+                    var nlw = TK.createNode('div');
+                    nlw.setClass(ED_CLS.lw);
+                    var nltext = TK.createNode('span');
+                    nltext.setClass(ED_CLS.lc);
+                    nlw.appendChild(nltext);
+                    nl.appendChild(nlw);
+                    ED.appendChild(nl);
+                    ED_LAST_LINE = nl;
+                    CUR_NODE = ED;
+                    ACT_NODE = nltext;
+                    ED_LAST_LINE.setStyle('height',CURH+'px');
+                    cursor2End();
+                };
+                function cursor2End() {
+                    var elkp = ACT_NODE.getPos();
+                    //TK.log(elkp);
+                    CB.setStyle('top', elkp.y+'px');
+                    CB.setStyle('left', (elkp.x +elkp.w)+'px');
+                    ENAB.setStyle('top', elkp.y+'px');
+                    ENAB.setStyle('left', (elkp.x +elkp.w)+'px');
+                };
+                function blinkCursor() {
+                    CUR.setOpacity(opacityValue);
+                    opacityValue = opacityValue == 100 ? 0 : 100;
+                    if(CUR_STOP) {
+                        CUR.setOpacity(0);
+                        return;
+                    }
+                    ENA.focus();
+                    ST = setTimeout(blinkCursor,500);
+                };
+                function initEdit() {
+                    ED.setCss('height:300px;width:500px;');
+                    insertNewLine();
+                    var postion = ED_LAST_LINE.getChildNodeByAttr('class',ED_CLS.lc)[0].getPos();;
+                    CB.setStyle('top', postion.y + 'px');
+                    CB.setStyle('left', postion.x + 'px');
+                    CUR.setStyle('border-color', '#000');
+                    CURH = parseFloat(ED.getFirstNode().getStyle('font-size').replace('px','')) +3;
+                    CUR.setStyle('height',CURH+'px');
+                    ED_LAST_LINE.setStyle('height',CURH+'px');
+                };
+                function delContent(e) {
+                    if(CUR_STOP) return;
+                    ENA.value = ACT_NODE.innerHTML;
+                };
+                TK.mousedown().any(function(e){
+                    var eN = TK.getEventNode(e);
+                    if(!eN.isNodeChild(ED) && ED.id != eN.id && eN.id != CB.id 
+                            && eN.id != CUR.id && eN.id != ENA.id) {
+                        clearTimeout(ST);
+                        CUR.setOpacity(0);
+                        CUR_STOP = 1;
+                        return;
+                    }
+                    if(CUR_STOP) {
+                        CUR_STOP = 0;
+                        blinkCursor();
+                    }
+                    var mp = TK.mousePos(e);
+                    var npos = eN.getPos();
+                    if(eN.hasClass(ED_CLS.lc) || eN.getParentNodeByAttr('class',ED_CLS.lc)) {
+                        CB.setStyle('top',npos.y+'px');
+                        CB.setStyle('left', mp.x+'px');
+                        ENAB.setStyle('top',npos.y+'px');
+                        ENAB.setStyle('left', mp.x+'px');
+                        CUR_NODE = eN.getParentNodeByAttr('class',ED_CLS.l)[0];
+                        ACT_NODE = eN;
+                    } else if(eN.hasClass(ED_CLS.lw)) {
+                        var clkp = eN.getFirstNode().getPos();
+                        CB.setStyle('top',clkp.y+'px');
+                        ENAB.setStyle('top',clkp.y+'px');
+                        var lf = mp.x > clkp.x + clkp.w ?clkp.x + clkp.w:mpx;
+                        CB.setStyle('left', lf+'px');
+                        ENAB.setStyle('left', lf+'px');
+                        CUR_NODE = eN.getParentNodeByAttr('class',ED_CLS.l)[0];
+                        ACT_NODE = eN.getFirstNode().getLastNode();
+                    } else {
+                        CUR_NODE = ED_LAST_LINE;
+                        ACT_NODE = ED_LAST_LINE.getLastNode().getLastNode();
+                        var elkp = ED_LAST_LINE.getChildNodeByAttr('class',ED_CLS.lc)[0].getPos();
+                        var lf = elkp.x + elkp.w < mp.x ? elkp.x + elkp.w : mp.x;
+                        CB.setStyle('top', elkp.y+'px');
+                        CB.setStyle('left', lf+'px');
+                        ENAB.setStyle('top', elkp.y+'px');
+                        ENAB.setStyle('left', lf+'px');
+                    }
+                });
+                TK.keyUp().any(function(e) {
+                    if(CUR_STOP) return;
+                    if(e.keyCode == 8) {
+                        if(ACT_NODE.innerHTML == '') {
+                            var nt = ACT_NODE.getParentNodeByAttr('class',ED_CLS.lc)[0].getLastNode();
+                            if(nt) {
+                                ACT_NODE.destroy();
+                                ACT_NODE = nt;
+                            } else {
+                                var nll = ED.getFirstNode();
+                                if(nll) {
+                                    ED_LAST_LINE = nll;
+                                    ACT_NODE = nll.getLastNode().getLastNode().getLastNode();
+                                } else {
+                                    
+                                }
+                            }
+                        }
+                        ACT_NODE.innerHTML = ENA.value;
+                    }else if(ACT_NODE && ACT_NODE.hasClass(ED_CLS.lc)) {
+                        ACT_NODE.innerHTML += '<span>' + ENA.value +'</span>';
+                        ACT_NODE = ACT_NODE.getFirstNode();
+                    } else {
+                        ACT_NODE.innerHTML += ENA.value;
+                    }
+                    cursor2End();
+                    ENA.value = '';
+                });
+                TK.keyDown().enter(insertNewLine);
+                TK.keyDown().backspace(delContent)
+                initEdit();
+                blinkCursor();
+                CB.setOnTop();
+            })
+        </script>
+    </body>
+</html>
