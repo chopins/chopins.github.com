@@ -14,4 +14,13 @@ categories: blog
 目前数学推导唯一结论是：
 假设当两个物体以光速向相运动或离开时，通过万有引力公式可推出质能方程，
 
+Google Tanslate English:
+According to wave-particle two-phase nature can speculate: All games have a vector attributes, including electromagnetic and gravitational fields.
+This vector is expressed as a single particle properties direction exists, i.e., as if we field composed of particles, the particles there is a single orientation, such that the particles appear to be oval rather than round
 
+The performance of the oval in the same direction in the same field. Inconsistency on the spot when the direction of this vector property will produce interference between the two fields
+
+This is also the reason for the existence of gravitational force between particles
+
+The only conclusion is that the current mathematical derivation:
+Assuming the speed of light when two objects or leave the relative motion, gravitation formula can be introduced through mass-energy equation,
