@@ -21,7 +21,7 @@ categories: blog
 
 __Google Tanslate English below__:  
 
-1 According to the wave-particle two-phase nature can speculate: __All single cognate fields exist inside the same force__ a fixed direction, and the direction of movement of the role of the internal field in the direction of the force is not necessarily the same, the role of the external field force is the result of the movement and interaction of internal forces.
+1 According to the wave-particle two-phase nature can speculate: __All single cognate fields exist inside the same force a fixed direction__, and the direction of movement of the role of the internal field in the direction of the force is not necessarily the same, the role of the external field force is the result of the movement and interaction of internal forces.
 Due to the fixed direction of the internal force field and the field of broadcasting, so in different positions relative to the force effects of the object is not the same, the internal force may be just the pointing object, which generates a gravitational same token, the object point the front, there is a repulsive force.
 
 Internal atomic particles such force because the internal forces between the particles are not parallel direction, so in the inertia motion trajectories of electrons causes uncertainty.
