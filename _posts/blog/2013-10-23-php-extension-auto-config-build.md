@@ -23,3 +23,20 @@ categories: blog
 
 使用时切换到root用户，进入PHP扩展源码目录，然后执行
 
+Features:
++ Auto search `phpize` path, search path order by: 
+    1. /opt/php/bin/phpize
+    2. /usr/local/php/bin/phpize
+    3. /usr/bin/phpize 
++ Auto exec `phpize`
++ Auto exec `configure`
++ Auto exec `make && make install`
++ Auto add extension config to `php.ini`
++ Auto clean bulid dir
++ Auto restart `php-fpm`
++ Can not check depend
+
+[Now Download](http://toknot.com/download/phpicm)
+
+The script need run on __root__ user, and exec in extension directory
+	
