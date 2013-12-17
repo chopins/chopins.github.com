@@ -196,6 +196,8 @@
                     + '</style>'
                     + '<div id="videoInfo"><span id="curIdx">1/' + global.playlist.length + '</span>'
                     + '<span id="videoTime">00:00/' + t + '</span>'
+					+ '<span onclick="videoNextSeqs();" style="cursor:pointer;>下一节</span>'
+					+ '<span onclick="videoPreviousSeqs();" style="cursor:pointer;>上一节</span>'
                     + '</div><div id="playerPlaceholder"></div>';
             global.playIndex = 0;
 
@@ -208,14 +210,29 @@
             timeUpdate();
             return global.player;
         };
+		global.videoNextSeqs = function videoNextSeqs() {
+			playComplete();
+		};
+		global.videoPreviousSeqs = function videoPreviousSeqs() {
+			var nextIndex = global.playIndex - 1;
+            if (nextIndex >0) {
+                global.playIndex = nextIndex;
+                nextIndex++;
+                global.seqsPlayTime += global.global.playlist[nextIndex]['seconds'];
+                getNode('curIdx').innerHTML = nextIndex + '/' + global.playlist.length;
+                getNode('mplayer').setAttribute('src', global.playlist[nextIndex]['url']);
+                getNode('mplayer').Play();
+                return;
+            }
+		};
         global.playComplete = function playComplete(e) {
             var nextIndex = global.playIndex + 1;
             if (nextIndex < global.playlist.length) {
                 global.playIndex = nextIndex;
                 nextIndex++;
-                global.seqsPlayTime += global.player.getDuration();
+                global.seqsPlayTime += global.global.playlist[nextIndex]['seconds'];
                 getNode('curIdx').innerHTML = nextIndex + '/' + global.playlist.length;
-                getNode('mplayer').setAttribute('src', global.playlist[nextIndex]);
+                getNode('mplayer').setAttribute('src', global.playlist[nextIndex]['url']);
                 getNode('mplayer').Play();
                 return;
             }
@@ -234,7 +251,10 @@
                         fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
 
                 global.videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
-                global.playlist.push(url);
+				var seq = {};
+				seq['seconds'] = parseInt(data['segs'][fileType][i]['seconds']);
+				seq['url'] = url;
+                global.playlist.push(seq);
                 if (i == 0) {
                     first = url
                 }
