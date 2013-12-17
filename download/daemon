@@ -1,0 +1,72 @@
+#!/bin/env python
+
+import sys,os
+
+LOG_FILE = "/tmp/pydaemon.log"
+def daemon():
+    global LOG_FILE
+    cur_dir = os.getcwd()
+    exec_file = os.path.abspath(sys.argv[1])
+    if not os.path.isfile(exec_file):
+        exec_file = sys.argv[1]  
+    elif not os.access(exec_file, os.X_OK):
+        print "%s can not executable"%exec_file 
+        exit(0)
+          
+    if len(sys.argv) > 2:
+          exec_file = [exec_file] + sys.argv[2:]
+          exec_file = "%s "*len(exec_file) % tuple(exec_file)
+         
+    print exec_file 
+    pid = os.fork()
+    if pid>0:
+       os._exit(0)
+
+    if pid<0:
+       print 'Fork1 error'
+       os._exit(1)
+
+    pid = os.fork()
+    if pid <0:
+       print 'Fork2 error'
+       os._exit(1)
+   
+    if pid >0:
+       os._exit(0)
+
+    os.chdir('/')
+    os.umask(0)
+    os.setsid()
+    sys.stdout.close()
+    sys.stdin.close()
+    sys.stderr.close()
+    sys.stdout = open(LOG_FILE,'a')
+    sys.stdin = open(LOG_FILE,'a')
+    sys.stderr = open(LOG_FILE,'a')
+    
+    pid = os.fork()
+    if pid <0:
+        print 'Fork 3 error'
+        os._exit(1)
+
+    if pid >0:
+        os._exit(0)
+    
+    pid = os.fork()
+    if pid < 0:
+        print 'Fork work error'
+        os._exit(1)
+
+    if pid >0:
+        os.waitpid(pid,0)
+        exit(0)
+         
+    if pid == 0:
+        os.chdir(cur_dir)
+        buf = os.popen(exec_file).readlines()
+	    for info in tmp:
+            print info
+    
+
+if __name__ == "__main__":
+    daemon()

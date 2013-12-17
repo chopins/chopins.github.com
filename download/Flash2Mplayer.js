@@ -49,7 +49,6 @@
             var nextIndex = global.playIndex + 1;
             if (nextIndex < global.playlist.length) {
                 global.playIndex = nextIndex;
-                nextIndex++;
                 var audioInfo = '<img src="' + global.playlist[nextIndex]['picture'] + '" />'
                         + '<div style="float: right;font-weight: bold;width: 300px;">'
                         + '<style type="text/css">span {display:inline-block;margin-right:10px;}</style>'
@@ -62,6 +61,7 @@
                 getNode("audioInfo").innerHTML = audioInfo;
                 getNode('mplayer').setAttribute('src', global.playlist[nextIndex]['url']);
                 getNode('mplayer').Play();
+                nextIndex++;
                 return;
             } else {
                 getDoubanPlayList();
