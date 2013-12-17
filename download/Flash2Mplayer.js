@@ -6,6 +6,7 @@
 // @match http://v.youku.com/v_show/*
 // @match http://www.tudou.com/*
 // @match http://douban.fm/
+// @match http://pan.baidu.com/
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -43,8 +44,25 @@
                     global.playIndex = 0;
                     nextAudio();
                 }
-            }
+            };
         };
+		globla.bdPanVideo = function dbPanVideo() {
+			var token = self.FileUtils.bdstoken;
+			var path = window.location.hash.split('=')[1].split('&')[0];
+			var url = 'http://pan.baidu.com/api/list?channel=chunlei&clienttype=0'
+					 +'&web=1&dir='+path+'&bdstoken='+token+'&channel=chunlei&clienttype=0&web=1';
+			XMLHttp.open('GET', url, 10);
+            XMLHttp.send();
+            XMLHttp.onreadystatechange = function() {
+                if (XMLHttp.readyState == 4 && XMLHttp.status == 200) {
+                    var videourl= JSON.parse(XMLHttp.responseText)['list'][0]['dlink'];
+					embed =  + '<embed id="mplayer" type="application/x-mplayer2" '
+						+ 'style="width:980px;height:480px;" src="'+videourl+'" '
+						+ 'onMediaCompleteWithError="mplayerError(error);"></embed>';
+                    getNode('video-wrap').innerHTML = embed;
+                }
+            }; 
+		};
         global.nextAudio = function nextAudio() {
             var nextIndex = global.playIndex + 1;
             if (nextIndex < global.playlist.length) {
@@ -67,9 +85,7 @@
                 getDoubanPlayList();
             }
         };
-        global.r = function(a) {
-            console.log(a);
-        };
+
         global.cleanDoubanFMEvent = function cleanDoubanFMEvent() {
             global.initBannerAd = function() {
             };
@@ -147,6 +163,9 @@
                     check();
                 }
             }
+			if(document.domain =='pan.baidu.com') {
+				return bdPanVideo();
+			}
             if (typeof videoId2 !== 'undefined') {
                 var videoId = videoId2;
             } else if (typeof vcode !== 'undefined') {
@@ -182,7 +201,7 @@
             }
             global.playlist = re;
             global.videoSeconds = seconds;
-            createPlayer(re[0]);
+            createPlayer(re[0]['url']);
         };
         global.createPlayer = function createPlayer(url) {
             var w = getNode('player').offsetWidth;
@@ -196,8 +215,8 @@
                     + '</style>'
                     + '<div id="videoInfo"><span id="curIdx">1/' + global.playlist.length + '</span>'
                     + '<span id="videoTime">00:00/' + t + '</span>'
-					+ '<span onclick="videoNextSeqs();" style="cursor:pointer;>下一节</span>'
-					+ '<span onclick="videoPreviousSeqs();" style="cursor:pointer;>上一节</span>'
+					+ '<span onclick="videoNextSeqs();" style="cursor:pointer;">下一节</span>'
+					+ '<span onclick="videoPreviousSeqs();" style="cursor:pointer;">上一节</span>'
                     + '</div><div id="playerPlaceholder"></div>';
             global.playIndex = 0;
 
@@ -230,7 +249,7 @@
             if (nextIndex < global.playlist.length) {
                 global.playIndex = nextIndex;
                 nextIndex++;
-                global.seqsPlayTime += global.global.playlist[nextIndex]['seconds'];
+                global.seqsPlayTime += global.playlist[nextIndex]['seconds'];
                 getNode('curIdx').innerHTML = nextIndex + '/' + global.playlist.length;
                 getNode('mplayer').setAttribute('src', global.playlist[nextIndex]['url']);
                 getNode('mplayer').Play();
@@ -353,13 +372,16 @@
                     request = GM_xmlhttpRequest({
                         idx: i,
                         method: 'GET',
+						seconds:seconds,
                         url: url,
                         onload: function(response) {
                             var tmp = document.createElement('span');
                             var re = response.responseText.split('>') [1].split('<') [0];
                             tmp.innerHTML = re;
                             var index = seg[this.idx]['no'];
-                            playlist[index] = tmp.textContent;
+							playlist[index] = {};
+                            playlist[index]['url'] = tmp.textContent;
+							playlist[index]['seconds'] = Math.round(this.seconds/1000);
                             count++;
                             if (count == len) {
                                 var script = document.createElement('script');
