@@ -213,7 +213,7 @@
             if (nextIndex < global.playlist.length) {
                 global.playIndex = nextIndex;
                 nextIndex++;
-                global.seqsPlayTime += global.player.getTime();
+                global.seqsPlayTime += global.player.getDuration();
                 getNode('curIdx').innerHTML = nextIndex + '/' + global.playlist.length;
                 getNode('mplayer').setAttribute('src', global.playlist[nextIndex]);
                 getNode('mplayer').Play();
