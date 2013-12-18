@@ -5,9 +5,11 @@ categories: blog
 ---
 
 1. MySQL 多字段排序SQL为
+
 ```sql
 ORDER BY field_A AND field_B ASC
 ```
+
    必须加 AND，如果用 , 其中一个会被忽略
 
 2. 多区域查询，比如如下需求：
