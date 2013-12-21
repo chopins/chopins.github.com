@@ -7,6 +7,7 @@
 // @match http://www.tudou.com/*
 // @match http://douban.fm/
 // @match http://pan.baidu.com/*
+// @match http:/tv.sohu.com/*
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -118,7 +119,7 @@
                 getDoubanPlayList();
                 $.getJSON("/j/change_channel?fcid=" + T.attr("data-cid") + "&tcid=" + X + "&area=" + U);
             });
-        }
+        };
         global.mplayerError = function mplayerError(error) {
             var msg = '';
             switch(error) {
@@ -173,7 +174,10 @@
                         }
                     }
                     check();
-                }
+                };
+            }
+            if(document.domain == 'tv.sohu.com') {
+                return sohuVideo();
             }
             if(document.domain =='pan.baidu.com') {
                 return bdPanVideo();
@@ -184,18 +188,18 @@
                 var videoId = window.vcode;
             } else if (typeof iid !== 'undefined') {
                 var videoId = window.iid;
-                document.getElementById('__flash2vlc').setAttribute('tudouiid', 1);
-                document.getElementById('__flash2vlc').setAttribute('segs', pageConfig.segs.toString());
+                document.getElementById('__flash2mplayer').setAttribute('tudouiid', 1);
+                document.getElementById('__flash2mplayer').setAttribute('segs', pageConfig.segs.toString());
 
             } else if (typeof pageConfig !== 'undefined' && typeof pageConfig.iid !== 'undefined') {
                 var videoId = pageConfig.iid;
-                document.getElementById('__flash2vlc').setAttribute('tudouiid', 1);
-                document.getElementById('__flash2vlc').setAttribute('segs', pageConfig.segs);
+                document.getElementById('__flash2mplayer').setAttribute('tudouiid', 1);
+                document.getElementById('__flash2mplayer').setAttribute('segs', pageConfig.segs);
             } else {
                 //console.log('No Video Id');
                 return;
             }
-            document.getElementById('__flash2vlc').setAttribute('vcode', videoId);
+            document.getElementById('__flash2mplayer').setAttribute('vcode', videoId);
             //getNode('player').innerHTML = 'Loading Mplayer...';
         }
         ;
@@ -213,19 +217,49 @@
             }
             global.playlist = re;
             global.videoSeconds = seconds;
-            createPlayer(re[0]['url']);
+            if(document.domain == 'tv.sohu.com') {
+                videoWarperId = 'sohuplayer';
+            } else {
+                videoWarperId = 'player';
+            }
+            createPlayer(re[0]['url'],videoWarperId);
         };
-        global.createPlayer = function createPlayer(url) {
-            var w = getNode('player').offsetWidth;
+
+        global.sohuVideo = function sohuVideo() {
+            var fuid = getCookie('fuid');
+			if(!fuid) {
+				setTimeout(sohuVideo,1000);
+				return;
+			}
+            document.getElementById('__flash2mplayer').setAttribute('sohufuid',fuid);
+            document.getElementById('__flash2mplayer').setAttribute('sohuplaylistId',playlistId);
+            document.getElementById('__flash2mplayer').setAttribute('vid',vid);
+            //createPlayer('sohuplayer');
+        };
+        global.getCookie = function getCookie(cn) {
+            var i, x, y, a = document.cookie.split(";");
+            for (i = 0; i < a.length; i++) {
+                x = a[i].substr(0, a[i].indexOf("="));
+                y = a[i].substr(a[i].indexOf("=") + 1);
+                x = x.replace(/^\s+|\s+$/g, "");
+                if (x == cn)
+                    return unescape(y);
+            }
+            return null;
+        };
+        global.createPlayer = function createPlayer(url,playerId) {
+			playerId = playerId || 'player';
+            var w = getNode(playerId).offsetWidth;
             var t = farmatTime(global.videoSeconds);
-            getNode('player').setAttribute('style', 'background-color:#EEE;');
-            getNode('player').innerHTML = '<embed type="application/x-mplayer2" id="mplayer"'
+            
+            getNode(playerId).setAttribute('style', 'background-color:#EEE;');
+            getNode(playerId).innerHTML = '<embed type="application/x-mplayer2" id="mplayer"'
                     + 'name="video2" width="' + w + '" height="500" src="' + url + '"'
                     + 'onMediaComplete="playComplete();" showlogo="true" onMediaCompleteWithError="mplayerError(error);"/>'
                     + '<style type="text/css">'
                     + '#videoInfo span {display:inline-block;margin-left:10px;font-weight:bold;color:#000;}'
                     + '</style>'
-                    + '<div id="videoInfo"><span id="curIdx">1/' + global.playlist.length + '</span>'
+                    + '<div id="videoInfo" style="background-color:#EEE;"><span id="curIdx">1/' + global.playlist.length + '</span>'
                     + '<span id="videoTime">00:00/' + t + '</span>'
                     + '<span onclick="videoNextSeqs();" style="cursor:pointer;">下一节</span>'
                     + '<span onclick="videoPreviousSeqs();" style="cursor:pointer;">上一节</span>'
@@ -291,7 +325,7 @@
                 seq['url'] = url;
                 global.playlist.push(seq);
                 if (i == 0) {
-                    first = url
+                    first = url;
                 }
             }
             createPlayer(first);
@@ -349,7 +383,7 @@
         if (window.top != window)
             return;
         var script = document.createElement('script');
-        script.id = '__flash2vlc';
+        script.id = '__flash2mplayer';
         script.textContent = '(' + callback.toString() + ')(window);';
         document.body.appendChild(script);
         if (document.domain == 'douban.fm') {
@@ -357,7 +391,57 @@
         }
         var conunt = 0, max = 6;
         function request() {
-            var vcode = document.getElementById('__flash2vlc').getAttribute('vcode');
+            if(document.domain == 'tv.sohu.com') {
+                var vid = document.getElementById('__flash2mplayer').getAttribute('vid');
+                if(!vid) {
+                    if (count > max)
+                        return;
+                    count++;
+                    setTimeout(request, 1000);
+                    return;
+                }
+                var fuid = document.getElementById('__flash2mplayer').getAttribute('sohufuid');
+                var playlistId = document.getElementById('__flash2mplayer').getAttribute('sohuplaylistId');
+
+                var url = "http://hot.vrs.sohu.com/vrs_flash.action?vid="+vid
+                        +"&af=1&bw=8135&plid="+playlistId+"&uid="+fuid+"&out=0&g=8&referer="
+                        + encodeURIComponent(window.location.href)+'&t='+Math.random();
+                var playlist = [];
+                var count = 0;
+                 GM_xmlhttpRequest({method: 'GET',url: url,
+                        onload: function(response) {
+                            var videoList= JSON.parse(response.responseText);
+                            var sohucatcode = videoList.catcode;
+                            var ip = videoList.allot;
+                            var len = videoList.data.su.length;
+                            for(var i in videoList.data.su) {
+                                 var clip = videoList.data.clipsURL[i].split('/').splice(-4,4).join('/');
+                                 var getrealurl = "http://"+ip+"/?prot=2&t=0.123123&file="+clip+"&new="+videoList.data.su[i];
+                                 var sec = videoList.data.clipsDuration;
+                                 var tsec = videoList.data.totalDuration;
+                                 GM_xmlhttpRequest({method: 'GET',url: getrealurl,
+                                    su : videoList.data.su[i],
+                                    idx : i,sec:sec,
+                                    onload: function(response) {
+                                        count++;
+                                        var realurl = response.responseText.split('|');
+                                        var videourl = realurl[0]+this.su+'?key='+realurl[3]
+                                                    +'&ua=&ch=v&catcode='+sohucatcode
+                                                    +'&plat=flash_Linux3.11.10-200.fc19.x86_64&n=6&a=4019';
+										playlist[this.idx] = {};
+                                        playlist[this.idx]['url'] = videourl;
+                                        playlist[this.idx]['seconds'] = this.sec;
+                                        if(count == len) {
+                                            var script = document.createElement('script');
+                                            script.textContent = 'F2McallbackGetData(' + JSON.stringify(playlist) + ',' + Math.round(tsec) + ');';
+                                            document.body.appendChild(script);
+                                        }
+                                    }});
+							}
+						}});
+				return;
+            }
+            var vcode = document.getElementById('__flash2mplayer').getAttribute('vcode');
 
             if (!vcode) {
                 if (count > max)
@@ -366,10 +450,11 @@
                 setTimeout(request, 1000);
                 return;
             }
-            var tudoduiid = document.getElementById('__flash2vlc').getAttribute('tudouiid');
+
+            var tudoduiid = document.getElementById('__flash2mplayer').getAttribute('tudouiid');
 
             if (tudoduiid) {
-                var videosegs = JSON.parse(document.getElementById('__flash2vlc').getAttribute('segs'));
+                var videosegs = JSON.parse(document.getElementById('__flash2mplayer').getAttribute('segs'));
                 if (typeof videosegs['5'] !== 'undefined') {
                     var seg = videosegs['5'];
                 } else if (typeof videosegs['3'] !== 'undefined') {
@@ -424,7 +509,8 @@
                 }
             });
         }
-        setTimeout(request, 1000);
+		request();
+        //setTimeout(request, 1000);
 
     }
     ;
