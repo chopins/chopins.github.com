@@ -6,7 +6,7 @@
 // @match http://v.youku.com/v_show/*
 // @match http://www.tudou.com/*
 // @match http://douban.fm/
-// @match http://pan.baidu.com/
+// @match http://pan.baidu.com/*
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -46,26 +46,38 @@
                 }
             };
         };
-		globla.bdPanVideo = function dbPanVideo() {
-			var token = self.FileUtils.bdstoken;
-			var path = window.location.hash.split('=')[1].split('&')[0];
-			var url = 'http://pan.baidu.com/api/list?channel=chunlei&clienttype=0'
-					 +'&web=1&dir='+path+'&bdstoken='+token+'&channel=chunlei&clienttype=0&web=1';
-			XMLHttp.open('GET', url, 10);
+        global.bdloadCnt = 0;
+        global.bdPanVideo = function dbPanVideo() {
+            var token = window.self.FileUtils.bdstoken;
+            global.bdloadCnt++;
+            if(typeof token == 'undefined') {
+                if(global.bdloadCnt >5) {
+                    return;
+                }
+                setTimeout(dbPanVideo, 1000);
+                return;
+            }
+            console.log(token);
+            var path = window.location.hash.split('=')[1].split('&')[0].split('/')[2];
+            var url = 'http://pan.baidu.com/api/list?channel=chunlei&clienttype=0'
+                     +'&web=1&dir='+path+'&bdstoken='+token+'&channel=chunlei&clienttype=0&web=1';
+            var XMLHttp = new XMLHttpRequest();
+            XMLHttp.open('GET', url, 10);
             XMLHttp.send();
             XMLHttp.onreadystatechange = function() {
                 if (XMLHttp.readyState == 4 && XMLHttp.status == 200) {
-                    var videourl= JSON.parse(XMLHttp.responseText)['list'][0]['dlink'];
-					embed =  + '<embed id="mplayer" type="application/x-mplayer2" '
-						+ 'style="width:980px;height:480px;" src="'+videourl+'" '
-						+ 'onMediaCompleteWithError="mplayerError(error);"></embed>';
+                    var videourl= JSON.parse(XMLHttp.responseText);
+                    console.log(videourl);
+                    embed =  + '<embed id="mplayer" type="application/x-mplayer2" '
+                        + 'style="width:980px;height:480px;" src="'+videourl+'" '
+                        + 'onMediaCompleteWithError="mplayerError(error);"></embed>';
                     getNode('video-wrap').innerHTML = embed;
                 }
-            }; 
-		};
+            };
+        };
         global.nextAudio = function nextAudio() {
             var nextIndex = global.playIndex + 1;
-            if (nextIndex < global.playlist.length) {
+            if (nextIndex <= global.playlist.length) {
                 global.playIndex = nextIndex;
                 var audioInfo = '<img src="' + global.playlist[nextIndex]['picture'] + '" />'
                         + '<div style="float: right;font-weight: bold;width: 300px;">'
@@ -79,7 +91,7 @@
                 getNode("audioInfo").innerHTML = audioInfo;
                 getNode('mplayer').setAttribute('src', global.playlist[nextIndex]['url']);
                 getNode('mplayer').Play();
-                nextIndex++;
+                //nextIndex++;
                 return;
             } else {
                 getDoubanPlayList();
@@ -91,7 +103,7 @@
             };
             global.bgad = {has_channel_ad: function() {
                 }};
-            global.DBR = {swf: function() {}, act: function(s, q) {}, 
+            global.DBR = {swf: function() {}, act: function(s, q) {},
                         radio_getlist: function(q) {},
                         close_video: function() {},
                 play_video: function() {
@@ -163,9 +175,9 @@
                     check();
                 }
             }
-			if(document.domain =='pan.baidu.com') {
-				return bdPanVideo();
-			}
+            if(document.domain =='pan.baidu.com') {
+                return bdPanVideo();
+            }
             if (typeof videoId2 !== 'undefined') {
                 var videoId = videoId2;
             } else if (typeof vcode !== 'undefined') {
@@ -215,8 +227,8 @@
                     + '</style>'
                     + '<div id="videoInfo"><span id="curIdx">1/' + global.playlist.length + '</span>'
                     + '<span id="videoTime">00:00/' + t + '</span>'
-					+ '<span onclick="videoNextSeqs();" style="cursor:pointer;">下一节</span>'
-					+ '<span onclick="videoPreviousSeqs();" style="cursor:pointer;">上一节</span>'
+                    + '<span onclick="videoNextSeqs();" style="cursor:pointer;">下一节</span>'
+                    + '<span onclick="videoPreviousSeqs();" style="cursor:pointer;">上一节</span>'
                     + '</div><div id="playerPlaceholder"></div>';
             global.playIndex = 0;
 
@@ -229,30 +241,34 @@
             timeUpdate();
             return global.player;
         };
-		global.videoNextSeqs = function videoNextSeqs() {
-			playComplete();
-		};
-		global.videoPreviousSeqs = function videoPreviousSeqs() {
-			var nextIndex = global.playIndex - 1;
+        global.videoNextSeqs = function videoNextSeqs() {
+            playComplete();
+        };
+        global.videoPreviousSeqs = function videoPreviousSeqs() {
+            var nextIndex = global.playIndex - 1;
+
             if (nextIndex >0) {
                 global.playIndex = nextIndex;
-                nextIndex++;
+                //nextIndex++;
                 global.seqsPlayTime += global.global.playlist[nextIndex]['seconds'];
                 getNode('curIdx').innerHTML = nextIndex + '/' + global.playlist.length;
-                getNode('mplayer').setAttribute('src', global.playlist[nextIndex]['url']);
-                getNode('mplayer').Play();
+                player.setAttribute('src', global.playlist[nextIndex]['url']);
+                player.Play();
                 return;
             }
-		};
+        };
         global.playComplete = function playComplete(e) {
             var nextIndex = global.playIndex + 1;
-            if (nextIndex < global.playlist.length) {
+            if (nextIndex <= global.playlist.length) {
                 global.playIndex = nextIndex;
-                nextIndex++;
+               // nextIndex++;
                 global.seqsPlayTime += global.playlist[nextIndex]['seconds'];
-                getNode('curIdx').innerHTML = nextIndex + '/' + global.playlist.length;
-                getNode('mplayer').setAttribute('src', global.playlist[nextIndex]['url']);
-                getNode('mplayer').Play();
+                var fullscreen = player.fullscreen ? "true" :"false";
+
+                getNode('curIdx').innerHTML = global.playIndex + '/' + global.playlist.length;
+                player.setAttribute('src', global.playlist[nextIndex]['url']);
+                player.Play();
+                player.setAttribute("fullscreen", fullscreen);
                 return;
             }
         };
@@ -270,9 +286,9 @@
                         fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
 
                 global.videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
-				var seq = {};
-				seq['seconds'] = parseInt(data['segs'][fileType][i]['seconds']);
-				seq['url'] = url;
+                var seq = {};
+                seq['seconds'] = parseInt(data['segs'][fileType][i]['seconds']);
+                seq['url'] = url;
                 global.playlist.push(seq);
                 if (i == 0) {
                     first = url
@@ -322,7 +338,7 @@
         ;
         function toHex(number) {
             var str = number.toString(16);
-            return (str.length < 2) ? '0' + str : str;
+            return ((str.length < 2) ? '0' + str : str).toUpperCase();
         }
         ;
         replacePlayer();
@@ -372,16 +388,16 @@
                     request = GM_xmlhttpRequest({
                         idx: i,
                         method: 'GET',
-						seconds:seconds,
+                        seconds:seconds,
                         url: url,
                         onload: function(response) {
                             var tmp = document.createElement('span');
                             var re = response.responseText.split('>') [1].split('<') [0];
                             tmp.innerHTML = re;
                             var index = seg[this.idx]['no'];
-							playlist[index] = {};
+                            playlist[index] = {};
                             playlist[index]['url'] = tmp.textContent;
-							playlist[index]['seconds'] = Math.round(this.seconds/1000);
+                            playlist[index]['seconds'] = Math.round(this.seconds/1000);
                             count++;
                             if (count == len) {
                                 var script = document.createElement('script');
