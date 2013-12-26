@@ -11,6 +11,7 @@
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
 
+
 (function() {
     function Flash2Mplayer(global) {
         global.playIndex = 0;
@@ -208,8 +209,8 @@
                 //console.log('No Video Id');
                 return;
             }
-			global.mpalyer_videoId = videoId;
-			setCookie('mplayer_videoId',videoId,global.cookieExpire);
+			global.mpalyer_videoId = 'youkutudou'+videoId;
+			
             document.getElementById('__flash2mplayer').setAttribute('vcode', videoId);
             //getNode('player').innerHTML = 'Loading Mplayer...';
         }
@@ -251,7 +252,7 @@
 				setTimeout(sohuVideo,1000);
 				return;
 			}
-			global.mpalyer_videoId = vid;
+			global.mpalyer_videoId = 'sohu'+vid;
             document.getElementById('__flash2mplayer').setAttribute('sohufuid',fuid);
             document.getElementById('__flash2mplayer').setAttribute('sohuplaylistId',playlistId);
             document.getElementById('__flash2mplayer').setAttribute('vid',vid);
@@ -295,7 +296,7 @@
             //global.playIndex = 0;
 			getNode('curIdx').innerHTML = (global.playIndex+1) + '/' + global.playlist.length;
             global.player = getNode('mplayer');
-			
+			setCookie('mplayer_videoId',global.mpalyer_videoId,global.cookieExpire);
             global.timeUpdate = function timeUpdate() {
                 var nt = Math.round(global.seqsPlayTime + global.player.getTime());
                 getNode('videoTime').innerHTML = farmatTime(nt) + '/' + t;
@@ -358,12 +359,12 @@
             var rand2 = 1000 + parseInt(Math.random() * 9000);
             var sid = d.getTime() + '' + rand1 + '' + rand2;
             var first = '';
+			var pathType = fileType == 'mp4' ? 'mp4' : 'flv';
             for (var i = 0, len = (data['segs'][fileType]).length; i < len; i++) {
                 var k = data['segs'][fileType][i]['k'],
                         url = 'http://f.youku.com/player/getFlvPath/sid/' +
-                        sid + '_' + toHex(i) + '/st/flv/fileid/' +
+                        sid + '_' + toHex(i) + '/st/'+pathType+'/fileid/' +
                         fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
-
                 global.videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
                 var seq = {};
                 seq['seconds'] = parseInt(data['segs'][fileType][i]['seconds']);
@@ -375,7 +376,6 @@
             }
 			var vid = getCookie('mplayer_videoId');
 			var history = parseInt(getCookie('mplayer_seqs'));
-
 			if(history && vid && vid == global.mpalyer_videoId) {
 				global.playIndex = history;
 				createPlayer(global.playlist[history]['url']);
@@ -415,14 +415,13 @@
         ;
         function getFileType(obj) {
             var keys = Object.keys(obj);
-            var type = [
-                'hd2',
-                'mp4',
-                'flv'
-            ].filter(function(item) {
-                return !!(keys.indexOf(item) + 1);
-            });
-            return type[0] || 'flv';
+			if(keys.indexOf('hd2') > 0) {
+				return 'hd2';
+			} else if(keys.indexOf('flv') > 0) {
+				return 'flv';
+			} else if(keys.indexOf('mp4') > 0) {
+				return 'mp4';
+			}
         }
         ;
         function toHex(number) {
