@@ -325,14 +325,32 @@
                 global.playIndex = nextIndex;
 				setCookie('mplayer_seqs',nextIndex,global.cookieExpire);
                 global.seqsPlayTime += global.playlist[nextIndex]['seconds'];
-                var fullscreen = player.fullscreen ? "true" :"false";
+                var fullscreen = player.fullscreen;
                 getNode('curIdx').innerHTML = (global.playIndex+1) + '/' + global.playlist.length;
                 player.setAttribute('src', global.playlist[nextIndex]['url']);
                 player.Play();
-                player.setAttribute("fullscreen", fullscreen);
+				if(fullscreen) {
+					function fs() {
+						if(player.playState == 8 || player.playState==1) {
+							return;
+						}
+						if(player.playState == 6) {
+							setTimeout(fs,2000);
+							return;
+						}
+						if(player.playState != 3) {
+							setTimeout(fs,1000);
+							return;
+						} 
+						player.fullscreen = true;
+						player.setAttribute("fullscreen", fullscreen);
+					}
+					fs();
+				}
                 return;
             }
         };
+		
         global.F2MgetYoukuURL = function F2MgetYoukuURL(spec) {
             var data = spec.data[0], d = new Date(), fileType = getFileType(data['streamfileids']);
             var fileid = getFileID(data['streamfileids'][fileType], data['seed']);
@@ -357,9 +375,7 @@
             }
 			var vid = getCookie('mplayer_videoId');
 			var history = parseInt(getCookie('mplayer_seqs'));
-			console.log(vid);
-			console.log(history);
-			console.log(global.mpalyer_videoId);
+
 			if(history && vid && vid == global.mpalyer_videoId) {
 				global.playIndex = history;
 				createPlayer(global.playlist[history]['url']);
