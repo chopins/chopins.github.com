@@ -101,11 +101,16 @@ server {
         root $appPath/WebRoot;
         fastcgi_pass   127.0.0.1:9000;
         fastcgi_index  index.php;
+        
+        #如果fastcgi_params文件中设置有fastcgi_param  SCRIPT_FILENAME，需要把本行放在
+        #下面一句的前面
+        include        fastcgi_params;
+
         #set applcation index.php file(a single entry point file) for nginx
         #SCRIPT_FILENAME support PATH access mode
         #otherwise only use GET query mode
         fastcgi_param  SCRIPT_FILENAME $appPath/WebRoot/index.php;
-        include        fastcgi_params;
+        
     }
 }
 ```
