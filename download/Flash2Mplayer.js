@@ -3,7 +3,7 @@
 // @namespace youku.todou.vlc.player
 // @description Flash.2.MPlayer
 // @version 1
-// @match http://v.youku.com/v_show/*
+// @match http://*/*
 // @match http://www.tudou.com/*
 // @match http://douban.fm/
 // @match http://pan.baidu.com/*
@@ -17,7 +17,15 @@
         global.playlist = [];
         global.videoSeconds = 0;
         global.seqsPlayTime = 0;
+		global.mpalyer_videoId = null;
         global.DBR = null;
+		global.cookieExpire = 60*24*3600;
+        document.body.onload = function() {
+            if(document.getElementsByTagName('video').length == 0) return;
+            var html5video = document.getElementsByTagName('video')[0];
+            var htmlUrl = html5video.getAttribute('type','video/mp4');
+            replacePlayer();
+        };
         function randomString(len) {
             len = len || 32;
             var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
@@ -163,6 +171,7 @@
             getDoubanPlayList();
         };
         function replacePlayer() {
+            console.log('replace');
             if (document.domain == 'douban.fm') {
                 return document.body.onload = function() {
                     function check() {
@@ -199,6 +208,8 @@
                 //console.log('No Video Id');
                 return;
             }
+			global.mpalyer_videoId = videoId;
+			setCookie('mplayer_videoId',videoId,global.cookieExpire);
             document.getElementById('__flash2mplayer').setAttribute('vcode', videoId);
             //getNode('player').innerHTML = 'Loading Mplayer...';
         }
@@ -222,7 +233,16 @@
             } else {
                 videoWarperId = 'player';
             }
-            createPlayer(re[0]['url'],videoWarperId);
+			var vid = getCookie('mplayer_videoId');
+			var history = parseInt(getCookie('mplayer_seqs'));
+			if(history && vid && vid == global.mpalyer_videoId) {
+				global.playIndex = history;
+				createPlayer(re[history]['url'],videoWarperId);
+			} else {
+				setCookie('mplayer_seqs',0,global.cookieExpire);
+				global.playIndex = 0;
+				createPlayer(re[0]['url'],videoWarperId);
+			}
         };
 
         global.sohuVideo = function sohuVideo() {
@@ -231,6 +251,7 @@
 				setTimeout(sohuVideo,1000);
 				return;
 			}
+			global.mpalyer_videoId = vid;
             document.getElementById('__flash2mplayer').setAttribute('sohufuid',fuid);
             document.getElementById('__flash2mplayer').setAttribute('sohuplaylistId',playlistId);
             document.getElementById('__flash2mplayer').setAttribute('vid',vid);
@@ -247,6 +268,13 @@
             }
             return null;
         };
+		global.setCookie = function setCookie(cn,v,ex) {
+            var e = new Date(), n = e.getTime();
+            ex = n + ex * 1000;
+            e.setTime(ex);
+            var cv = escape(v) + "; exs=" + e.toUTCString();
+            document.cookie = cn + "=" + cv;
+		};
         global.createPlayer = function createPlayer(url,playerId) {
 			playerId = playerId || 'player';
             var w = getNode(playerId).offsetWidth;
@@ -255,7 +283,7 @@
             getNode(playerId).setAttribute('style', 'background-color:#EEE;');
             getNode(playerId).innerHTML = '<embed type="application/x-mplayer2" id="mplayer"'
                     + 'name="video2" width="' + w + '" height="500" src="' + url + '"'
-                    + 'onMediaComplete="playComplete();" showlogo="true" onMediaCompleteWithError="mplayerError(error);"/>'
+                    + 'onMediaComplete="playComplete();" showlogo="true" onMediaCompleteWithError="mplayerError(error);" forcecache="64" fullscreen single_instance replace_and_play />'
                     + '<style type="text/css">'
                     + '#videoInfo span {display:inline-block;margin-left:10px;font-weight:bold;color:#000;}'
                     + '</style>'
@@ -264,9 +292,10 @@
                     + '<span onclick="videoNextSeqs();" style="cursor:pointer;">下一节</span>'
                     + '<span onclick="videoPreviousSeqs();" style="cursor:pointer;">上一节</span>'
                     + '</div><div id="playerPlaceholder"></div>';
-            global.playIndex = 0;
-
+            //global.playIndex = 0;
+			getNode('curIdx').innerHTML = (global.playIndex+1) + '/' + global.playlist.length;
             global.player = getNode('mplayer');
+			
             global.timeUpdate = function timeUpdate() {
                 var nt = Math.round(global.seqsPlayTime + global.player.getTime());
                 getNode('videoTime').innerHTML = farmatTime(nt) + '/' + t;
@@ -279,14 +308,13 @@
             playComplete();
         };
         global.videoPreviousSeqs = function videoPreviousSeqs() {
-            var nextIndex = global.playIndex - 1;
-
-            if (nextIndex >0) {
-                global.playIndex = nextIndex;
-                //nextIndex++;
-                global.seqsPlayTime += global.global.playlist[nextIndex]['seconds'];
-                getNode('curIdx').innerHTML = nextIndex + '/' + global.playlist.length;
-                player.setAttribute('src', global.playlist[nextIndex]['url']);
+            var preIndex = global.playIndex - 1;
+            if (preIndex >=0) {
+                global.playIndex = preIndex;
+                setCookie('mplayer_seqs',preIndex,global.cookieExpire);
+                global.seqsPlayTime -= global.playlist[preIndex]['seconds'];
+                getNode('curIdx').innerHTML = (preIndex+1) + '/' + global.playlist.length;
+                player.setAttribute('src', global.playlist[preIndex]['url']);
                 player.Play();
                 return;
             }
@@ -295,11 +323,10 @@
             var nextIndex = global.playIndex + 1;
             if (nextIndex <= global.playlist.length) {
                 global.playIndex = nextIndex;
-               // nextIndex++;
+				setCookie('mplayer_seqs',nextIndex,global.cookieExpire);
                 global.seqsPlayTime += global.playlist[nextIndex]['seconds'];
                 var fullscreen = player.fullscreen ? "true" :"false";
-
-                getNode('curIdx').innerHTML = global.playIndex + '/' + global.playlist.length;
+                getNode('curIdx').innerHTML = (global.playIndex+1) + '/' + global.playlist.length;
                 player.setAttribute('src', global.playlist[nextIndex]['url']);
                 player.Play();
                 player.setAttribute("fullscreen", fullscreen);
@@ -328,7 +355,19 @@
                     first = url;
                 }
             }
-            createPlayer(first);
+			var vid = getCookie('mplayer_videoId');
+			var history = parseInt(getCookie('mplayer_seqs'));
+			console.log(vid);
+			console.log(history);
+			console.log(global.mpalyer_videoId);
+			if(history && vid && vid == global.mpalyer_videoId) {
+				global.playIndex = history;
+				createPlayer(global.playlist[history]['url']);
+			} else {
+				setCookie('mplayer_seqs',0, global.cookieExpire);
+				global.playIndex = 0;
+				createPlayer(first);
+			}
         };
         function getFileIDMixString(seed) {
             var mixed = [
@@ -382,6 +421,7 @@
     function run(callback) {
         if (window.top != window)
             return;
+        if(document.getElementsByTagName('object').length == 0) return;
         var script = document.createElement('script');
         script.id = '__flash2mplayer';
         script.textContent = '(' + callback.toString() + ')(window);';
