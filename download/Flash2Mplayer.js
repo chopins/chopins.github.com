@@ -283,7 +283,7 @@
             
             getNode(playerId).setAttribute('style', 'background-color:#EEE;');
             getNode(playerId).innerHTML = '<embed type="application/x-mplayer2" id="mplayer"'
-                    + 'name="video2" width="' + w + '" height="500" src="' + url + '"'
+                    + 'name="video2 --cache=10 --volume=80 --forcecache=10" width="' + w + '" height="500" src="' + url + '"'
                     + 'onMediaComplete="playComplete();" showlogo="true" onMediaCompleteWithError="mplayerError(error);" forcecache="64" fullscreen single_instance replace_and_play />'
                     + '<style type="text/css">'
                     + '#videoInfo span {display:inline-block;margin-left:10px;font-weight:bold;color:#000;}'
