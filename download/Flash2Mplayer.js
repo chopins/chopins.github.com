@@ -415,11 +415,11 @@
         ;
         function getFileType(obj) {
             var keys = Object.keys(obj);
-			if(keys.indexOf('hd2') > 0) {
+			if(keys.indexOf('hd2') >= 0) {
 				return 'hd2';
-			} else if(keys.indexOf('flv') > 0) {
+			} else if(keys.indexOf('flv') >= 0) {
 				return 'flv';
-			} else if(keys.indexOf('mp4') > 0) {
+			} else if(keys.indexOf('mp4') >= 0) {
 				return 'mp4';
 			}
         }
