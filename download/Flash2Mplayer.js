@@ -20,6 +20,7 @@
         global.seqsPlayTime = 0;
 		global.mpalyer_videoId = null;
         global.DBR = null;
+        //global.playerBox = null;
 		global.cookieExpire = 60*24*3600;
         document.body.onload = function() {
             if(document.getElementsByTagName('video').length == 0) return;
@@ -89,8 +90,8 @@
             var nextIndex = global.playIndex + 1;
             if (nextIndex <= global.playlist.length) {
                 global.playIndex = nextIndex;
-                var audioInfo = '<img src="' + global.playlist[nextIndex]['picture'] + '" />'
-                        + '<div style="float: right;font-weight: bold;width: 300px;">'
+                var audioInfo = '<img src="' + global.playlist[nextIndex]['picture'].replace('mpic','lpic') + '" width="245" height="245" />'
+                        + '<div style="float: right;font-weight: bold;width: 240px;">'
                         + '<style type="text/css">span {display:inline-block;margin-right:10px;}</style>'
                         + '<span>歌者:</span>' + global.playlist[nextIndex]['artist']
                         + '<br /><span>公司:</span>' + global.playlist[nextIndex]['company']
@@ -168,23 +169,22 @@
                     + 'onMediaComplete="nextAudio();"'
                     + 'onMediaCompleteWithError="mplayerError(error);"></embed>';
             global.player = getNode('mplayer');
+
             getNode('fm-player').firstElementChild.innerHTML = htmlRadio;
             getDoubanPlayList();
         };
         function replacePlayer() {
             console.log('replace');
             if (document.domain == 'douban.fm') {
-                return document.body.onload = function() {
-                    function check() {
-                        getNode('fm-player').firstElementChild.innerHTML = '';
-                        if (typeof getNode('radioplayer') != 'undefined') {
-                            createDoubanFmAudo();
-                        } else {
-                            setTimeout(check, 1000);
-                        }
+                function check() {
+                    getNode('fm-player').firstElementChild.innerHTML = '';
+                    if (typeof getNode('radioplayer') != 'undefined') {
+                        createDoubanFmAudo();
+                    } else {
+                        setTimeout(check, 1000);
                     }
-                    check();
-                };
+                }
+                check();
             }
             if(document.domain == 'tv.sohu.com') {
                 return sohuVideo();
@@ -207,7 +207,23 @@
                 document.getElementById('__flash2mplayer').setAttribute('segs', pageConfig.segs);
             } else {
                 //console.log('No Video Id');
-                return;
+                var embedList = document.getElementsByTagName('embed');
+                for(var i=0;i<embedList.length;i++) {
+                    var embedNode = embedList[i];
+                    if(embedNode.getAttribute('type') == 'application/x-shockwave-flash') {
+                        var uriInfo = embedNode.getAttribute('src').split('/');
+                        if(uriInfo.indexOf('player.youku.com') >=0) {
+                            var i = uriInfo.indexOf('sid')+1;
+                            videoId = uriInfo[i];
+                            embedNode.parentNode.setAttribute('id','player');
+                            document.getElementById('__flash2mplayer').setAttribute('site', 'youku');
+                            document.getElementById('__flash2mplayer').setAttribute('embed', 1);
+                        }
+                    }
+                }
+                if(typeof videoId == 'undefined') {
+                    return;
+                }
             }
 			global.mpalyer_videoId = 'youkutudou'+videoId;
 			
@@ -225,6 +241,9 @@
 
         global.F2McallbackGetData = function F2McallbackGetData(re, seconds) {
             if (typeof vcode !== 'undefined' || document.domain == 'youku.com') {
+                return F2MgetYoukuURL(re);
+            }
+            if(getNode('__flash2mplayer').getAttribute('site') == 'youku') {
                 return F2MgetYoukuURL(re);
             }
             global.playlist = re;
@@ -280,8 +299,8 @@
 			playerId = playerId || 'player';
             var w = getNode(playerId).offsetWidth;
             var t = farmatTime(global.videoSeconds);
-            
-            getNode(playerId).setAttribute('style', 'background-color:#EEE;');
+
+            getNode(playerId).setAttribute('style', 'background-color:#EEE;margin:0;padding:0;text-indent: 0;');
             getNode(playerId).innerHTML = '<embed type="application/x-mplayer2" id="mplayer"'
                     + 'name="video2 --cache=1024 --volume=80 --forcecache=1024" width="100%" height="500" src="' + url + '"'
                     + 'onMediaComplete="playComplete();" showlogo="true" onMediaCompleteWithError="mplayerError(error);" forcecache="64" fullscreen single_instance replace_and_play />'
@@ -435,8 +454,8 @@
 
     function run(callback) {
         if (window.top != window)
-            return;
-        if(document.getElementsByTagName('object').length == 0) return;
+            return true;
+        
         var script = document.createElement('script');
         script.id = '__flash2mplayer';
         script.textContent = '(' + callback.toString() + ')(window);';
@@ -569,6 +588,18 @@
 
     }
     ;
-    run(Flash2Mplayer);
+    var ckc = 1;
+    var call = function() {
+        if(ckc >=5) return;
+        if(document.getElementsByTagName('object').length == 0 
+                && document.getElementsByTagName('embed').length == 0) {
+             setTimeout(call, 2000);
+        } else {
+            run(Flash2Mplayer);
+            return;
+        } 
+        ckc++;
+    }
+    call();
 })();
 
