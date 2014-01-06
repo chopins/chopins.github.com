@@ -589,12 +589,15 @@
     }
     ;
     var ckc = 1;
+    var stop = false;
     var call = function() {
         if(ckc >=5) return;
         if(document.getElementsByTagName('object').length == 0 
                 && document.getElementsByTagName('embed').length == 0) {
+             if(stop) return;
              setTimeout(call, 2000);
         } else {
+            var stop = true;
             run(Flash2Mplayer);
             return;
         } 
