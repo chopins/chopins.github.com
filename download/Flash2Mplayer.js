@@ -88,10 +88,10 @@
         };
         global.nextAudio = function nextAudio() {
             var nextIndex = global.playIndex + 1;
-            if (nextIndex <= global.playlist.length) {
+            if (nextIndex < global.playlist.length) {
                 global.playIndex = nextIndex;
-                var audioInfo = '<img src="' + global.playlist[nextIndex]['picture'].replace('mpic','lpic') + '" width="245" height="245" />'
-                        + '<div style="float: right;font-weight: bold;width: 240px;">'
+                var audioInfo = '<img src="' + global.playlist[nextIndex]['picture'].replace('mpic','lpic') + '" style="max-width: 245px; max-height: 205px;" />'
+                        + '<div style="float: right;font-weight: bold;width: 240px;color: #007D5C; line-height: 30px;">'
                         + '<style type="text/css">span {display:inline-block;margin-right:10px;}</style>'
                         + '<span>歌者:</span>' + global.playlist[nextIndex]['artist']
                         + '<br /><span>公司:</span>' + global.playlist[nextIndex]['company']
@@ -163,7 +163,7 @@
             cleanDoubanFMEvent();
             global.channel = 1;
             var htmlRadio = '<div id="audioInfo" style="height:205px;">'
-                    + '</div><div id="test"></div>'
+                    + '</div>'
                     + '<embed id="mplayer" type="application/x-mplayer2" '
                     + 'style="width:510px;height:40px;"'
                     + 'onMediaComplete="nextAudio();"'
@@ -317,7 +317,9 @@
             global.player = getNode('mplayer');
 			setCookie('mplayer_videoId',global.mpalyer_videoId,global.cookieExpire);
             global.timeUpdate = function timeUpdate() {
-                var nt = Math.round(global.seqsPlayTime + global.player.getTime());
+                var cpt = global.player.getTime();
+                var nt = Math.round(global.seqsPlayTime + (cpt||0));
+                
                 getNode('videoTime').innerHTML = farmatTime(nt) + '/' + t;
                 setTimeout(timeUpdate, 1000);
             };
@@ -340,6 +342,9 @@
             }
         };
         global.playComplete = function playComplete(e) {
+            if(player.playState == 6 || player.playState == 11) {
+                return;
+            }
             var nextIndex = global.playIndex + 1;
             if (nextIndex <= global.playlist.length) {
                 global.playIndex = nextIndex;
