@@ -110,22 +110,26 @@
         };
 
         global.cleanDoubanFMEvent = function cleanDoubanFMEvent() {
-            global.initBannerAd = function() {
-            };
-            global.bgad = {has_channel_ad: function() {
-                }};
+//            global.initBannerAd = function() {
+//            };
+//            global.bgad = {has_channel_ad: function() {
+//                }};
             global.DBR = {swf: function() {}, act: function(s, q) {},
                         radio_getlist: function(q) {},
                         close_video: function() {},
                 play_video: function() {
                 },
                 is_paused: function() {
-                }};
+                },
+                logout: function (){window.is_user_login=false;delete globalConfig.uid;$("#fm-header").find("#anony_nav").remove().end().find("#user_info").remove().end().prepend($.tmpl($("#tmpl_user_info").html(),{}))},
+                show_login: function (){var q=globalConfig.doubanHost+"/service/account/check_with_js?"+$.param({return_to:globalConfig.login_check_url,sig:globalConfig.ajax_sig,r:Math.random()})+"&callback=?";$.getJSON(q,function(r){$.getJSON(r.url,function(s){if(s.r==0){$(window).trigger(window.consts.LOGIN_EVENT,s.user_info)}else{show_login()}})})}};
+            
             $(".channel_list").undelegate();
             $(".channel_list").delegate(".channel:not(.selected)", "click", function(V) {
                  var T = $(this), R = $(".channel"), X = T.data("cid"),
                  U = T.closest(".channel_list").attr("id");
                 global.channel = T.attr("cid");
+                setCookie('mplayer_doubanChannel', global.channel,global.cookieExpire);
                 getDoubanPlayList();
                 $.getJSON("/j/change_channel?fcid=" + T.attr("data-cid") + "&tcid=" + X + "&area=" + U);
             });
@@ -161,7 +165,7 @@
         };
         global.createDoubanFmAudo = function createDoubanFmAudo() {
             cleanDoubanFMEvent();
-            global.channel = 1;
+            global.channel = getCookie('mplayer_doubanChannel')||1;
             var htmlRadio = '<div id="audioInfo" style="height:205px;">'
                     + '</div>'
                     + '<embed id="mplayer" type="application/x-mplayer2" '
