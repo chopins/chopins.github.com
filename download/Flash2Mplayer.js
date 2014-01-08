@@ -428,7 +428,7 @@
                     }, 1000);
                 }
                 ;
-                if (Math.round(curTime) < Math.round(player.getDuration())) {
+                if (player.getPercent() < 0.95) {
                     setTimeout(continuePlay, 10000);
                     return;
                 }
