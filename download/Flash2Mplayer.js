@@ -358,6 +358,7 @@
                     + '<span id="videoTime">00:00/' + t + '</span>'
                     + '<span onclick="videoNextSeqs(\'click\');" style="cursor:pointer;">下一节</span>'
                     + '<span onclick="videoPreviousSeqs(\'click\');" style="cursor:pointer;">上一节</span>'
+					+ '<span id="videoState"></span>'
                     + '</div><div id="playerPlaceholder"></div>';
 
             global.useMplayer = function useMplayer() {
@@ -458,6 +459,7 @@
                 var curTime = getVideoTime();
                 function continuePlay() {
                     videoPlay();
+					getNode('videoState').innerHTML = 'playing..';
                     setTimeout(function() {
                         setVideoTime(curTime);
                         setTimeout(function() {
@@ -470,7 +472,8 @@
                 }
                 ;
                 if (getVideoPercent() < 0.95) {
-                    setTimeout(continuePlay, 10000);
+                    setTimeout(continuePlay, 50000);
+					getNode('videoState').innerHTML = 'waiting..';
                     return;
                 }
             }
