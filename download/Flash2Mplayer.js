@@ -361,7 +361,8 @@
                     + '</div><div id="playerPlaceholder"></div>';
 
             global.useMplayer = function useMplayer() {
-                html = '<embed type="application/x-mplayer2" id="mplayer"'
+                //html = '<embed type="application/x-mplayer2" id="mplayer"'
+                var html = '<embed type="video/flv" id="mplayer"'
                         + 'name="video2 --cache=1024 --volume=80 --forcecache=1024" width="100%" height="500" src="' + url + '"'
                         + 'onMediaComplete="playComplete();" showlogo="true" onMediaCompleteWithError="mplayerError(error);" forcecache="64" fullscreen single_instance replace_and_play />' + ih;
                 getNode(playerId).innerHTML = html;
@@ -370,7 +371,7 @@
             };
 
             getNode(playerId).setAttribute('style', 'background-color:#EEE;margin:0;padding:0;text-indent: 0;');
-            getNode(playerId).innerHTML = '<video id="mplayer" preload="metadata" type="video/x-h264" autoplay controls style="width:100%;height:500px;" src="' + url + '" onerror="useMplayer()">'
+            getNode(playerId).innerHTML = '<video id="mplayer" preload="metadata" type="video/x-h264" autoplay controls style="width:100%;height:500px;" src="' + url + '" onerror="useMplayer();" onended="playComplete();">'
                     + '</video>' + ih;
             //global.playIndex = 0;
 
@@ -402,7 +403,7 @@
                 global.seqsPlayTime -= global.playlist[preIndex]['seconds'];
                 getNode('curIdx').innerHTML = (preIndex + 1) + '/' + global.playlist.length;
                 player.setAttribute('src', global.playlist[preIndex]['url']);
-                player.Play();
+                videoPlay();
                 return;
             }
         };
@@ -411,24 +412,64 @@
             for (var t = Date.now(); Date.now() - t <= d; )
                 ;
         };
+        global.videoPlay = function videoPlay() {
+            try {
+                return player.Play();
+            } catch(e) {
+                return player.play();
+            }
+        };
+        global.setVideoTime = function setVideoTime(v) {
+            try {
+                return player.PlayAt(curTime);
+            } catch(e) {
+                player.currentTime = curTime;
+            }
+        };
+        global.getVideoTime = function getVideoTime() {
+            try{
+                return player.getTime();
+            } catch(e) {
+                return player.currentTime;
+            }
+        };
+        global.videoFullScreenState = function videoFullScreenState() {
+            if(typeof player.fullscreen != 'undefined') {
+                return player.fullscreen;
+            }
+            return document.mozFullScreenElement != null;
+        };
+        global.setFullScreen = function setFullScrenn() {
+            if(typeof player.fullscreen != 'undefined') {
+                return player.fullscreen = true;
+            }
+            return player.mozRequestFullScreen()
+        };
+        global.getVideoPercent = function getVideoPercent() {
+            try {
+                return player.getPercent();
+            } catch(e) {
+                return player.currentTime/player.duration;
+            }
+        }
         global.playComplete = function playComplete(e) {
-            var fullscreen = player.fullscreen;
+            var fullscreen = videoFullScreenState;
             if (e != 'click') {
-                var curTime = player.getTime();
+                var curTime = getVideoTime();
                 function continuePlay() {
-                    player.Play();
+                    videoPlay();
                     setTimeout(function() {
-                        player.PlayAt(curTime);
+                        setVideoTime(curTime);
                         setTimeout(function() {
-                            player.PlayAt(curTime);
+                            setVideoTime(curTime);
                             if (fullscreen) {
-                                player.fullscreen = true;
+                                setFullScreen();
                             }
                         }, 1000);
                     }, 1000);
                 }
                 ;
-                if (player.getPercent() < 0.95) {
+                if (getVideoPercent() < 0.95) {
                     setTimeout(continuePlay, 10000);
                     return;
                 }
@@ -441,9 +482,13 @@
 
                 getNode('curIdx').innerHTML = (global.playIndex + 1) + '/' + global.playlist.length;
                 player.setAttribute('src', global.playlist[nextIndex]['url']);
-                player.Play();
+                videoPlay();
                 if (fullscreen) {
                     function fs() {
+                        if(typeof player.playState == 'undefined') {
+                            setFullScreen();
+                            return;
+                        }
                         if (player.playState == 8 || player.playState == 1) {
                             return;
                         }
@@ -455,7 +500,7 @@
                             setTimeout(fs, 1000);
                             return;
                         }
-                        player.fullscreen = true;
+                        setFullScreen();
                         player.setAttribute("fullscreen", fullscreen);
                     }
                     fs();
@@ -549,7 +594,6 @@
     function run(callback) {
         if (window.top != window)
             return true;
-
         var script = document.createElement('script');
         script.id = '__flash2mplayer';
         script.textContent = '(' + callback.toString() + ')(window);';
@@ -685,12 +729,17 @@
     var ckc = 1;
     var stop = false;
     var call = function() {
-        if (ckc >= 5)
+        if (ckc == 4) {
+            stop = true;
+        }
+        if(ckc >= 5) 
             return;
         if (document.getElementsByTagName('object').length == 0
                 && document.getElementsByTagName('embed').length == 0) {
-            if (stop)
+            if (stop) {
+                run(Flash2Mplayer);
                 return;
+            }
             setTimeout(call, 2000);
         } else {
             var stop = true;
