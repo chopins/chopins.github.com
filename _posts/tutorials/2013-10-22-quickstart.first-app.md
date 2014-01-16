@@ -23,7 +23,7 @@ categories: tutorials
 
 --------------------
 2.创建一个应用程序使用如下命令
-`php /home/Toknot/Tool/CreateApp.php`
+`php /home/Toknot/Toknot.php CreateApp`
 
   该脚本会创建应用程序基本目录结构,并且会创建一些简单的示例代码,
   如果你创建的是后台管理程序,该脚本还会创建后台页面框架结构,你只需要完成每一项管理功能即可
@@ -73,15 +73,15 @@ $ php -S localhost:8000 index.php -t static/
 ```
 
 Web服务器普通配置情况下，可以通过类似下面的方式访问控制器:
-   `http://localhost/index.php?c=Index`   
-   `http://localhost/index.php?c=User.Login`   
-   `http://localhost/index.php?c=User`   
+   `http://localhost/index.php?c=/Index`   
+   `http://localhost/index.php?c=/User/Login`   
+   `http://localhost/index.php?c=/User`   
 但是在入口文件的代码应当是下面这样:
 
 ```php
 use Toknot\Control\Application;
 use Toknot\Control\Router;
-require_once '/home/Toknot/Control/Application.php';
+require_once '/home/Toknot/Toknot.php';
 $app = new Application;
 $app->run('\MyApp',dirname(__DIR__),'\Index',Router::ROUTER_GET_QUERY);
 ```
@@ -130,7 +130,8 @@ server {
 ```php
 namespace MyApp\Controller;
 use MyApp\MyAppBase;
-class Index extends  MyAppBase{
+use Toknot\Control\ControllerInterface as CI;
+class Index extends  MyAppBase implements CI\GET,CI\POST,CI\PUT,CI\CLI{
 
     //支持HTTP GET 请求的方法
     public function GET() {
@@ -168,11 +169,13 @@ class Index extends  MyAppBase{
 
 ```php
 namespace MyApp\MyAppBase;
-class MyAppBase
+use Toknot\Control\FMAI;
+use Toknot\Control\ControllerInterface as CI;
+class MyAppBase implements CI\ControllerInterface {
       public $FMAI = null;
       public $AR = null;
       public $AppPath;
-      public function __construct($FMAI) {
+      public function __construct(FMAI $FMAI) {
           $this->FMAI = $FMAI;
           $this->AppPath = dirname(__DIR__);
           //加载应用的配置文件，默认会加载框架配置文件，如果想覆盖框架的配置项，可以创建同名的进行覆盖
