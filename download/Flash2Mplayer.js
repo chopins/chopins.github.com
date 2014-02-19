@@ -358,7 +358,7 @@
                     + '<span id="videoTime">00:00/' + t + '</span>'
                     + '<span onclick="videoNextSeqs(\'click\');" style="cursor:pointer;">下一节</span>'
                     + '<span onclick="videoPreviousSeqs(\'click\');" style="cursor:pointer;">上一节</span>'
-					+ '<span id="videoState"></span>'
+                    + '<span id="videoState"></span>'
                     + '</div><div id="playerPlaceholder"></div>';
 
             global.useMplayer = function useMplayer() {
@@ -368,7 +368,7 @@
                         + 'onMediaComplete="playComplete();" showlogo="true" onMediaCompleteWithError="mplayerError(error);" forcecache="64" fullscreen single_instance replace_and_play />' + ih;
                 getNode(playerId).innerHTML = html;
                 global.player = getNode('mplayer');
-                
+
             };
 
             getNode(playerId).setAttribute('style', 'background-color:#EEE;margin:0;padding:0;text-indent: 0;');
@@ -459,7 +459,7 @@
                 var curTime = getVideoTime();
                 function continuePlay() {
                     videoPlay();
-					getNode('videoState').innerHTML = 'playing..';
+                    getNode('videoState').innerHTML = 'playing..';
                     setTimeout(function() {
                         setVideoTime(curTime);
                         setTimeout(function() {
@@ -473,7 +473,7 @@
                 ;
                 if (getVideoPercent() < 0.95) {
                     setTimeout(continuePlay, 50000);
-					getNode('videoState').innerHTML = 'waiting..';
+                    getNode('videoState').innerHTML = 'waiting..';
                     return;
                 }
             }
@@ -667,8 +667,7 @@
             }
 
             var tudoduiid = document.getElementById('__flash2mplayer').getAttribute('tudouiid');
-
-            if (tudoduiid) {
+            if (tudoduiid || (vcode && document.domain == 'tudou.com')) {
                 var videosegs = JSON.parse(document.getElementById('__flash2mplayer').getAttribute('segs'));
                 if (typeof videosegs['5'] !== 'undefined') {
                     var seg = videosegs['5'];
@@ -682,8 +681,10 @@
                 var len = seg.length;
                 var count = 0;
                 var seconds = 0;
+
                 for (var i in seg) {
                     var url = 'http://v2.tudou.com/f?sender=pepper&v=4.2.2&sj=1&id=' + seg[i]['k'] + '&sid=11000&hd=5&r=0';
+
                     seconds = seconds + seg[i]['seconds'];
                     request = GM_xmlhttpRequest({
                         idx: i,
@@ -735,7 +736,7 @@
         if (ckc == 4) {
             stop = true;
         }
-        if(ckc >= 5) 
+        if(ckc >= 5)
             return;
         if (document.getElementsByTagName('object').length == 0
                 && document.getElementsByTagName('embed').length == 0) {
