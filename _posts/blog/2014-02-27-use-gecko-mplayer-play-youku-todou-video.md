@@ -9,7 +9,7 @@ categories: blog
 
 1. 安装有 gecko-mplayer 插件
 2. 安装 Greasemonkey 扩展
-3. 下载并安装脚本，脚本下载地址： (http://toknot.com/download/Flash2Mplayer.js)
+3. 下载并安装脚本，[脚本下载地址](http://toknot.com/download/Flash2Mplayer.js)
 4. 刷新页面即可
 
 脚本特性及注意：
