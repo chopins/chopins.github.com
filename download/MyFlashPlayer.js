@@ -80,19 +80,27 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		}
 		return pwd;
 	}
-	function farmatTime(sec) {
-		sec = parseInt(sec);
-		var s = sec % 60;
-		s = s > 9 ? s : '0' + s;
-		var m = Math.round(sec / 60);
-		m = m > 9 ? m : '0' + m;
-		return m + ':' + s;
-	}
-	;
+
 	function createFlowPlayer(id, playerList, duration) {
+		function farmatTime(sec) {
+			sec = parseInt(sec);
+			var s = sec % 60;
+			s = s > 9 ? s : '0' + s;
+			var m = Math.round(sec / 60);
+			m = m > 9 ? m : '0' + m;
+			return m + ':' + s;
+		}
+		;
+		function getSeqsTime(seq) {
+			var t = 0;
+			for (var i = 0; i < seq; i++) {
+				t += playerList[i].duration;
+			}
+			return t;
+		}
+
 		var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
-		var player = document.getElementById('player');
-		player.innerHTML = '';
+		document.getElementById('player').innerHTML = '';
 		flowplayer(id, playerUrl, {
 			clip: {
 				autoPlay: true,
@@ -101,12 +109,62 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			},
 			playlist: playerList,
 			plugins: {
-			controls: {
-				 playlist:true,
-				 scrubber:true
-			}}
+				controls: {
+					playlist: true,
+					scrubber: true
+				}}
 		});
-		console.log(playerUrl);
+		var playerDiv = document.getElementById(id).parentNode;
+		var info = document.createElement('div');
+		info.id = 'videoData';
+		var seqList = document.createElement('select');
+		for (var i = 0; i < playerList.length; i++) {
+			var op = document.createElement('option');
+			op.innerHTML = i + 1;
+			op.value = i;
+			op.id = 'seq_' + i;
+			seqList.appendChild(op);
+		}
+		seqList.onchange = function(e) {
+			$f('player').play(parseInt(seqList.value));
+		};
+		info.appendChild(seqList);
+		var currPlayerTime = document.createElement('span');
+		currPlayerTime.innerHTML = '00:00';
+		info.appendChild(currPlayerTime);
+		var sumDuration = document.createElement('span');
+		sumDuration.innerHTML = '/'+farmatTime(duration);
+		info.appendChild(sumDuration);
+
+		
+
+		playerDiv.appendChild(info);
+		var currIndex = 0;
+		var playerTime = 0;
+		var opList = seqList.getElementsByTagName('option');
+		function updateTime() {
+			var clip = $f('player').getClip();
+			if (clip) {
+				var index = clip.index;
+				if (index != currIndex) {
+					for (var i = 0; i < opList.length; i++) {
+						if (opList[i].value == index) {
+							opList[i].setAttribute('selected', true);
+						}
+						if (opList[i].value == currIndex) {
+							opList[i].setAttribute('selected', false);
+						}
+					}
+					currIndex = index;
+					playerTime = getSeqsTime(currIndex);
+
+				}
+				var htmlTime = playerTime + $f('player').getTime();
+				currPlayerTime.innerHTML = farmatTime(htmlTime);
+			}
+			setTimeout(updateTime, 500);
+		}
+		updateTime();
 	}
 	function F2MgetYoukuURL(spec) {
 		function getFileIDMixString(seed) {
@@ -123,7 +181,6 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			}
 			return mixed;
 		}
-		;
 		;
 		function getFileID(fileid, seed) {
 			var mixed = getFileIDMixString(seed);
@@ -179,7 +236,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 
 			}
 			var script = document.createElement('script');
-			script.textContent = '('+createFlowPlayer.toString()+')("player",' + JSON.stringify(playList) + ',' + videoSeconds + ');';
+			script.textContent = '(' + createFlowPlayer.toString() + ')("player",' + JSON.stringify(playList) + ',' + videoSeconds + ');';
 			document.body.appendChild(script);
 		} catch (e) {
 			console.log(e);
@@ -191,9 +248,23 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: url,
+			synchronous: true,
 			onload: function(response) {
-				var re = JSON.parse(response.responseText);
-				F2MgetYoukuURL(re);
+				try {
+					var re = JSON.parse(response.responseText);
+					F2MgetYoukuURL(re);
+				} catch (e) {
+					console.log(e);
+				}
+			},
+			onerror: function(e) {
+				console.log(e);
+			},
+			ontimeout: function(e) {
+				console.log(e);
+			},
+			onreadystatechange: function(e) {
+
 			}
 		});
 	}
@@ -269,5 +340,9 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		createSetVideoScript();
 		requestVideoUrl();
 	}
-	run();
+	try {
+		run();
+	} catch (e) {
+		console.log(e);
+	}
 })(window);
