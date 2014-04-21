@@ -1,29 +1,42 @@
 #!/bin/sh
-#svn search update-log script
 
-err=0
+usage () {
+echo 'Usage: svn-ext username -d 2012-09-23  check commit log after this date '
+echo '       svn-ext username -v 123         check commit log after this version'
+echo '       svn-ext --help|-h               display this message'
+exit
+}
+
+ERR=0
+if [ ! -x /bin/sed ];then
+    $err = 1
+fi
+if [ ! -x /usr/bin/sed -a $err ==1 ];then
+    echo "need install sed"
+    exit 1
+fi
+
 if [ "$1" == "" ];then
-        echo 'need username'
-err=1
+	echo 'need username'
+    usage
 fi
-if [ "$2" == ""];then
+if [ "$1" == '-h' -o "$1" == '--help' ];then
+usage
+fi
+
+if [ "$2" == "" ];then
 echo 'need date or version number'
-err=1
 fi
+
 if [ "$3" == "" ];then
 echo 'need date or version number'
-err=1
-fi
-
-if [ $err -eq 1 ];then
-echo 'Usage: svn-ext username -d 2012-09-23'
-echo '       svn-ext username -n 2012-09-23'
-exit
+    usage
 fi
 
 if [ $2 == '-d' ];then
 echo 'checking...'
-        svn log -rhead:{$3} -v|sed -n '/'$1'/,/-----$/ p'
+	svn log -rhead:{$3} -v|sed -n '/'$1'/,/-----$/ p'
+echo 'complete'
 elif [ $2 == '-v' ];then
-        svn log -rhead:$3 -v|sed -n '/'$1'/,/-----$/ p'
+	svn log -rhead:$3 -v|sed -n '/'$1'/,/-----$/ p'
 fi
