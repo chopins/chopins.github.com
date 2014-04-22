@@ -99,7 +99,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			return t;
 		}
 
-		var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
+		var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
 		document.getElementById('player').innerHTML = '';
 		flowplayer(id, playerUrl, {
 			clip: {
