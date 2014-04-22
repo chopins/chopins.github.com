@@ -15,6 +15,134 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 }
 
 (function(global) {
+	function createFlowPlayer(id, allList, duration) {
+		//var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
+		var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
+		function farmatTime(sec) {
+			sec = parseInt(sec);
+			var s = sec % 60;
+			s = s > 9 ? s : '0' + s;
+			var m = Math.round(sec / 60);
+			m = m > 9 ? m : '0' + m;
+			return m + ':' + s;
+		}
+		;
+		function getSeqsTime(seq) {
+			var t = 0;
+			for (var i = 0; i < seq; i++) {
+				t += playerList[i].duration;
+			}
+			return t;
+		}
+		function getFileType(obj) {
+			var keys = Object.keys(obj);
+			if (keys.indexOf('hd2') >= 0) {
+				return 'hd2';
+			} else if (keys.indexOf('mp4') >= 0) {
+				return 'mp4';
+			} else if (keys.indexOf('flv') >= 0) {
+				return 'flv';
+			}
+		}
+		;
+		
+		document.getElementById('player').innerHTML = '';
+		var defaultType = getFileType(allList);
+		var playerList = allList[defaultType];
+		flowplayer(id, playerUrl, {
+			clip: {
+				autoPlay: true,
+				autoBuffering: true,
+				duration: duration
+			},
+			playlist: playerList,
+			plugins: {
+				controls: {
+					playlist: true,
+					scrubber: true
+				}}
+		});
+		var playerDiv = document.getElementById(id).parentNode;
+		var info = document.createElement('div');
+		info.id = 'videoData';
+		var allType = Object.keys(allList);
+		var typeList = document.createElement('select');
+		for (var i = 0; i < allType.length; i++) {
+			var op = document.createElement('option');
+			op.innerHTML = allType[i];
+			op.value = allType[i];
+			op.id = 'type_' + allType[i];
+			if(allType[i] == defaultType) {
+				op.setAttribute('selected', true);
+			}
+			typeList.appendChild(op);
+		}
+		
+		info.appendChild(typeList);
+		
+		var seqList = document.createElement('select');
+		for (var i = 0; i < playerList.length; i++) {
+			var op = document.createElement('option');
+			op.innerHTML = i + 1;
+			op.value = i;
+			op.id = 'seq_' + i;
+			seqList.appendChild(op);
+		}
+		
+		seqList.onchange = function(e) {
+			$f('player').play(parseInt(seqList.value));
+		};
+		info.appendChild(seqList);
+		var currPlayerTime = document.createElement('span');
+		currPlayerTime.innerHTML = '00:00';
+		info.appendChild(currPlayerTime);
+		var sumDuration = document.createElement('span');
+		sumDuration.innerHTML = '/'+farmatTime(duration);
+		info.appendChild(sumDuration);
+
+		playerDiv.appendChild(info);
+		var currIndex = 0;
+		var playerTime = 0;
+		var opList = seqList.getElementsByTagName('option');
+		
+		typeList.onchange = function(e) {
+			var pList = allList[typeList.value];
+			$f('player').setPlaylist(pList);
+			$f('player').play();
+			seqList.innerHTML = '';
+			for (var i = 0; i < pList.length; i++) {
+				var op = document.createElement('option');
+				op.innerHTML = i + 1;
+				op.value = i;
+				op.id = 'seq_' + i;
+				seqList.appendChild(op);
+			}
+		};
+		
+		function updateTime() {
+			var clip = $f('player').getClip();
+			if (clip) {
+				var index = clip.index;
+				if (index != currIndex) {
+					for (var i = 0; i < opList.length; i++) {
+						if (opList[i].value == index) {
+							opList[i].setAttribute('selected', true);
+						}
+						if (opList[i].value == currIndex) {
+							opList[i].setAttribute('selected', false);
+						}
+					}
+					currIndex = index;
+					playerTime = getSeqsTime(currIndex);
+
+				}
+				var htmlTime = playerTime + $f('player').getTime();
+				currPlayerTime.innerHTML = farmatTime(htmlTime);
+			}
+			setTimeout(updateTime, 500);
+		}
+		updateTime();
+	}
 	function createPlayerJs() {
 		var script = document.createElement('script');
 		script.setAttribute('type', 'text/javascript');
@@ -81,91 +209,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		return pwd;
 	}
 
-	function createFlowPlayer(id, playerList, duration) {
-		function farmatTime(sec) {
-			sec = parseInt(sec);
-			var s = sec % 60;
-			s = s > 9 ? s : '0' + s;
-			var m = Math.round(sec / 60);
-			m = m > 9 ? m : '0' + m;
-			return m + ':' + s;
-		}
-		;
-		function getSeqsTime(seq) {
-			var t = 0;
-			for (var i = 0; i < seq; i++) {
-				t += playerList[i].duration;
-			}
-			return t;
-		}
-
-		var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
-		document.getElementById('player').innerHTML = '';
-		flowplayer(id, playerUrl, {
-			clip: {
-				autoPlay: true,
-				autoBuffering: true,
-				duration: duration
-			},
-			playlist: playerList,
-			plugins: {
-				controls: {
-					playlist: true,
-					scrubber: true
-				}}
-		});
-		var playerDiv = document.getElementById(id).parentNode;
-		var info = document.createElement('div');
-		info.id = 'videoData';
-		var seqList = document.createElement('select');
-		for (var i = 0; i < playerList.length; i++) {
-			var op = document.createElement('option');
-			op.innerHTML = i + 1;
-			op.value = i;
-			op.id = 'seq_' + i;
-			seqList.appendChild(op);
-		}
-		seqList.onchange = function(e) {
-			$f('player').play(parseInt(seqList.value));
-		};
-		info.appendChild(seqList);
-		var currPlayerTime = document.createElement('span');
-		currPlayerTime.innerHTML = '00:00';
-		info.appendChild(currPlayerTime);
-		var sumDuration = document.createElement('span');
-		sumDuration.innerHTML = '/'+farmatTime(duration);
-		info.appendChild(sumDuration);
-
-		
-
-		playerDiv.appendChild(info);
-		var currIndex = 0;
-		var playerTime = 0;
-		var opList = seqList.getElementsByTagName('option');
-		function updateTime() {
-			var clip = $f('player').getClip();
-			if (clip) {
-				var index = clip.index;
-				if (index != currIndex) {
-					for (var i = 0; i < opList.length; i++) {
-						if (opList[i].value == index) {
-							opList[i].setAttribute('selected', true);
-						}
-						if (opList[i].value == currIndex) {
-							opList[i].setAttribute('selected', false);
-						}
-					}
-					currIndex = index;
-					playerTime = getSeqsTime(currIndex);
-
-				}
-				var htmlTime = playerTime + $f('player').getTime();
-				currPlayerTime.innerHTML = farmatTime(htmlTime);
-			}
-			setTimeout(updateTime, 500);
-		}
-		updateTime();
-	}
+	
 	function F2MgetYoukuURL(spec) {
 		function getFileIDMixString(seed) {
 			var mixed = [
@@ -195,17 +239,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			return realId.join('');
 		}
 		;
-		function getFileType(obj) {
-			var keys = Object.keys(obj);
-			if (keys.indexOf('hd2') >= 0) {
-				return 'hd2';
-			} else if (keys.indexOf('mp4') >= 0) {
-				return 'mp4';
-			} else if (keys.indexOf('flv') >= 0) {
-				return 'flv';
-			}
-		}
-		;
+		
 		function toHex(number) {
 			var str = number.toString(16);
 			return ((str.length < 2) ? '0' + str : str).toUpperCase();
@@ -213,30 +247,34 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		;
 		try {
 			var playerId = 'player';
-			var data = spec.data[0], d = new Date(), fileType = getFileType(data['streamfileids']);
-			var fileid = getFileID(data['streamfileids'][fileType], data['seed']);
-			var rand1 = 1000 + parseInt(Math.random() * 999);
-			var rand2 = 1000 + parseInt(Math.random() * 9000);
-			var sid = d.getTime() + '' + rand1 + '' + rand2;
-			var first = '';
-			var pathType = fileType == 'mp4' ? 'mp4' : 'flv';
-			var playList = [];
-			var videoSeconds = 0;
-			for (var i = 0, len = (data['segs'][fileType]).length; i < len; i++) {
-				var k = data['segs'][fileType][i]['k'],
-						url = 'http://f.youku.com/player/getFlvPath/sid/' +
-						sid + '_' + toHex(i) + '/st/' + pathType + '/fileid/' +
-						fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
-				videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
-				var seq = {};
-				seq['duration'] = parseInt(data['segs'][fileType][i]['seconds']);
-				seq['url'] = url;
-				seq['autoBuffering'] = true;
-				playList.push(seq);
+			var data = spec.data[0], d = new Date(); /*fileType = getFileType(data['streamfileids'])*/
+			var allUrl = {};
+			for(var fileType in data['streamfileids']) {
+				var fileid = getFileID(data['streamfileids'][fileType], data['seed']);
+				var rand1 = 1000 + parseInt(Math.random() * 999);
+				var rand2 = 1000 + parseInt(Math.random() * 9000);
+				var sid = d.getTime() + '' + rand1 + '' + rand2;
+				var first = '';
+				var pathType = fileType == 'mp4' ? 'mp4' : 'flv';
+				var playList = [];
+				var videoSeconds = 0;
+				for (var i = 0, len = (data['segs'][fileType]).length; i < len; i++) {
+					var k = data['segs'][fileType][i]['k'],
+							url = 'http://f.youku.com/player/getFlvPath/sid/' +
+							sid + '_' + toHex(i) + '/st/' + pathType + '/fileid/' +
+							fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
+					videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
+					var seq = {};
+					seq['duration'] = parseInt(data['segs'][fileType][i]['seconds']);
+					seq['url'] = url;
+					seq['autoBuffering'] = true;
+					playList.push(seq);
 
+				}
+				allUrl[fileType] = playList;
 			}
 			var script = document.createElement('script');
-			script.textContent = '(' + createFlowPlayer.toString() + ')("player",' + JSON.stringify(playList) + ',' + videoSeconds + ');';
+			script.textContent = '(' + createFlowPlayer.toString() + ')("player",' + JSON.stringify(allUrl) + ',' + videoSeconds + ');';
 			document.body.appendChild(script);
 		} catch (e) {
 			console.log(e);
@@ -269,6 +307,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		});
 	}
 	function getTudou(vcode) {
+		return;
 		var videosegs = JSON.parse(document.getElementById('__flash2mplayer').getAttribute('segs'));
 		if (typeof videosegs['5'] !== 'undefined') {
 			var seg = videosegs['5'];
