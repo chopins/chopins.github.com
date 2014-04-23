@@ -30,7 +30,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		function getSeqsTime(seq) {
 			var t = 0;
 			for (var i = 0; i < seq; i++) {
-				t += playerList[i].duration;
+				t += playerList[i].t;
 			}
 			return t;
 		}
@@ -121,6 +121,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		
 		function updateTime() {
 			var clip = $f('player').getClip();
+			var state = $f('player').getState();
 			if (clip) {
 				var index = clip.index;
 				if (index != currIndex) {
@@ -265,7 +266,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 							fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
 					videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
 					var seq = {};
-					seq['duration'] = parseInt(data['segs'][fileType][i]['seconds']);
+					seq['t'] = parseInt(data['segs'][fileType][i]['seconds']);
 					seq['url'] = url;
 					seq['autoBuffering'] = true;
 					playList.push(seq);
@@ -338,7 +339,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 					var index = seg[this.idx]['no'];
 					playlist[index] = {};
 					playlist[index]['url'] = tmp.textContent;
-					playlist[index]['duration'] = Math.round(this.seconds / 1000);
+					playlist[index]['t'] = Math.round(this.seconds / 1000);
 					count++;
 					if (count == len) {
 						var script = document.createElement('script');
