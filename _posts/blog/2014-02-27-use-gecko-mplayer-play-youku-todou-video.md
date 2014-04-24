@@ -21,3 +21,7 @@ categories: blog
 5. 由于替换了播放器，所以视频网站的广告也会被同时去掉
 6. gecko-mplayer 需要的缓存设置通过 gnome-mplayer 来设置。
 7. gecok-mplayer 默认缓存比例是 20%， 所以需要设置缓存为 1024KB 才能实现即时播放，注意不能少于 1024KB，否则这个值会被忽略
+
+最近写了一改使用 flowplayer 替换youku视频播发器的脚本
+[下载地址](http://toknot.com/download/MyFlashPlayer.js)
+这个脚本是使用了第三方flash播发器来替换youku原有的视频播放器，主要作用其实就是去广告
