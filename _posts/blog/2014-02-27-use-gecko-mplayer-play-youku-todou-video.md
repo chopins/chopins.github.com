@@ -1,6 +1,6 @@
 ---
 layout: blog_contents
-title: 在 Firefox 中使用 gecko-mplayer 插件播放 youku,tudou,sohu等站的视频
+title: 替换 youku 等站的视频站默认播放器
 categories: blog
 ---
 #使用gecko-mplayer播放器替换#
