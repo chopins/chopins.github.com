@@ -49,6 +49,6 @@ function createFlowPlayer(id, allList, duration) {
 
 [flash播放器下载地址](http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf) 注意使用右键另存为  
 [flash播放器空制条下载地址](http://page.toknot.com/flowplayer/flowplayer.controls-3.2.16.swf)
-下载好后，将两个swf文件需要放到同一个目录即可
+下载好后，将两个swf文件需要放到同一个目录即可   
 [flowplayer官方下载地址](https://releases.flowplayer.org/flowplayer/flowplayer-3.2.18.zip)
 
