@@ -28,9 +28,10 @@ categories: blog
 [下载地址](http://toknot.com/download/MyFlashPlayer.js)  
 这个脚本是使用了第三方flash播发器来替换youku原有的视频播放器，主要作用其实就是去广告 
 脚本特性:
-    1.没有广告
-    2.可以选择清晰度
-    3.可以选择分段播发
+
+1. 没有广告
+2. 可以选择清晰度
+3. 可以选择分段播发
  
 播发器中的地址可以自行替换为自己的可用链接，
 
@@ -46,8 +47,8 @@ function createFlowPlayer(id, allList, duration) {
 替换为 `var playerUrl = 'http://你的服务器地址/flowplayer-3.2.18.swf';`
 
 
-flash播放器下载地址(http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf) 注意使用右键另存为 
-flash播放器空制条 (http://page.toknot.com/flowplayer/flowplayer.controls-3.2.16.swf) 
-以上两个swf文件需要放到同一个目录 
-flowplayer官方下载地址(https://releases.flowplayer.org/flowplayer/flowplayer-3.2.18.zip)
+flash播放器下载地址 [http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf] 注意使用右键另存为 
+flash播放器空制条  [http://page.toknot.com/flowplayer/flowplayer.controls-3.2.16.swf] 
+下载好后，将两个swf文件需要放到同一个目录即可
+flowplayer官方下载地址 [https://releases.flowplayer.org/flowplayer/flowplayer-3.2.18.zip]
 
