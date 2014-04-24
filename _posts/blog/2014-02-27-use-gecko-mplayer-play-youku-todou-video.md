@@ -27,7 +27,10 @@ categories: blog
 由于gecko-mplayer版本缓存与播发状态转换问题，以及mplayer不断创建 xscreensaver挂起进程，让人很不舒服，
 所以最近写了一个 使用 flowplayer 替换youku视频播发器的脚本  
 [下载地址](http://toknot.com/download/MyFlashPlayer.js)  
-这个脚本是使用了第三方flash播发器来替换youku原有的视频播放器，主要作用其实就是去广告 
+这个脚本是使用了第三方flash播发器来替换youku原有的视频播放器，
+__脚本需要 安装 Greasemonkey 扩展才可运行__， 
+需要注意的是 noscript 的ABE需要禁用，否在无法播发，当然如果会写规则请无视 
+
 脚本特性:
 
 1. 没有广告
