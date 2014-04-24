@@ -22,7 +22,7 @@ categories: blog
 6. gecko-mplayer 需要的缓存设置通过 gnome-mplayer 来设置。
 7. gecok-mplayer 默认缓存比例是 20%， 所以需要设置缓存为 1024KB 才能实现即时播放，注意不能少于 1024KB，否则这个值会被忽略
 
-#最新写更新#
+#最新变更#
 
 最近写了一个 使用 flowplayer 替换youku视频播发器的脚本  
 [下载地址](http://toknot.com/download/MyFlashPlayer.js)  
@@ -46,8 +46,8 @@ function createFlowPlayer(id, allList, duration) {
 替换为 `var playerUrl = 'http://你的服务器地址/flowplayer-3.2.18.swf';`
 
 
-flash播放器下载地址(http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf) 注意使用右键另存为
-flash播放器空制条 (http://page.toknot.com/flowplayer/flowplayer.controls-3.2.16.swf)
-以上两个swf文件需要放到同一个目录
+flash播放器下载地址(http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf) 注意使用右键另存为 
+flash播放器空制条 (http://page.toknot.com/flowplayer/flowplayer.controls-3.2.16.swf) 
+以上两个swf文件需要放到同一个目录 
 flowplayer官方下载地址(https://releases.flowplayer.org/flowplayer/flowplayer-3.2.18.zip)
 
