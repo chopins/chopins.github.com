@@ -3,7 +3,7 @@ layout: blog_contents
 title: 在 Firefox 中使用 gecko-mplayer 插件播放 youku,tudou,sohu等站的视频
 categories: blog
 ---
-###Flash版本见后面###
+#使用gecko-mplayer播放器替换#
 由于 Flash 容易崩溃，并且使 CPU 使用率居高不下，所以写了一个脚本，替换视频网站原有的 Flash 视频播放器
 本脚本需要按以下步骤来安装：
 
@@ -22,9 +22,10 @@ categories: blog
 6. gecko-mplayer 需要的缓存设置通过 gnome-mplayer 来设置。
 7. gecok-mplayer 默认缓存比例是 20%， 所以需要设置缓存为 1024KB 才能实现即时播放，注意不能少于 1024KB，否则这个值会被忽略
 
-#最新变更#
+#使用第三方Flash播放器替换#
 
-最近写了一个 使用 flowplayer 替换youku视频播发器的脚本  
+由于gecko-mplayer版本缓存与播发状态转换问题，以及mplayer不断创建 xscreensaver挂起进程，让人很不舒服，
+所以最近写了一个 使用 flowplayer 替换youku视频播发器的脚本  
 [下载地址](http://toknot.com/download/MyFlashPlayer.js)  
 这个脚本是使用了第三方flash播发器来替换youku原有的视频播放器，主要作用其实就是去广告 
 脚本特性:
@@ -32,6 +33,7 @@ categories: blog
 1. 没有广告
 2. 可以选择清晰度
 3. 可以选择分段播发
+4. 土豆的似乎不需替换
  
 播发器中的地址可以自行替换为自己的可用链接，
 
