@@ -40,7 +40,7 @@ categories: blog
 function createFlowPlayer(id, allList, duration) {
 		var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
 		//var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
-``
+```
 
 将 `var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';`
 替换为 `var playerUrl = 'http://你的服务器地址/flowplayer-3.2.18.swf';`
