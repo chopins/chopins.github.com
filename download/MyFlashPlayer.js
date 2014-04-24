@@ -16,8 +16,8 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 
 (function(global) {
 	function createFlowPlayer(id, allList, duration) {
-		//var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
-		var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
+		var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
+		//var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
 		function farmatTime(sec) {
 			sec = parseInt(sec);
 			var s = sec % 60;

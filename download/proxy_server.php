@@ -1,9 +1,7 @@
 <?php
 $errstr = $errno = 0;
 $daemon = true;
-$port = $_SERVER["REMOTE_PORT"];
-$ip = $_SERVER["REMOTE_ADDR"];
-var_dump($ip);
+
 if (!function_exists('pcntl_fork')) {
     dl('pcntl.so');
 }
