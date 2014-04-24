@@ -25,4 +25,4 @@ categories: blog
 最近写了一改使用 flowplayer 替换youku视频播发器的脚本  
 [下载地址](http://toknot.com/download/MyFlashPlayer.js)  
 这个脚本是使用了第三方flash播发器来替换youku原有的视频播放器，主要作用其实就是去广告  
-脚本第20行的链接需要自行替换为可用，19行的链接也是可用的
+脚本第20行的链接需要自行替换为自己实际可用链接(19行的链接也是可用的)
