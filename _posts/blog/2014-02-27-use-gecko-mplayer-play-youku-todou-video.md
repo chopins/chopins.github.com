@@ -3,7 +3,7 @@ layout: blog_contents
 title: 在 Firefox 中使用 gecko-mplayer 插件播放 youku,tudou,sohu等站的视频
 categories: blog
 ---
-
+###Flash版本见后面###
 由于 Flash 容易崩溃，并且使 CPU 使用率居高不下，所以写了一个脚本，替换视频网站原有的 Flash 视频播放器
 本脚本需要按以下步骤来安装：
 
