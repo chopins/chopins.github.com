@@ -107,6 +107,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		
 		typeList.onchange = function(e) {
 			var pList = allList[typeList.value];
+			playerList = pList;
 			$f('player').setPlaylist(pList);
 			$f('player').play();
 			seqList.innerHTML = '';
