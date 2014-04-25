@@ -2,7 +2,7 @@
 // @name replaceFlashPlayer
 // @namespace replace.youku.todou.player
 // @description Flash.2.MPlayer
-// @version 1
+// @version 2
 // @match http://*/*
 // @match http://www.tudou.com/*
 // @match http://douban.fm/
