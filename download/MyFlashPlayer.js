@@ -109,15 +109,22 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			var pList = allList[typeList.value];
 			playerList = pList;
 			$f('player').setPlaylist(pList);
-			$f('player').play();
+			currIndex =0;
 			seqList.innerHTML = '';
+			var timeSum = 0;
 			for (var i = 0; i < pList.length; i++) {
 				var op = document.createElement('option');
 				op.innerHTML = i + 1;
 				op.value = i;
 				op.id = 'seq_' + i;
 				seqList.appendChild(op);
+				if(timeSum < playerTime && (timeSum + pList[i].t) > playerTime) {
+					currIndex = i;
+					op.selected = true;
+				}
+				timeSum += pList[i].t;
 			}
+			$f('player').play(currIndex);
 		};
 		
 		function updateTime() {
