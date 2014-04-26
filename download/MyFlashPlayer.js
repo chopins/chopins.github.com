@@ -52,8 +52,8 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		flowplayer(id, playerUrl, {
 			clip: {
 				autoPlay: true,
-				autoBuffering: true,
-				duration: duration
+				autoBuffering: true
+				//duration: duration
 			},
 			playlist: playerList,
 			plugins: {
