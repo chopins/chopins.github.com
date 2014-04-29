@@ -38,14 +38,17 @@ categories: tutorials
 
 --------------------
 3.应用创建成功后需要修改配置
-    应用的所有配置配置信息都位于 Config/config.ini
-    Admin应用的管理项配置位于  Config/managelist.ini
+
+    应用的所有配置配置信息都位于 Config/config.ini  
+    Admin应用的管理项配置位于  Config/managelist.ini  
+
 这两个文件在运行CreateApp.php时将会被自动创建,只需要修改项目选项即可
 
 -----------------
 4.命名空间
-应用的的顶级命名空间名字必须与应用所在文件夹的名字相同,大小写相同
-框架约定的命名空间的规则：即命名空间的名字与类所在文件夹的名字相同
+
+   应用的的顶级命名空间名字必须与应用所在文件夹的名字相同,大小写相同   
+   框架约定的命名空间的规则：即命名空间的名字与类所在文件夹的名字相同   
 
 ----------------
 5.进入`/home/MyApp/Controller`文件夹，修改Index.php
@@ -130,8 +133,7 @@ server {
 ```php
 namespace MyApp\Controller;
 use MyApp\MyAppBase;
-use Toknot\Control\ControllerInterface as CI;
-class Index extends  MyAppBase implements CI\GET,CI\POST,CI\PUT,CI\CLI{
+class Index extends  MyAppBase {
 
     //支持HTTP GET 请求的方法
     public function GET() {
@@ -170,8 +172,8 @@ class Index extends  MyAppBase implements CI\GET,CI\POST,CI\PUT,CI\CLI{
 ```php
 namespace MyApp\MyAppBase;
 use Toknot\Control\FMAI;
-use Toknot\Control\ControllerInterface as CI;
-class MyAppBase implements CI\ControllerInterface {
+
+class MyAppBase {
       public $FMAI = null;
       public $AR = null;
       public $AppPath;
