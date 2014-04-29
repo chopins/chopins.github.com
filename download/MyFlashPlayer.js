@@ -2,7 +2,7 @@
 // @name replaceFlashPlayer
 // @namespace replace.youku.todou.player
 // @description Flash.2.MPlayer
-// @version 1
+// @version 2
 // @match http://*/*
 // @match http://www.tudou.com/*
 // @match http://douban.fm/
@@ -52,8 +52,8 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		flowplayer(id, playerUrl, {
 			clip: {
 				autoPlay: true,
-				autoBuffering: true,
-				duration: duration
+				autoBuffering: true
+				//duration: duration
 			},
 			playlist: playerList,
 			plugins: {
@@ -107,16 +107,24 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		
 		typeList.onchange = function(e) {
 			var pList = allList[typeList.value];
+			playerList = pList;
 			$f('player').setPlaylist(pList);
-			$f('player').play();
+			currIndex =0;
 			seqList.innerHTML = '';
+			var timeSum = 0;
 			for (var i = 0; i < pList.length; i++) {
 				var op = document.createElement('option');
 				op.innerHTML = i + 1;
 				op.value = i;
 				op.id = 'seq_' + i;
 				seqList.appendChild(op);
+				if(timeSum < playerTime && (timeSum + pList[i].t) > playerTime) {
+					currIndex = i;
+					op.selected = true;
+				}
+				timeSum += pList[i].t;
 			}
+			$f('player').play(currIndex);
 		};
 		
 		function updateTime() {
