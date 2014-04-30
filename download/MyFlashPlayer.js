@@ -149,8 +149,8 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 
 				}
 				var curTime = $f('player').getTime();
-				if(curTime == prePlayTime && $f('player').getState() == 3) {
-					if(cnt > 3) {
+				if(curTime == prePlayTime && (clip.t - curTime) <= 5) {
+					if(cnt > 4) {
 						$f('player').play();
 						$f('player').seek(prePlayTime);
 					}
