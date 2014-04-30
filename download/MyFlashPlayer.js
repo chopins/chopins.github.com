@@ -149,7 +149,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 
 				}
 				var curTime = $f('player').getTime();
-				if(curTime == prePlayTime) {
+				if(curTime == prePlayTime && $f('player').getState() == 3) {
 					if(cnt > 3) {
 						$f('player').play();
 						$f('player').seek(prePlayTime);
