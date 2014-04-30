@@ -126,8 +126,10 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			}
 			$f('player').play(currIndex);
 		};
+
 		var prePlayTime = 0;
 		var cnt = 0;
+		
 		function updateTime() {
 			var clip = $f('player').getClip();
 			
@@ -150,6 +152,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				if(curTime == prePlayTime) {
 					if(cnt > 3) {
 						$f('player').play();
+						$f('player').seek(prePlayTime);
 					}
 					cnt = cnt+1;
 				} else {
