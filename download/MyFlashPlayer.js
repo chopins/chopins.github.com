@@ -126,10 +126,11 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			}
 			$f('player').play(currIndex);
 		};
-		
+		var prePlayTime = 0;
+		var cnt = 0;
 		function updateTime() {
 			var clip = $f('player').getClip();
-			var state = $f('player').getState();
+			
 			if (clip) {
 				var index = clip.index;
 				if (index != currIndex) {
@@ -145,7 +146,17 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 					playerTime = getSeqsTime(currIndex);
 
 				}
-				var htmlTime = playerTime + $f('player').getTime();
+				var curTime = $f('player').getTime();
+				if(curTime == prePlayTime) {
+					if(cnt > 3) {
+						$f('player').play();
+					}
+					cnt = cnt+1;
+				} else {
+					cnt =0;
+				}
+				prePlayTime = curTime;
+				var htmlTime = playerTime + curTime;
 				currPlayerTime.innerHTML = farmatTime(htmlTime);
 			}
 			setTimeout(updateTime, 500);
