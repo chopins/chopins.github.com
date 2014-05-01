@@ -150,7 +150,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				}
 				var curTime = $f('player').getTime();
 				if(curTime == prePlayTime && (clip.t - curTime) <= 10) {
-					if(cnt > 4) {
+					if(cnt > 3) {
 						$f('player').play();
 						$f('player').seek(prePlayTime-1);
 					}
