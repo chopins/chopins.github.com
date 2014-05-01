@@ -149,10 +149,10 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 
 				}
 				var curTime = $f('player').getTime();
-				if(curTime == prePlayTime && (clip.t - curTime) <= 5) {
+				if(curTime == prePlayTime && (clip.t - curTime) <= 10) {
 					if(cnt > 4) {
 						$f('player').play();
-						$f('player').seek(prePlayTime);
+						$f('player').seek(prePlayTime-1);
 					}
 					cnt = cnt+1;
 				} else {
