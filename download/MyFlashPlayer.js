@@ -15,396 +15,429 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 }
 
 (function(global) {
-	function createFlowPlayer(id, allList, duration) {
-		var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
-		//var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
-		function farmatTime(sec) {
-			sec = parseInt(sec);
-			var s = sec % 60;
-			s = s > 9 ? s : '0' + s;
-			var m = Math.round(sec / 60);
-			m = m > 9 ? m : '0' + m;
-			return m + ':' + s;
-		}
-		;
-		function getSeqsTime(seq) {
-			var t = 0;
-			for (var i = 0; i < seq; i++) {
-				t += playerList[i].t;
-			}
-			return t;
-		}
-		function getFileType(obj) {
-			var keys = Object.keys(obj);
-			if (keys.indexOf('hd2') >= 0) {
-				return 'hd2';
-			} else if (keys.indexOf('mp4') >= 0) {
-				return 'mp4';
-			} else if (keys.indexOf('flv') >= 0) {
-				return 'flv';
-			}
-		}
-		;
-		
-		document.getElementById('player').innerHTML = '';
-		var defaultType = getFileType(allList);
-		var playerList = allList[defaultType];
-		flowplayer(id, playerUrl, {
-			clip: {
-				autoPlay: true,
-				autoBuffering: true
-				//duration: duration
-			},
-			playlist: playerList,
-			plugins: {
-				controls: {
-					playlist: true,
-					scrubber: true
-				}}
-		});
-		var playerDiv = document.getElementById(id).parentNode;
-		var info = document.createElement('div');
-		info.id = 'videoData';
-		var allType = Object.keys(allList);
-		var typeList = document.createElement('select');
-		for (var i = 0; i < allType.length; i++) {
-			var op = document.createElement('option');
-			op.innerHTML = allType[i];
-			op.value = allType[i];
-			op.id = 'type_' + allType[i];
-			if(allType[i] == defaultType) {
-				op.setAttribute('selected', true);
-			}
-			typeList.appendChild(op);
-		}
-		
-		info.appendChild(typeList);
-		
-		var seqList = document.createElement('select');
-		for (var i = 0; i < playerList.length; i++) {
-			var op = document.createElement('option');
-			op.innerHTML = i + 1;
-			op.value = i;
-			op.id = 'seq_' + i;
-			seqList.appendChild(op);
-		}
-		
-		seqList.onchange = function(e) {
-			$f('player').play(parseInt(seqList.value));
-		};
-		info.appendChild(seqList);
-		var currPlayerTime = document.createElement('span');
-		currPlayerTime.innerHTML = '00:00';
-		info.appendChild(currPlayerTime);
-		var sumDuration = document.createElement('span');
-		sumDuration.innerHTML = '/'+farmatTime(duration);
-		info.appendChild(sumDuration);
+    function createFlowPlayer(id, allList, duration) {
+        var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
+        //var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
+        function farmatTime(sec) {
+            sec = parseInt(sec);
+            var s = sec % 60;
+            s = s > 9 ? s : '0' + s;
+            var m = Math.round(sec / 60);
+            m = m > 9 ? m : '0' + m;
+            return m + ':' + s;
+        }
+        ;
+        function getSeqsTime(seq) {
+            var t = 0;
+            for (var i = 0; i < seq; i++) {
+                t += playerList[i].t;
+            }
+            return t;
+        }
+        function getFileType(obj) {
+            var keys = Object.keys(obj);
+            if (keys.indexOf('hd2') >= 0) {
+                return 'hd2';
+            } else if (keys.indexOf('mp4') >= 0) {
+                return 'mp4';
+            } else if (keys.indexOf('flv') >= 0) {
+                return 'flv';
+            }
+        }
+        ;
 
-		playerDiv.appendChild(info);
-		var currIndex = 0;
-		var playerTime = 0;
-		var opList = seqList.getElementsByTagName('option');
-		
-		typeList.onchange = function(e) {
-			var pList = allList[typeList.value];
-			playerList = pList;
-			$f('player').setPlaylist(pList);
-			currIndex =0;
-			seqList.innerHTML = '';
-			var timeSum = 0;
-			for (var i = 0; i < pList.length; i++) {
-				var op = document.createElement('option');
-				op.innerHTML = i + 1;
-				op.value = i;
-				op.id = 'seq_' + i;
-				seqList.appendChild(op);
-				if(timeSum < playerTime && (timeSum + pList[i].t) > playerTime) {
-					currIndex = i;
-					op.selected = true;
-				}
-				timeSum += pList[i].t;
-			}
-			$f('player').play(currIndex);
-		};
+        document.getElementById('player').innerHTML = '';
+        var defaultType = getFileType(allList);
+        var playerList = allList[defaultType];
+        flowplayer(id, playerUrl, {
+            clip: {
+                autoPlay: true,
+                autoBuffering: true
+                        //duration: duration
+            },
+            playlist: playerList,
+            plugins: {
+                controls: {
+                    playlist: true,
+                    scrubber: true
+                }}
+        });
+        var playerDiv = document.getElementById(id).parentNode;
+        var info = document.createElement('div');
+        info.id = 'videoData';
+        var allType = Object.keys(allList);
+        var typeList = document.createElement('select');
+        for (var i = 0; i < allType.length; i++) {
+            var op = document.createElement('option');
+            op.innerHTML = allType[i];
+            op.value = allType[i];
+            op.id = 'type_' + allType[i];
+            if (allType[i] == defaultType) {
+                op.setAttribute('selected', true);
+            }
+            typeList.appendChild(op);
+        }
 
-		var prePlayTime = 0;
-		var cnt = 0;
-		
-		function updateTime() {
-			var clip = $f('player').getClip();
-			
-			if (clip) {
-				var index = clip.index;
-				if (index != currIndex) {
-					for (var i = 0; i < opList.length; i++) {
-						if (opList[i].value == index) {
-							opList[i].setAttribute('selected', true);
-						}
-						if (opList[i].value == currIndex) {
-							opList[i].setAttribute('selected', false);
-						}
-					}
-					currIndex = index;
-					playerTime = getSeqsTime(currIndex);
+        info.appendChild(typeList);
 
-				}
-				var curTime = $f('player').getTime();
-				if(curTime == prePlayTime && (clip.t - curTime) <= 10) {
-					if(cnt > 3) {
-						$f('player').play();
-						$f('player').seek(prePlayTime-1);
-					}
-					cnt = cnt+1;
-				} else {
-					cnt =0;
-				}
-				prePlayTime = curTime;
-				var htmlTime = playerTime + curTime;
-				currPlayerTime.innerHTML = farmatTime(htmlTime);
-			}
-			setTimeout(updateTime, 500);
-		}
-		updateTime();
-	}
-	function createPlayerJs() {
-		var script = document.createElement('script');
-		script.setAttribute('type', 'text/javascript');
-		var c = F.toString().replace('function F() {//', '');
-		script.textContent = c.substr(0, c.length - 1);
-		script.id = 'flowplayer';
-		document.getElementsByTagName('head')[0].appendChild(script);
-	}
-	function getCookie(cn) {
-		var i, x, y, a = document.cookie.split(";");
-		for (i = 0; i < a.length; i++) {
-			x = a[i].substr(0, a[i].indexOf("="));
-			y = a[i].substr(a[i].indexOf("=") + 1);
-			x = x.replace(/^\s+|\s+$/g, "");
-			if (x == cn)
-				return unescape(y);
-		}
-		return null;
-	}
-	;
-	function setCookie(cn, v, ex) {
-		var e = new Date(), n = e.getTime();
-		ex = n + ex * 1000;
-		e.setTime(ex);
-		var cv = escape(v) + "; exs=" + e.toUTCString();
-		document.cookie = cn + "=" + cv;
-	}
-	;
-	function setVideoId() {
-		if (typeof videoId2 !== 'undefined' && videoId2 != '') {
-			var videoId = videoId2;
-		} else if (typeof vcode !== 'undefined' && vcode != '') {
-			var videoId = window.vcode;
-		} else if (typeof iid !== 'undefined') {
-			var videoId = window.iid;
-			document.getElementById('__flash2mplayer').setAttribute('tudouiid', 1);
-			document.getElementById('__flash2mplayer').setAttribute('segs', itemData.segs.toString());
-		} else if (typeof itemData != 'undefined' && typeof itemData.iid != 'undefined') {
-			var videoId = itemData.iid;
-			document.getElementById('__flash2mplayer').setAttribute('segs', itemData.segs.toString());
-		} else if (typeof pageConfig != 'undefined' && typeof pageConfig.iid != 'undefined') {
-			var videoId = pageConfig.iid;
-			document.getElementById('__flash2mplayer').setAttribute('tudouiid', 1);
-			document.getElementById('__flash2mplayer').setAttribute('segs', pageConfig.segs);
-		} else {
-			console.log('No Video Id');
-			if (typeof videoId == 'undefined') {
-				return;
-			}
-		}
-		window.vcode = videoId;
-		document.getElementById('__flash2mplayer').setAttribute('vcode', videoId);
-	}
+        var seqList = document.createElement('select');
+        for (var i = 0; i < playerList.length; i++) {
+            var op = document.createElement('option');
+            op.innerHTML = i + 1;
+            op.value = i;
+            op.id = 'seq_' + i;
+            seqList.appendChild(op);
+        }
 
-	function randomString(len) {
-		len = parseInt(len);
-		len = len || 32;
-		var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
-		var maxPos = $chars.length;
-		var pwd = '';
-		for (i = 0; i < len; i++) {
-			pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-		}
-		return pwd;
-	}
+        seqList.onchange = function(e) {
+            $f('player').play(parseInt(seqList.value));
+        };
+        info.appendChild(seqList);
+        var currPlayerTime = document.createElement('span');
+        currPlayerTime.innerHTML = '00:00';
+        info.appendChild(currPlayerTime);
+        var sumDuration = document.createElement('span');
+        sumDuration.innerHTML = '/' + farmatTime(duration);
+        info.appendChild(sumDuration);
 
-	
-	function F2MgetYoukuURL(spec) {
-		function getFileIDMixString(seed) {
-			var mixed = [
-			];
-			var source = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/\\:._-1234567890'.split('');
-			var index,
-					len = source.length;
-			for (var i = 0; i < len; i++) {
-				seed = (seed * 211 + 30031) % 65536;
-				index = Math.floor(seed / 65536 * source.length);
-				mixed.push(source[index]);
-				source.splice(index, 1);
-			}
-			return mixed;
-		}
-		;
-		function getFileID(fileid, seed) {
-			var mixed = getFileIDMixString(seed);
-			var ids = fileid.split('*');
-			var realId = [
-			];
-			var idx;
-			for (var i = 0; i < ids.length; i++) {
-				idx = parseInt(ids[i], 10);
-				realId.push(mixed[idx]);
-			}
-			return realId.join('');
-		}
-		;
-		
-		function toHex(number) {
-			var str = number.toString(16);
-			return ((str.length < 2) ? '0' + str : str).toUpperCase();
-		}
-		;
-		try {
-			var playerId = 'player';
-			var data = spec.data[0], d = new Date(); /*fileType = getFileType(data['streamfileids'])*/
-			var allUrl = {};
-			for(var fileType in data['streamfileids']) {
-				var fileid = getFileID(data['streamfileids'][fileType], data['seed']);
-				var rand1 = 1000 + parseInt(Math.random() * 999);
-				var rand2 = 1000 + parseInt(Math.random() * 9000);
-				var sid = d.getTime() + '' + rand1 + '' + rand2;
-				var first = '';
-				var pathType = fileType == 'mp4' ? 'mp4' : 'flv';
-				var playList = [];
-				var videoSeconds = 0;
-				for (var i = 0, len = (data['segs'][fileType]).length; i < len; i++) {
-					var k = data['segs'][fileType][i]['k'],
-							url = 'http://f.youku.com/player/getFlvPath/sid/' +
-							sid + '_' + toHex(i) + '/st/' + pathType + '/fileid/' +
-							fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
-					videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
-					var seq = {};
-					seq['t'] = parseInt(data['segs'][fileType][i]['seconds']);
-					seq['url'] = url;
-					seq['autoBuffering'] = true;
-					playList.push(seq);
+        playerDiv.appendChild(info);
+        var currIndex = 0;
+        var playerTime = 0;
+        var opList = seqList.getElementsByTagName('option');
 
-				}
-				allUrl[fileType] = playList;
-			}
-			var script = document.createElement('script');
-			script.textContent = '(' + createFlowPlayer.toString() + ')("player",' + JSON.stringify(allUrl) + ',' + videoSeconds + ');';
-			document.body.appendChild(script);
-		} catch (e) {
-			console.log(e);
-		}
-	}
-	;
-	function getYouku(vcode) {
-		var url = 'http://v.youku.com/player/getPlayList/VideoIDS/' + vcode + '/timezone/+08/version/5/source/out/Sc/2?password=&ran=9777&n=3';
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: url,
-			synchronous: true,
-			onload: function(response) {
-				try {
-					var re = JSON.parse(response.responseText);
-					F2MgetYoukuURL(re);
-				} catch (e) {
-					console.log(e);
-				}
-			},
-			onerror: function(e) {
-				console.log(e);
-			},
-			ontimeout: function(e) {
-				console.log(e);
-			},
-			onreadystatechange: function(e) {
+        typeList.onchange = function(e) {
+            var pList = allList[typeList.value];
+            playerList = pList;
+            $f('player').setPlaylist(pList);
+            currIndex = 0;
+            seqList.innerHTML = '';
+            var timeSum = 0;
+            for (var i = 0; i < pList.length; i++) {
+                var op = document.createElement('option');
+                op.innerHTML = i + 1;
+                op.value = i;
+                op.id = 'seq_' + i;
+                seqList.appendChild(op);
+                if (timeSum < playerTime && (timeSum + pList[i].t) > playerTime) {
+                    currIndex = i;
+                    op.selected = true;
+                }
+                timeSum += pList[i].t;
+            }
+            $f('player').play(currIndex);
+        };
 
-			}
-		});
-	}
-	function getTudou(vcode) {
-		return;
-		var videosegs = JSON.parse(document.getElementById('__flash2mplayer').getAttribute('segs'));
-		if (typeof videosegs['5'] !== 'undefined') {
-			var seg = videosegs['5'];
-		} else if (typeof videosegs['3'] !== 'undefined') {
-			var seg = videosegs['3'];
-		} else {
-			var seg = videosegs['2'];
-		}
+        var prePlayTime = 0;
+        var cnt = 0;
 
-		var playlist = [];
-		var len = seg.length;
-		var count = 0;
-		var seconds = 0;
+        function updateTime() {
+            var clip = $f('player').getClip();
 
-		for (var i in seg) {
-			var url = 'http://v2.tudou.com/f?sender=pepper&v=4.2.2&sj=1&id=' + seg[i]['k'] + '&sid=11000&hd=5&r=0';
+            if (clip) {
+                var index = clip.index;
+                if (index != currIndex) {
+                    for (var i = 0; i < opList.length; i++) {
+                        if (opList[i].value == index) {
+                            opList[i].setAttribute('selected', true);
+                        }
+                        if (opList[i].value == currIndex) {
+                            opList[i].setAttribute('selected', false);
+                        }
+                    }
+                    currIndex = index;
+                    playerTime = getSeqsTime(currIndex);
 
-			seconds = seconds + seg[i]['seconds'];
-			request = GM_xmlhttpRequest({
-				idx: i,
-				method: 'GET',
-				seconds: seconds,
-				url: url,
-				onload: function(response) {
-					var tmp = document.createElement('span');
-					var re = response.responseText.split('>') [1].split('<') [0];
-					tmp.innerHTML = re;
-					var index = seg[this.idx]['no'];
-					playlist[index] = {};
-					playlist[index]['url'] = tmp.textContent;
-					playlist[index]['t'] = Math.round(this.seconds / 1000);
-					count++;
-					if (count == len) {
-						var script = document.createElement('script');
-						script.textContent = 'createFlowPlayer("player",' + JSON.stringify(playlist) + ',' + Math.round(seconds / 1000) + ');';
-						document.body.appendChild(script);
-					}
-					delete tmp;
-				}
-			});
-		}
-	}
-	function requestVideoUrl() {
-		var vcode = document.getElementById('__flash2mplayer').getAttribute('vcode');
-		if (!vcode) {
-			if (count > max)
-				return;
-			count++;
-			setTimeout(requestVideoUrl, 1000);
-			return;
-		}
-		var tudoduiid = document.getElementById('__flash2mplayer').getAttribute('tudouiid');
-		if (tudoduiid || (vcode && document.domain == 'tudou.com')) {
-			getTudou(vcode);
-		} else {
-			getYouku(vcode);
-		}
-	}
-	function createSetVideoScript() {
-		var script = document.createElement('script');
-		script.id = '__flash2mplayer';
-		script.textContent = '(' + setVideoId.toString() + ')();';
-		document.body.appendChild(script);
-	}
-	function run() {
-		if (window.top != window)
-			return true;
-		createPlayerJs();
-		createSetVideoScript();
-		requestVideoUrl();
-	}
-	try {
-		run();
-	} catch (e) {
-		console.log(e);
-	}
+                }
+                var curTime = $f('player').getTime();
+                if (curTime == prePlayTime && (clip.t - curTime) <= 10) {
+                    if (cnt > 3) {
+                        $f('player').play();
+                        $f('player').seek(prePlayTime - 1);
+                    }
+                    cnt = cnt + 1;
+                } else {
+                    cnt = 0;
+                }
+                prePlayTime = curTime;
+                var htmlTime = playerTime + curTime;
+                currPlayerTime.innerHTML = farmatTime(htmlTime);
+            }
+            setTimeout(updateTime, 500);
+        }
+        updateTime();
+    }
+    function createPlayerJs() {
+        var script = document.createElement('script');
+        script.setAttribute('type', 'text/javascript');
+        var c = F.toString().replace('function F() {//', '');
+        script.textContent = c.substr(0, c.length - 1);
+        script.id = 'flowplayer';
+        document.getElementsByTagName('head')[0].appendChild(script);
+    }
+    function getCookie(cn) {
+        var i, x, y, a = document.cookie.split(";");
+        for (i = 0; i < a.length; i++) {
+            x = a[i].substr(0, a[i].indexOf("="));
+            y = a[i].substr(a[i].indexOf("=") + 1);
+            x = x.replace(/^\s+|\s+$/g, "");
+            if (x == cn)
+                return unescape(y);
+        }
+        return null;
+    }
+    ;
+    function setCookie(cn, v, ex) {
+        var e = new Date(), n = e.getTime();
+        ex = n + ex * 1000;
+        e.setTime(ex);
+        var cv = escape(v) + "; exs=" + e.toUTCString();
+        document.cookie = cn + "=" + cv;
+    }
+    ;
+    function setVideoId() {
+        if (typeof videoId2 !== 'undefined' && videoId2 != '') {
+            var videoId = videoId2;
+        } else if (typeof vcode !== 'undefined' && vcode != '') {
+            var videoId = window.vcode;
+        } else if (typeof iid !== 'undefined') {
+            var videoId = window.iid;
+            document.getElementById('__flash2mplayer').setAttribute('tudouiid', 1);
+            document.getElementById('__flash2mplayer').setAttribute('segs', itemData.segs.toString());
+        } else if (typeof itemData != 'undefined' && typeof itemData.iid != 'undefined') {
+            var videoId = itemData.iid;
+            document.getElementById('__flash2mplayer').setAttribute('segs', itemData.segs.toString());
+        } else if (typeof pageConfig != 'undefined' && typeof pageConfig.iid != 'undefined') {
+            var videoId = pageConfig.iid;
+            document.getElementById('__flash2mplayer').setAttribute('tudouiid', 1);
+            document.getElementById('__flash2mplayer').setAttribute('segs', pageConfig.segs);
+        } else {
+            var embedList = document.getElementsByTagName('embed');
+            if (embedList.length > 0) {
+                for (var i = 0; i < embedList.length; i++) {
+                    if (/youku.com/.test(embedList[i].src)) {
+                        videoId = embedList[i].src.split('/')[5];
+                        var width = embedList[i].width;
+                        var height = embedList[i].height;
+                        var prNode = embedList[i].parentNode;
+                        prNode.removeChild(embedList[i]);
+                        var div = document.createElement('div');
+                        div.setAttribute('style','width:'+width+'px;height:'+height+'px;');
+                        div.id = 'player';
+                        prNode.appendChild(div);
+                        
+                    }
+                }
+            }
+            var iframe = document.getElementsByTagName('iframe');
+            if (iframe.length > 0) {
+                for (var i = 0; i < iframe.length; i++) {
+                    if (/player.youku.com\/embed/.test(iframe[i].src)) {
+                        videoId = iframe[i].src.split('/')[4];
+                        var width = iframe[i].width;
+                        var height = iframe[i].height;
+                        var prNode = iframe[i].parentNode;
+                        prNode.removeChild(iframe[i]);
+                        var div = document.createElement('div');
+                        div.setAttribute('style','width:'+width+'px;height:'+height+'px;');
+                        div.id = 'player';
+                        prNode.appendChild(div);
+                    }
+                }
+            }
+            if (typeof videoId == 'undefined') {
+                console.log('No Video Id');
+                return;
+            }
+        }
+        window.vcode = videoId;
+        document.getElementById('__flash2mplayer').setAttribute('vcode', videoId);
+    }
+
+    function randomString(len) {
+        len = parseInt(len);
+        len = len || 32;
+        var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+        var maxPos = $chars.length;
+        var pwd = '';
+        for (i = 0; i < len; i++) {
+            pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+        }
+        return pwd;
+    }
+
+
+    function F2MgetYoukuURL(spec) {
+        function getFileIDMixString(seed) {
+            var mixed = [
+            ];
+            var source = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/\\:._-1234567890'.split('');
+            var index,
+                    len = source.length;
+            for (var i = 0; i < len; i++) {
+                seed = (seed * 211 + 30031) % 65536;
+                index = Math.floor(seed / 65536 * source.length);
+                mixed.push(source[index]);
+                source.splice(index, 1);
+            }
+            return mixed;
+        }
+        ;
+        function getFileID(fileid, seed) {
+            var mixed = getFileIDMixString(seed);
+            var ids = fileid.split('*');
+            var realId = [
+            ];
+            var idx;
+            for (var i = 0; i < ids.length; i++) {
+                idx = parseInt(ids[i], 10);
+                realId.push(mixed[idx]);
+            }
+            return realId.join('');
+        }
+        ;
+
+        function toHex(number) {
+            var str = number.toString(16);
+            return ((str.length < 2) ? '0' + str : str).toUpperCase();
+        }
+        ;
+        try {
+            var playerId = 'player';
+            var data = spec.data[0], d = new Date(); /*fileType = getFileType(data['streamfileids'])*/
+            var allUrl = {};
+            for (var fileType in data['streamfileids']) {
+                var fileid = getFileID(data['streamfileids'][fileType], data['seed']);
+                var rand1 = 1000 + parseInt(Math.random() * 999);
+                var rand2 = 1000 + parseInt(Math.random() * 9000);
+                var sid = d.getTime() + '' + rand1 + '' + rand2;
+                var first = '';
+                var pathType = fileType == 'mp4' ? 'mp4' : 'flv';
+                var playList = [];
+                var videoSeconds = 0;
+                for (var i = 0, len = (data['segs'][fileType]).length; i < len; i++) {
+                    var k = data['segs'][fileType][i]['k'],
+                            url = 'http://f.youku.com/player/getFlvPath/sid/' +
+                            sid + '_' + toHex(i) + '/st/' + pathType + '/fileid/' +
+                            fileid.substr(0, 8) + toHex(i) + fileid.substr(10, fileid.length - 2) + '?start=0&K=' + k + '&hd=2&myp=0&ts=185&ypp=0';
+                    videoSeconds += parseInt(data['segs'][fileType][i]['seconds']);
+                    var seq = {};
+                    seq['t'] = parseInt(data['segs'][fileType][i]['seconds']);
+                    seq['url'] = url;
+                    seq['autoBuffering'] = true;
+                    playList.push(seq);
+
+                }
+                allUrl[fileType] = playList;
+            }
+            var script = document.createElement('script');
+            script.textContent = '(' + createFlowPlayer.toString() + ')("player",' + JSON.stringify(allUrl) + ',' + videoSeconds + ');';
+            document.body.appendChild(script);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    ;
+    function getYouku(vcode) {
+        var url = 'http://v.youku.com/player/getPlayList/VideoIDS/' + vcode + '/timezone/+08/version/5/source/out/Sc/2?password=&ran=9777&n=3';
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: url,
+            synchronous: true,
+            onload: function(response) {
+                try {
+                    var re = JSON.parse(response.responseText);
+                    F2MgetYoukuURL(re);
+                } catch (e) {
+                    console.log(e);
+                }
+            },
+            onerror: function(e) {
+                console.log(e);
+            },
+            ontimeout: function(e) {
+                console.log(e);
+            },
+            onreadystatechange: function(e) {
+
+            }
+        });
+    }
+    function getTudou(vcode) {
+        return;
+        var videosegs = JSON.parse(document.getElementById('__flash2mplayer').getAttribute('segs'));
+        if (typeof videosegs['5'] !== 'undefined') {
+            var seg = videosegs['5'];
+        } else if (typeof videosegs['3'] !== 'undefined') {
+            var seg = videosegs['3'];
+        } else {
+            var seg = videosegs['2'];
+        }
+
+        var playlist = [];
+        var len = seg.length;
+        var count = 0;
+        var seconds = 0;
+
+        for (var i in seg) {
+            var url = 'http://v2.tudou.com/f?sender=pepper&v=4.2.2&sj=1&id=' + seg[i]['k'] + '&sid=11000&hd=5&r=0';
+
+            seconds = seconds + seg[i]['seconds'];
+            request = GM_xmlhttpRequest({
+                idx: i,
+                method: 'GET',
+                seconds: seconds,
+                url: url,
+                onload: function(response) {
+                    var tmp = document.createElement('span');
+                    var re = response.responseText.split('>') [1].split('<') [0];
+                    tmp.innerHTML = re;
+                    var index = seg[this.idx]['no'];
+                    playlist[index] = {};
+                    playlist[index]['url'] = tmp.textContent;
+                    playlist[index]['t'] = Math.round(this.seconds / 1000);
+                    count++;
+                    if (count == len) {
+                        var script = document.createElement('script');
+                        script.textContent = 'createFlowPlayer("player",' + JSON.stringify(playlist) + ',' + Math.round(seconds / 1000) + ');';
+                        document.body.appendChild(script);
+                    }
+                    delete tmp;
+                }
+            });
+        }
+    }
+    function requestVideoUrl() {
+        var vcode = document.getElementById('__flash2mplayer').getAttribute('vcode');
+        if (!vcode) {
+            if (count > max)
+                return;
+            count++;
+            setTimeout(requestVideoUrl, 1000);
+            return;
+        }
+        var tudoduiid = document.getElementById('__flash2mplayer').getAttribute('tudouiid');
+        if (tudoduiid || (vcode && document.domain == 'tudou.com')) {
+            getTudou(vcode);
+        } else {
+            getYouku(vcode);
+        }
+    }
+    function createSetVideoScript() {
+        var script = document.createElement('script');
+        script.id = '__flash2mplayer';
+        script.textContent = '(' + setVideoId.toString() + ')();';
+        document.body.appendChild(script);
+    }
+    function run() {
+        if (window.top != window)
+            return true;
+        createPlayerJs();
+        createSetVideoScript();
+        requestVideoUrl();
+    }
+    try {
+        run();
+    } catch (e) {
+        console.log(e);
+    }
 })(window);
