@@ -161,16 +161,18 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				prePlayTime = curTime;
 				var htmlTime = playerTime + curTime;
 				currPlayerTime.innerHTML = farmatTime(htmlTime);
-				if(htmlTime < vd.head) {
-					$f('player').seek(vd.head);
-				}
-				if(vd.tail && htmlTime >vd.tail&& vd.nV) {
-					window.location.href = vd.nV;
-					return;
-				}
-				if(htmlTime >= (duration-1) && vd.nV) {
-					window.location.href = vd.nV;
-					return;
+				if(vd) {
+					if(htmlTime < vd.head) {
+						$f('player').seek(vd.head);
+					}
+					if(vd.tail && htmlTime >vd.tail&& vd.nV) {
+						window.location.href = vd.nV;
+						return;
+					}
+					if(htmlTime >= (duration-1) && vd.nV) {
+						window.location.href = vd.nV;
+						return;
+					}
 				}
 			}
 			setTimeout(updateTime, 500);
