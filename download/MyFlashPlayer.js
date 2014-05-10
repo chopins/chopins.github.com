@@ -15,7 +15,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 }
 
 (function(global) {
-	function createFlowPlayer(id, allList, duration,nextVideo) {
+	function createFlowPlayer(id, allList, duration,vd) {
 		//var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
 		var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
 		function farmatTime(sec) {
@@ -161,8 +161,15 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				prePlayTime = curTime;
 				var htmlTime = playerTime + curTime;
 				currPlayerTime.innerHTML = farmatTime(htmlTime);
-				if(htmlTime == duration && nextVideo) {
-					window.location,href = nextVideo;
+				if(htmlTime < vd.head) {
+					$f('player').seek(vd.head);
+				}
+				if(vd.tail && htmlTime >vd.tail&& vd.nV) {
+					window.location.href = vd.nV;
+					return;
+				}
+				if(htmlTime >= (duration-1) && vd.nV) {
+					window.location.href = vd.nV;
 					return;
 				}
 			}
@@ -279,7 +286,10 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 		try {
 			var playerId = 'player';
 			var data = spec.data[0], d = new Date(); /*fileType = getFileType(data['streamfileids'])*/
-			var nextVideo = 'http://v.youku.com/v_show/id_'+spec.data[0].list_next.vidEncoded+'.html';
+			var vdata = {};
+			vdata.nV = 'http://v.youku.com/v_show/id_'+spec.data[0].list_next.vidEncoded+'.html';
+			vdata.head = Math.round(spec.data[0].dvd.head/1000);
+			vdata.tail = Math.round(spec.data[0].dvd.tail/1000);
 			var allUrl = {};
 			for(var fileType in data['streamfileids']) {
 				var fileid = getFileID(data['streamfileids'][fileType], data['seed']);
@@ -306,7 +316,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				allUrl[fileType] = playList;
 			}
 			var script = document.createElement('script');
-			script.textContent = '(' + createFlowPlayer.toString() + ')("player",' + JSON.stringify(allUrl) + ',' + videoSeconds + ',"'+nextVideo+'");';
+			script.textContent = '(' + createFlowPlayer.toString() + ')("player",' + JSON.stringify(allUrl) + ',' + videoSeconds + ','+JSON.stringify(vdata)+');';
 			document.body.appendChild(script);
 		} catch (e) {
 			console.log(e);
