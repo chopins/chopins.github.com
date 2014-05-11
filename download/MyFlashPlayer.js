@@ -163,7 +163,7 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				var htmlTime = playerTime + curTime;
 				currPlayerTime.innerHTML = farmatTime(htmlTime);
 				if(vd) {
-					if(htmlTime>5 && htmlTime < vd.head -2 
+					if( htmlTime>5 && htmlTime < vd.head -2 
 							&& !$f('player').isPaused()) {
 						if(scnt ==4) {
 							$f('player').seek(vd.head);
@@ -296,9 +296,13 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 			var playerId = 'player';
 			var data = spec.data[0], d = new Date(); /*fileType = getFileType(data['streamfileids'])*/
 			var vdata = {};
-			vdata.nV = 'http://v.youku.com/v_show/id_'+spec.data[0].list_next.vidEncoded+'.html';
-			vdata.head = Math.round(spec.data[0].dvd.head/1000);
-			vdata.tail = Math.round(spec.data[0].dvd.tail/1000);
+			if(spec.data[0].list_next) {
+				vdata.nV = 'http://v.youku.com/v_show/id_'+spec.data[0].list_next.vidEncoded+'.html';
+			}
+			if(spec.data[0].dvd) {
+				vdata.head = Math.round(spec.data[0].dvd.head/1000);
+				vdata.tail = Math.round(spec.data[0].dvd.tail/1000);
+			}
 			var allUrl = {};
 			for(var fileType in data['streamfileids']) {
 				var fileid = getFileID(data['streamfileids'][fileType], data['seed']);
