@@ -163,9 +163,11 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				var htmlTime = playerTime + curTime;
 				currPlayerTime.innerHTML = farmatTime(htmlTime);
 				if(vd) {
-					if(scnt <=0 && htmlTime>5 && htmlTime < vd.head -2 
+					if(htmlTime>5 && htmlTime < vd.head -2 
 							&& !$f('player').isPaused()) {
-						$f('player').seek(vd.head);
+						if(scnt ==4) {
+							$f('player').seek(vd.head);
+						}
 						scnt--;
 					} else {
 						scnt = 4;
