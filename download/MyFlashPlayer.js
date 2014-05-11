@@ -16,8 +16,8 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 
 (function(global) {
 	function createFlowPlayer(id, allList, duration,vd) {
-		//var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
-		var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
+		var playerUrl = 'http://page.toknot.com/flowplayer/flowplayer-3.2.18.swf';
+		//var playerUrl = 'http://127.0.0.1:8086/flowplayer/flowplayer-3.2.18.swf';
 		function farmatTime(sec) {
 			sec = parseInt(sec);
 			var s = sec % 60;
@@ -129,7 +129,8 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 
 		var prePlayTime = 0;
 		var cnt = 0;
-		
+		//console.log(vd.head);
+		var scnt = 4;
 		function updateTime() {
 			var clip = $f('player').getClip();
 			
@@ -162,8 +163,12 @@ function F() {//!function(){function h(p){console.log("$f.fireEvent",[].slice.ca
 				var htmlTime = playerTime + curTime;
 				currPlayerTime.innerHTML = farmatTime(htmlTime);
 				if(vd) {
-					if(htmlTime < vd.head) {
+					if(scnt <=0 && htmlTime>5 && htmlTime < vd.head -2 
+							&& !$f('player').isPaused()) {
 						$f('player').seek(vd.head);
+						scnt--;
+					} else {
+						scnt = 4;
 					}
 					if(vd.tail && htmlTime >vd.tail&& vd.nV) {
 						window.location.href = vd.nV;
