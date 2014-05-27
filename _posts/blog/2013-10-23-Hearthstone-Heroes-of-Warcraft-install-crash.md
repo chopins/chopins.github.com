@@ -4,6 +4,8 @@ title: wine暴雪炉石传说安装崩溃问题解决
 categories: blog
 ---
 
+__wine-1.7.6已经完美支持__
+
 以下是winehq.org上的解决方法:
 
 >The downloader will crash when downloading Blizzard games. In order to fix this, the dbghelp lib  needs to be disabled through winecfg.
