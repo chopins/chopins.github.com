@@ -7,7 +7,7 @@ categories: blog
 
 如果脚本内部需要切换其他用户执行某些命令可以如下操作 
 
-```shell
+```
     #!/bin/bash
     su <<<EOF
     123456
