@@ -1,0 +1,49 @@
+#!/bin/sh
+DATE=`date +%Y-%m-%d_04h00m_%A`
+DBLIST=('mysql' 'test')
+USER="root"
+PASS="123456"
+BACKUP_DIR="/tmp"
+MAXFILENUM=7
+
+WEEK=`date +%u`
+DAY=`date +%d`
+TMP="${BACKUP_DIR}/tmp"
+DAILY="${BACKUP_DIR}/daily"
+WEEKLY="${BACKUP_DIR}/weekly"
+MONTHLY="${BACKUP_DIR}/monthly"
+
+if [ !-d $TMP ];then
+mkdir $TMP
+fi 
+if [ !-d $DAILY ];then
+mkdir $DAILY
+fi
+
+function rmoldfile()
+{
+    rmfilelist=`/bin/ls -lt $1 | grep ^- | awk -v p=$1 n=$MAXFILENUM 'BEGIN{k=1}{L[k]=$9;k++;} END{if(k>n){for(i=n+1;i<k;i++){print (p"/"L[i]);}}}'`
+    for f in $rmfilelist
+    do
+    rm -rf $f
+    done
+}
+
+
+for DB in ${DBLIST[@]}
+do
+TMPFILE="${TMP}/daily_${DB}_${DATE}.sql.gz"
+FILE="${DAILY}/$DB/daily_${DB}_${DATE}.sql.gz"
+mysqldump --single-transaction --flush-logs --add-locks --quick --user=${USER} --password=${PASS} $DB |gzip --fast > $TMPFILE
+cp $TMPFILE $FILE
+if [ $WEEK -eq 5 ];then
+cp $TMPFILE ${WEEKLY}/$DB/weekly_${DB}_${DATE}.sql.gz 
+fi
+if [ $DAY -eq "01" ];then
+cp $TMPFILE ${MONTHLY}/$DB/monthly_${DB}_${DATE}.sql.gz
+fi
+rm -rf $TMPFILE
+rmoldfile $DAILY/$DB
+rmoldfile $WEEKLY/$DB
+rmoldfile $MONTHLY/$DB
+done
