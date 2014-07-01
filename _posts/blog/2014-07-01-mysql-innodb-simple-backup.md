@@ -4,7 +4,7 @@ title: MySQL innodb 简单备份脚本
 categories: blog
 ---
 
-脚本下载(http://toknot.com/download/mysqlbackup)
+脚本下载 [http://toknot.com/download/mysqlbackup]
 
 脚本功能：
 分每日备份，每周备份，每月备份，所以备份默认只保留7份，多余的会删除  
