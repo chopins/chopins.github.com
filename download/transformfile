@@ -1,0 +1,87 @@
+#!/bin/sh
+t=0
+f=0
+rev=0
+to='null'
+from='null'
+file='null'
+
+function usage()
+{
+echo "Usage: transformfile  -t codeset -f codeset filename
+             transformfile -r -t codeset -f codeset *.ext
+     Option:
+        -t  to codeset
+        -f  from codeset
+        -r  recursion sub dir
+"
+}
+
+for v in $@
+do
+if [ $v == '-t' ];then
+  t=1
+  continue
+elif [ $t -eq 1 ];then
+  to="$v"
+  t=0
+  continue
+elif [ $v == '-f' ];then
+  f=1
+  continue
+elif [ $f  -eq 1 ];then
+  from=$v
+  f=0
+  continue
+elif [ $v == '-r' ];then
+  rev=1
+continue
+fi
+file=$v
+done
+
+if [ $to == 'null' ];then
+echo 'no to codeset'
+usage 
+exit
+fi
+if [ $from == 'null' ];then
+echo 'no from codeset'
+usage 
+exit
+fi
+if [ $file == 'null' ];then
+echo 'no transfrom file'
+usage 
+exit
+fi
+dir=`dirname "$file"`
+fn=`basename "$file"`
+if [ $rev -eq 1 ];then
+    for i in `find "$dir" -name "$fn"`
+    do
+echo "transfrom $i"
+tmpfile="${i}.tmp"
+iconv -c -f $from -t $to "$i" > "$tmpfile"
+if [ $? -eq 0 ];then
+    mv "$tmpfile" "${i}"
+    echo "Success"
+else 
+    rm -f "$tmpfile"
+    echo "Failure"
+fi
+done
+else
+for i in `realpath "$file"`
+do
+tmpfile="${i}.tmp"
+iconv -c -f $from -t $to "$i" > "$tmpfile"
+if [ $? -eq 0 ];then
+    mv "$tmpfile" "${i}"
+    echo "Success"
+else 
+    rm -f "$tmpfile"
+    echo "Failure"
+fi
+done
+fi
