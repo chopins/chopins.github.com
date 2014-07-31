@@ -19,7 +19,7 @@ err:wineconsole:WCUSER_SetFont wrong font
 err:wineconsole:WINECON_Fatal Couldn't find a decent font, aborting
 ```
 
-只需要修改注册表: HKEY_LOCAL_MACHINE/Software/Microsoft/Windows NT/CurrentVersion/FontSubstitutes
+只需要修改注册表: HKEY\_LOCAL\_MACHINE/Software/Microsoft/Windows NT/CurrentVersion/FontSubstitutes
 的 MS Shell Dlg 和 MS Shell Dlg2 的值数据为可用字体即可
 
 Battle.net 的Agent.exe 也会因为这个字体问题导致启动失败，
