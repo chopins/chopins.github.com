@@ -1,6 +1,6 @@
 ---
 layout: blog_contents
-title: Fedora 18创建 AP 模式热点方法
+title: wineconsole 运行字体错误解决方法
 categories: blog
 ---
 
