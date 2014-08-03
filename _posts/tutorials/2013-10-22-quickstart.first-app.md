@@ -36,11 +36,13 @@ categories: tutorials
     WebRoot                 HTTP Web 根目录
     {$AppName}Base.php      应用程序基础类,{$AppName}为应用名字
 
+`php /home/Toknot/Toknot.php GeneratePassword text` 加密一个密码
+
 --------------------
 3.应用创建成功后需要修改配置
 
     应用的所有配置配置信息都位于 Config/config.ini  
-    Admin应用的管理项配置位于  Config/managelist.ini  
+    Admin应用的管理项配置位于  Config/navigation.ini  
 
 这两个文件在运行CreateApp.php时将会被自动创建,只需要修改项目选项即可
 
@@ -68,11 +70,18 @@ categories: tutorials
 
 --------------
 6.配置Web服务器
-PHP 5.4.0 以上的开放环境只需要执行如下命令即可:
+PHP 5.4.0 以上的开发环境只需要执行如下命令即可:
 
 ```
 $ cd /home/MyApp/WebRoot
 $ php -S localhost:8000 index.php -t static/
+```
+
+当然也可以按照`demos/AppAdmin/WebRoot/phpCGIServer.php` 修改入口`index.php`文件，这样可以使用框架自带的一个测试用服务器
+执行方法:
+
+```
+$ php phpCGIServer.php
 ```
 
 Web服务器普通配置情况下，可以通过类似下面的方式访问控制器:
