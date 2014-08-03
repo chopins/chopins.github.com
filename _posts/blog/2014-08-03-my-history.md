@@ -1,6 +1,6 @@
 ---
 layout: blog_contents
-title: 我的行僧经历
+title: 我的行僧经历后的体会
 categories: blog
 ---
 
