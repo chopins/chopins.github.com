@@ -1,0 +1,67 @@
+#!/bin/sh
+sttime=`date +%s`
+trap 'rm -rf $F1;rm -rf $F2;rm -rf $F3;wait;exit' INT 
+trap 'rm -rf $F1;rm -rf $F2;rm -rf $F3;wait;exit' TERM
+ME=`whoami`
+F1="/home/$ME/.iotest.tmp"
+F2='/tmp/.iotest.tmp'
+F3='/var/tmp/.iotest.tmp'
+size=0
+filesize=0
+LOG="/home/$ME/iotest.log"
+t=`date`
+
+function readfile() {
+   cat $1 > /dev/null
+   cat $2 > /dev/null
+   cat $3 > /dev/null
+   rm -rf $1
+   rm -rf $2  
+   rm -rf $3
+}
+
+echo "Start at" `date` "Pid $$" > $LOG
+while true
+do
+
+if [ $filesize -gt 2024000 ];then
+
+   readfile $F1 $F2 $F3 &&  echo `date` "Read size: $filesize" >> $LOG
+
+   now=`date +%s`
+   ((exectime=$now-172800))
+   if [ $exectime -gt $sttime ];then
+        wait
+        exit
+   fi
+   F1=`cat /proc/sys/kernel/random/uuid |md5sum |awk p=$ME '{print "/home/"p"/."$1".io.test.tmp"}'`
+   F2=`cat /proc/sys/kernel/random/uuid |md5sum |awk '{print "/tmp/."$1".io.test.tmp"}'`
+   F3=`cat /proc/sys/kernel/random/uuid |md5sum |awk '{print "/var/tmp/."$1".io.test.tmp"}'`
+   filesize=0
+   echo `date` ":count write size: $size" >> $LOG
+
+fi
+ws=''
+((rnd=$RANDOM%100))
+
+for (( i=0;i<$rnd;i=i+1 ))
+do
+   s=`cat /proc/sys/kernel/random/uuid | base64`
+   ws="${ws} ${s}"
+done
+
+ws=`echo $ws | base64`
+len=`expr length "$ws"`
+let "size=$size+$len"
+let "filesize=$filesize+$len"
+stdbuf -o0 echo $ws >> $F1
+stdbuf -o0 echo $ws >> $F2
+stdbuf -o0 echo $ws >> $F3
+
+done
+
+rm -rf $F1
+rm -rf $F2
+rm -rf $F3
+wait
+exit
