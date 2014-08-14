@@ -1,6 +1,6 @@
 ---
 layout: blog_contents
-title: 
+title: 查看当前运行 MySQL 编译参数
 categories: blog
 ---
 
