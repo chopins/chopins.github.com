@@ -11,10 +11,21 @@ categories: blog
 ```shell
 #!/bin/bash
 tf="/tmp/sshconnect"
+trap 'rm -rf $tf;wait;exit' INT 
+trap 'rm -rf $tf;wait;exit' TERM
+nt=`date +%s`
 echopass=0
 
 if [ -f $tf ];then
-    store=`cat $tf`
+    ftime=`stat -c %X $tf`
+    ((vt=$nt-$ftime))
+    if [ $vt -gt 1 ];then
+        rm -rf $tf 
+        store=''
+    else
+        store=`cat $tf`
+    fi  
+
 else
     store=''
 fi
@@ -40,7 +51,11 @@ if [ $h == 'server_name1' ];then
 elif [ $h == 'server_name2' ];then
     host='user2@server_address2'
     pass='password2'
+else
+    echo 'given server name invaild'
+    exit 500
 fi
+
 #################################
 if [ $echopass == 1 ];then
     echo $pass
@@ -49,5 +64,6 @@ if [ $echopass == 1 ];then
 fi
 echo "$h" > $tf
 setsid env SSH_ASKPASS="$selffile" DISPLAY='none:0' ssh $host 
+rm -rf $tf
 
 ```
