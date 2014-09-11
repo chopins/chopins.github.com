@@ -8,7 +8,7 @@ categories: blog
 
 脚本原理是利用 ssh 的 SSH_ASKPASS 环境变量来实现密码认证,脚本代码如下:
 
-```shell
+```
 
     #!/bin/bash
 
