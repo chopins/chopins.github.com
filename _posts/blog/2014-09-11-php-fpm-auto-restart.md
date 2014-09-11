@@ -7,7 +7,7 @@ categories: blog
 本脚本检测php-fpm进程数目，达到最大进程数目后自动重启php-fpm
 脚本需要加入crontab中按计划执行，脚本执行间隔不会小于2分钟
 
-```shell
+```
 #!/bin/bash
 
 LOCK_FILE='/tmp/restart_php.lock'
