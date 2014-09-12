@@ -1,7 +1,7 @@
 <?php
 
 date_default_timezone_set('UTC');
-new socks5('127.0.0.1:8999');
+new socks5('127.0.0.1:9050');
 
 class socks5 {
 
@@ -14,13 +14,79 @@ class socks5 {
     private $sshUser;
     private $sshPass;
     private $sshServerCommand;
+    private $readable = false;
+    private $writeable = false;
+    private $remoteLocalName = 0;
+    private $localPort = 0;
+    private $ts;
 
     public function __construct($address) {
         $this->sshHost = '192.168.7.33';
+        $this->sshHost = 'page.toknot.com';
         $this->sshUser = 'root';
+        $this->sshUser = 'mytoknot';
         $this->sshPass = 'paidai';
-        $this->sshServerCommand = '/root/bin/php /root/server.php';
+        $this->sshPass = 'ARXCCV@qq1122';
+        $this->httpRequest();
+        echo $this->remoteLocalName;
+        $this->tunnelServer();
+        $this->sshServerCommand = "/root/bin/php /root/server.php";
+        $this->sshServerCommand = '/usr/local/php5_3/bin/php -n /var/chroot/home/content/09/12374909/data/server.php';
+        list($host, $port) = explode(':', $this->remoteLocalName);
+        $this->connectTarget($host, $port);
+        pcntl_wait($status);
+        return;
         $this->startListen($address);
+    }
+
+    public function tunnelServer() {
+        $pid = pcntl_fork();
+        if($pid > 0) return;
+        $num = 0;
+        while($num < 3) {
+            $s = @stream_socket_server("0.0.0.0:{$this->localPort}");
+            if($s) {
+                break;
+            }
+            sleep(1);
+            $num++;
+        }
+        echo 'start tunnel';
+        while ($acceptConnect = stream_socket_accept($s, -1)) {
+            echo 'connect success';
+        }
+    }
+
+    public function httpRequest() {
+        $fp = fsockopen($this->sshHost, 80);
+        if ($fp) {
+            fwrite($fp, "GET /host.php HTTP/1.1\r\nHost: {$this->sshHost}\r\nConnection: Close\r\n\r\n");
+        }
+        $name = stream_socket_get_name($fp, false);
+        echo $name;
+        list(, $this->localPort) = explode(':', $name);
+        $headerEnd = $chunked = false;
+        while (!feof($fp)) {
+            $r = fgets($fp);
+            if (trim($r) == 'Transfer-Encoding: chunked') {
+                $chunked = true;
+            }
+            if ("\r\n" == $r) {
+                $headerEnd = true;
+            }
+            if ($headerEnd) {
+                if ($chunked) {
+                    fgets($fp);
+                    $port = fgets($fp);
+                } else {
+                    $port = fgets($fp);
+                }
+                break;
+            }
+        }
+        $this->remoteLocalName = $port;
+        stream_socket_shutdown($fp, STREAM_SHUT_RD);
+        fclose($fp);
     }
 
     public function readByte() {
@@ -145,6 +211,8 @@ class socks5 {
         $status = $this->connectTarget($host, $data['port']);
         if ($status) {
             fwrite($this->acceptConnect, pack('C4Nn', 0x05, 0x00, 0x00, 0x01, 0, 0));
+            $this->readable = true;
+            $this->writeable = false;
             $this->transportData();
         } else {
             fwrite($this->acceptConnect, pack('C4Nn', 0x05, 0x01, 0x00, 0x01, 0, 0));
@@ -163,8 +231,9 @@ class socks5 {
         $this->socks = stream_socket_server($address);
         while ($this->acceptConnect = stream_socket_accept($this->socks, -1)) {
             $pid = pcntl_fork();
-            if($pid > 0) {
-               
+            if ($pid > 0) {
+                $this->acceptConnect = null;
+                usleep(10000);
             } else {
                 $this->onConnection();
             }
@@ -181,45 +250,47 @@ class socks5 {
 
     public function transportData() {
         echo "transport data\n";
-        //stream_set_blocking($this->acceptConnect, 0);
+
         $stdio = $this->sshProxy->getStdIO();
-        while (true) {
-            $st = @stream_get_meta_data($this->acceptConnect);
-            if (!$st) {
-                return;
-            }
-            while (!feof($this->acceptConnect)) {
-                echo "start read\n";
-                $d = fread($this->acceptConnect, 9216);
-                $len = sprintf('%04d', strlen($d));
-                fwrite($stdio, $len . $d);
-                echo "write part end\n";
-                
-                $write = $read = array($this->acceptConnect);
-                $except = array();
-                if (stream_select($read, $write, $except, 200000) > 0) {
-                    if (empty($read) && !empty($write)) {
-                        break;
-                    }
+        while (!feof($this->acceptConnect)) {
+            if ($this->readable && !$this->writeable) {
+                $data = stream_socket_recvfrom($this->acceptConnect, 1024);
+                echo "read\n";
+                if (!empty($data)) {
+                    echo "read data\n";
+                    $len = sprintf('%04d', strlen($data));
+                    fwrite($stdio, $len . $data);
+                } else {
+                    fwrite($stdio, '0008-0-0-0-0');
+                    echo "read end\n";
+                    $this->writeable = true;
+                    $this->readable = false;
                 }
             }
-            echo "write end\n";
-            fwrite($stdio, "0008-0-0-0-0");
-            while (true) {
+            if (!$this->readable && $this->writeable) {
+                fwrite($stdio, '-1-1-1-1');
+                echo "write\n";
                 $len = fread($stdio, 4);
-                if((int)$len == 0) {
+                if (empty($len)) {
                     continue;
                 }
-                $outdata = fread($stdio, (int)$len);
-                echo "$len\n";
-                if ($outdata == "-0-0-0-0") {
-                    break;
+                if ((int) $len == 0) {
+                    continue;
                 }
-                fwrite($this->acceptConnect,$outdata, strlen($outdata));
+                $outdata = fread($stdio, (int) $len);
+                fwrite($stdio, '-1-1-1-1');
+                if ($outdata == "-0-0-0-0") {
+                    echo "write end\n";
+                    $this->readable = true;
+                    $this->writeable = false;
+                    continue;
+                }
+                echo "write data\n";
+                fwrite($this->acceptConnect, $outdata);
             }
-            $this->endConnection();
-            exit(500);
         }
+        $this->endConnection();
+        exit(500);
     }
 
 }
@@ -229,6 +300,7 @@ class SSH2Proxy {
     private $sshConnection;
     private $stderr;
     private $stdio;
+    private $buffFile;
 
     public function connectSSHServer($host, $port = 22) {
         $this->sshConnection = ssh2_connect($host, $port);
@@ -245,26 +317,36 @@ class SSH2Proxy {
 
     public function createConnectShell($cmd, $ip, $port) {
         $cmd = "$cmd $ip $port";
+        echo $cmd ."\n";
         $shell = ssh2_exec($this->sshConnection, $cmd);
         $execStatus = fread($shell, 3);
+
         if (!empty($execStatus) && $execStatus !== '200') {
             throw new UnexpectedValueException('server command exec error');
         }
         stream_set_blocking($shell, true);
         $this->stderr = ssh2_fetch_stream($shell, SSH2_STREAM_STDERR);
         $this->stdio = ssh2_fetch_stream($shell, SSH2_STREAM_STDIO);
-        $connectStatus = fread($this->stderr, 300);
-        return $connectStatus == 200;
+        $connectStatus = fread($this->stderr, 100);
+        $connectStatusCode = substr($connectStatus, 0, 3);
+        $this->buffFile = substr($connectStatus, 3);
+        return $connectStatusCode == 200;
     }
 
     public function getStdError() {
         return $this->stderr;
     }
 
+    public function getBuffFile() {
+        return $this->buffFile;
+    }
+
     public function getStdIO() {
         return $this->stdio;
     }
+
     public function endSSH2() {
         ssh2_exec($this->sshConnection, 'exit');
     }
+
 }
