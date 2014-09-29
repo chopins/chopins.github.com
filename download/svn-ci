@@ -3,7 +3,10 @@
 function gstat() {
     svn status | while read line
     do
-    echo '0'
+    if [ ${line:0:3} == 'svn' ];then
+        return 1
+    fi
+    echo 'FALSE'
     FILE=$(realpath "${line:8}")
     echo "\"$FILE\""
     stat="${line:0:1}"
@@ -20,6 +23,9 @@ function gstat() {
     done
 }
 LIST=$(gstat | tr -t '\n' ' ')
+if [ -z "$LIST" ];then
+    exit
+fi
 function gmsg() {
     MSG=$(zenity --entry --title="Enter commit message" --text="commit message:" --entry-text "")
     MST=$?
@@ -53,7 +59,7 @@ function commit() {
     eval $cmd
 }
 
-GET_EVAL="zenity --width=600 --height=500 --list --text='Commit file' --separator='|' --column='?' --column='File' --column='Status' --column='File Type' --checklist --multiple $LIST"
+GET_EVAL="zenity --width=600 --height=500 --list --text='Commit file' --separator='|' --column='' --column='File' --column='Status' --column='File Type' --checklist --multiple $LIST"
 FILE_LIST=$(eval $GET_EVAL)
 FST=$?
 
