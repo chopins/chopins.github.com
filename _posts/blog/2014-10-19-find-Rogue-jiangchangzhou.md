@@ -27,7 +27,7 @@ categories: blog
 腾讯QQ号码:405153433
 
 其开过的一辆车的号码:京PE1Y71
-
+<style>p img{width:300px;}</style>
 以下是省份证复印件：
 ![身份证正面](http://toknot.com/download/20141018_220627_1.jpg)   
 ![身份证背面](http://toknot.com/download/20141018_215412.jpg)
