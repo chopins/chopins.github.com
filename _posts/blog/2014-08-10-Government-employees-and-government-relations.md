@@ -1,6 +1,6 @@
 ---
 layout: blog_contents
-title: 中国社会道德关系设想
+title: 社会人与人关系构成基础
 categories: blog
 ---
 
