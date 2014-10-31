@@ -49,17 +49,21 @@ categories: blog
     对于`InnoDB`引擎，我们可以使用`mysqldump`的`--master-data` 和`--single-transaction`配合使用进行数据备份。
 
 3. 获取自定义格式时间  
-    使用`DATE_FORMAT()`函数，例如获取当期日期如`2014-11-11`格式，使用`SELECT DATE_FORMAT(NOW(),'%Y-%m-%d');`  
+    使用`DATE_FORMAT()`函数，例如获取当期日期如`2014-11-11`格式，使用   
+    `SELECT DATE_FORMAT(NOW(),'%Y-%m-%d');`  
 
 4. EVENT相关操作
-    创建EVENT:   
+    创建EVENT:  
+ 
     ```SQL
     CREATE EVENT `event_name` ON SCHEDULE EVERY 10 SECOND STARTS '2014-07-18 15:01:40' ON COMPLETION NOT PRESERVE ENABLE DO CALL KillSleepThread()
     ```   
+
     更新使用:`ALTER EVENT`   
     显示状态使用:`SHOW EVENTS;`    
     显示创建信息:`SHOW CREATE EVENT event_name;` 
     查看当前是否开启了event scheduler三种方法:
+
     ```sql
     mysql> SHOW VARIABLES LIKE ‘event_scheduler’;
     mysql> SELECT @@event_scheduler;
@@ -68,12 +72,14 @@ categories: blog
 
 5. 存储过程操作:
     创建使用PROCEDURE：
+
     ```sql
     CREATE DEFINER=`root`@`localhost` PROCEDURE `KillSleepThread`( )`  
     BEGIN  
     /*SQL*/   
     END   
     ```  
+
     显示创建信息:`SHOW CREATE PROCEDURE procedure_name;`
     更新存储过程需要先删除，然后重新穿件，`DROP PROCEDURE procedure_name`
     
