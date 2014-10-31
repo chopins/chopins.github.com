@@ -22,8 +22,12 @@ categories: blog
     ```
 
     另外就是使用`mysqladmin`来修改用户密码，下面是例子    
-    当你没有设置过`root`用户密码时：`$ mysqladmin -u root password NEWPASSWORD`，`NEWPASSWORD`是你要设置的新密码  
-    当你已经更新过`root`用户密码时：`$ mysqladmin -u root -p password NEWPASSWORD`,`NEWPASSWORD`是你要设置的新密码，命令会要求你输入旧密码  
+    当你没有设置过`root`用户密码时：   
+    `$ mysqladmin -u root password NEWPASSWORD`，  
+    `NEWPASSWORD`是你要设置的新密码  
+    当你已经更新过`root`用户密码时：
+    `$ mysqladmin -u root -p password NEWPASSWORD`,   
+    `NEWPASSWORD`是你要设置的新密码，命令会要求你输入旧密码  
     如果忘记`root`用户密码时，可以在启动MySQL时跳过权限表，然后无需密码即可登入MySQL进行修改，方法如下：  
     `$ mysqld_safe --skip-grant-tables&`  
     密码修改方法与前面的相同。
