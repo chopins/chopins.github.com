@@ -7,7 +7,8 @@ categories: blog
 1. 修改用户密码  
     能够登录进入MySQL时，可以使用直接更新mysql用户表的办法来修改用户密码，下面是例子：  
 
-    `$ mysql -uroot -p`  
+    `$ mysql -uroot -p` 
+ 
     ```sql
     mysql> USE mysql;   
     mysql> UPDATE user SER Password=PASSWORD('new_password') WHERE User='user_name';   
@@ -32,9 +33,10 @@ categories: blog
     对于从服务器的相关配置官方建议通过SQL语句来进行配置，而不是将配置信息写入MySQL配置文件中。  
     配置文件中主要配置`server-id`，并增加`skip-slave-start`配置项，以及需要复制的库，或需要忽略的库。   
     完成后我们登入MySQL,执行下面的`CHANGE MASTER TO` SQL语句,该语句帮助信息可以通过`help change master to`获取：  
+
     ```sql
-    mysql> CHANGE MASTER TO MASTER_HOST='192.168.0.3',MASTER_USER='replication',MASTER_PASSWORD='password',MASTER_PORT=3306, MASTER_CONNECT_RETRY=10;
-    mysql> START SLAVE;
+    mysql> CHANGE MASTER TO MASTER_HOST='192.168.0.3',MASTER_USER='replication',MASTER_PASSWORD='password',MASTER_PORT=3306, MASTER_CONNECT_RETRY=10;   
+    mysql> START SLAVE;   
     ```
 
     上面是一个简单的配置，当主从服务器都没数据时，这样配置即可。但是如果主服务器上已经有数据就不能这样了。   
