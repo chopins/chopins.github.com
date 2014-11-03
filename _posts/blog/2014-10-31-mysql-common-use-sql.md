@@ -48,11 +48,11 @@ categories: blog
 
     对于`InnoDB`引擎，我们可以使用`mysqldump`的`--master-data` 和`--single-transaction`配合使用进行数据备份。
 
-3. 获取自定义格式时间  
+3. 获取自定义格式时间   
     使用`DATE_FORMAT()`函数，例如获取当期日期如`2014-11-11`格式，使用   
     `SELECT DATE_FORMAT(NOW(),'%Y-%m-%d');`  
 
-4. EVENT相关操作
+4. EVENT相关操作  
     创建EVENT:  
  
     ```SQL
@@ -61,17 +61,17 @@ categories: blog
 
     更新使用:`ALTER EVENT`   
     显示状态使用:`SHOW EVENTS;`    
-    显示创建信息:`SHOW CREATE EVENT event_name;` 
-    查看当前是否开启了event scheduler三种方法:
+    显示创建信息:`SHOW CREATE EVENT event_name;`   
+    查看当前是否开启了event scheduler三种方法:   
 
     ```sql
-    mysql> SHOW VARIABLES LIKE ‘event_scheduler’;
-    mysql> SELECT @@event_scheduler;
-    mysql> SHOW PROCESSLIST;//(是否有State为：Waiting for next activation的进程，User为event_scheduler)
+    mysql> SHOW VARIABLES LIKE ‘event_scheduler’;  
+    mysql> SELECT @@event_scheduler;  
+    mysql> SHOW PROCESSLIST;//(是否有State为：Waiting for next activation的进程，User为event_scheduler)  
     ```
 
-5. 存储过程操作:
-    创建使用PROCEDURE：
+5. 存储过程操作:   
+    创建使用PROCEDURE：  
 
     ```sql
     CREATE DEFINER=`root`@`localhost` PROCEDURE `KillSleepThread`( )`  
@@ -80,6 +80,12 @@ categories: blog
     END   
     ```  
 
-    显示创建信息:`SHOW CREATE PROCEDURE procedure_name;`
-    更新存储过程需要先删除，然后重新穿件，`DROP PROCEDURE procedure_name`
+    显示创建信息:`SHOW CREATE PROCEDURE procedure_name;`   
+    更新存储过程需要先删除，然后重新穿件，`DROP PROCEDURE procedure_name`   
+    显示所有存储过程:`SHOW PROCEDURE STATUS;`  
+ 
+6. 表信息查询   
+    显示表结构:`SHOW COLUMNS FROM table_name;` 或者他的快捷方式`DESCRIBE table_name;``DESC table_name;`   
+    显示表信息：`SHOW TABLE STATUS LIKE 'table_name'`    
+    显示表索引信息:`SHOW INDEX FROM table_name;`    
     
