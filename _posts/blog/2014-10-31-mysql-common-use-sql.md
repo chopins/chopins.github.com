@@ -85,7 +85,7 @@ categories: blog
     显示所有存储过程:`SHOW PROCEDURE STATUS;`  
  
 6. 表信息查询   
-    显示表结构:`SHOW COLUMNS FROM table_name;` 或者他的快捷方式`DESCRIBE table_name;``DESC table_name;`, 查询`information_schema`获取：`SELECT * FROM COLUMNS WHERE TABLE_NAME='表名' AND TABLE_SCHEMA='数据库名';  
+    显示表结构:`SHOW COLUMNS FROM table_name;` 或者他的快捷方式`DESCRIBE table_name;``DESC table_name;`, 查询`information_schema`获取：`SELECT * FROM COLUMNS WHERE TABLE_NAME='表名' AND TABLE_SCHEMA='数据库名';    
     显示表信息：`SHOW TABLE STATUS LIKE 'table_name'`    
     显示表索引信息:`SHOW INDEX FROM table_name;`    
     
