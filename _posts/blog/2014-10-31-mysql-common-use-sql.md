@@ -65,7 +65,7 @@ categories: blog
     查看当前是否开启了event scheduler三种方法:   
 
     ```sql
-    mysql> SHOW VARIABLES LIKE ‘event_scheduler’;  
+    mysql> SHOW VARIABLES LIKE 'event_scheduler';  
     mysql> SELECT @@event_scheduler;  
     mysql> SHOW PROCESSLIST;//(是否有State为：Waiting for next activation的进程，User为event_scheduler)  
     ```
