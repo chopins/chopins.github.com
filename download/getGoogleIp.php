@@ -4,6 +4,10 @@ date_default_timezone_set('UTC');
 
 $block = dns_get_record('_netblocks.google.com', DNS_TXT);
 
+if(!$block) {
+	die("Get Google DNS record error, Set DNS server to 8.8.8.8 for your host\n");
+}
+
 $txt = $block[0]['txt'];
 
 $blockList = explode('ip4:', $txt);
