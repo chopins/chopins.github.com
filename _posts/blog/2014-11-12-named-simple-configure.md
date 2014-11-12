@@ -10,7 +10,7 @@ categories: blog
 安装完毕后，开始配置。  
 首先是`/etc/name.conf`, 下面是配置文件   
 
-```conf
+```
     options {
         //如果需要向其他机器提供DNS服务，需要这么配置
         listen-on port 53 { any; }; 
