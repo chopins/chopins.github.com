@@ -11,62 +11,60 @@ categories: blog
 首先是`/etc/name.conf`, 下面是配置文件   
 
 ```conf
-options {
-    //如果需要向其他机器提供DNS服务，需要这么配置
-    listen-on port 53 { any; }; 
-    listen-on-v6 port 53 { ::1; };
-    directory   "/var/named";
-    dump-file   "/var/named/data/cache_dump.db";
-    statistics-file "/var/named/data/named_stats.txt";
-    memstatistics-file "/var/named/data/named_mem_stats.txt";
-    //如果需要向其他机器提供DNS服务，需要这么配置
-    allow-query     { any; };
-    //是否递归查询
-    recursion yes;
-    dnssec-enable yes;
-    dnssec-validation yes;
-    dnssec-lookaside auto;
-    //是否转发，就是遇到其他域名的时转发给下面列表的DNS服务器来解析
-    //下面两项根据情况修改
-    forward only;
-    forwarders {8.8.8.8;
-                8.8.4.4;
-                209.244.0.4;
-                195.46.39.39;
-                195.46.39.40;
-                208.71.35.137;
-                89.233.43.71;
-                89.104.194.142;
-                74.82.42.42;
-                109.69.8.51;
-                };
-    /* Path to ISC DLV key */
-    bindkeys-file "/etc/named.iscdlv.key";
-    managed-keys-directory "/var/named/dynamic";
-    pid-file "/run/named/named.pid";
-    session-keyfile "/run/named/session.key";
-};
-logging {
-        channel default_debug {
-                file "data/named.run";
-                severity dynamic;
-        };
-};
-
-zone "." IN {
-    type hint;
-    file "named.ca";
-};
-//这一块是加入需要解析的google域名
-zone "google.com" IN {
-    type master;
-    //下面是域名相关记录配置文件，实际地址位于/var/named/google.com.zone
-    //配置见下面
-    file "google.com.zone";
-};
-
-include "/etc/named.rfc1912.zones";
-include "/etc/named.root.key";
+    options {
+        //如果需要向其他机器提供DNS服务，需要这么配置
+        listen-on port 53 { any; }; 
+        listen-on-v6 port 53 { ::1; };
+        directory   "/var/named";
+        dump-file   "/var/named/data/cache_dump.db";
+        statistics-file "/var/named/data/named_stats.txt";
+        memstatistics-file "/var/named/data/named_mem_stats.txt";
+        //如果需要向其他机器提供DNS服务，需要这么配置
+        allow-query     { any; };
+        //是否递归查询
+        recursion yes;
+        dnssec-enable yes;
+        dnssec-validation yes;
+        dnssec-lookaside auto;
+        //是否转发，就是遇到其他域名的时转发给下面列表的DNS服务器来解析
+        //下面两项根据情况修改
+        forward only;
+        forwarders {8.8.8.8;
+                    8.8.4.4;
+                    209.244.0.4;
+                    195.46.39.39;
+                    195.46.39.40;
+                    208.71.35.137;
+                    89.233.43.71;
+                    89.104.194.142;
+                    74.82.42.42;
+                    109.69.8.51;
+                    };
+        /* Path to ISC DLV key */
+        bindkeys-file "/etc/named.iscdlv.key";
+        managed-keys-directory "/var/named/dynamic";
+        pid-file "/run/named/named.pid";
+        session-keyfile "/run/named/session.key";
+    };
+    logging {
+            channel default_debug {
+                    file "data/named.run";
+                    severity dynamic;
+            };
+    };
+    zone "." IN {
+        type hint;
+        file "named.ca";
+    };
+    //这一块是加入需要解析的google域名
+    zone "google.com" IN {
+        type master;
+        //下面是域名相关记录配置文件，实际地址位于/var/named/google.com.zone
+        //配置见下面
+        file "google.com.zone";
+    };
+    include "/etc/named.rfc1912.zones";
+    include "/etc/named.root.key";
 ```
 
 上面配置好后，在`/var/named/google.com.zone`文件，下面是样例配置
