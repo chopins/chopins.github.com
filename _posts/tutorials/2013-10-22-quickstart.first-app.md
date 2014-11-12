@@ -159,6 +159,8 @@ class Index extends  MyAppBase {
 
         //渲染模板index.html, 模板实例与构造函数的中的实例是同一个
         $this->FMAI->display('index');
+        //上面在使用伪多重继承的情况下，可以这么访问：
+        $this->display('index');
     }
 
     //支持HTTP POST 请求的方法
@@ -186,20 +188,27 @@ class MyAppBase {
       public $FMAI = null;
       public $AR = null;
       public $AppPath;
-      public function __construct(FMAI $FMAI) {
+      //__init()方法被用来替代类的默认构造函数
+      public function __init(FMAI $FMAI) {
           $this->FMAI = $FMAI;
           $this->AppPath = dirname(__DIR__);
           //加载应用的配置文件，默认会加载框架配置文件，如果想覆盖框架的配置项，可以创建同名的进行覆盖
           $this->CFG = $this->FMAI->loadConfigure($this->AppPath . '/Config/config.ini');
+          //由于框架会默认传入FMAI类，所以可以使用伪对象访问方法来完成上一行代码的工作
+          //伪多重继承见http://toknot.com/blog/implement-php-object-pseudo-multiple-inheritance/
+          //$this->CFG = $this->loadConfigure($this->AppPath . '/Config/config.ini');
           //创建一个数据库映射类
           $this->AR = $this->FMAI->getActiveRecord();
+          //$this->AR = $this->getActiveRecord();
           //使用数据库配置
           $this->AR->config($this->CFG->Database);
           //激活HTML缓存
           $this->FMAI->enableHTMLCache();
+          //$this->enableHTMLCache();
           //实例化一个模板渲染类，这里我们实例化了一个框架自带的渲染类，类文档见
        //http://toknot.com/toknot/class-Toknot.View.Renderer.html
           $view = $this->FMAI->newTemplateView();
+          //$view = $this->newTemplateView();
           //设置模板文件所在文件夹
           $view->scanPath = $this->AppPath . '/View';
           //设置模板编译后的文件存放文件夹
