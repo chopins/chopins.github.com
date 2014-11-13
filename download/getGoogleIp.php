@@ -5,9 +5,14 @@ date_default_timezone_set('UTC');
 
 $block = dns_get_record('_netblocks.google.com', DNS_TXT);
 
-if(!$block) {
-	die("Get Google DNS record error, Set DNS server to 8.8.8.8 for your host\n");
+if(!$block && is_array($block)) {
+	exec('nslookup -q=txt _netblocks.google.com 8.8.8.8', $output);
+    $txt = explode('"',$output[4]);
+    $block[0]['txt'] = $txt[1];
+} elseif($block === false) {
+    die("Get Google DNS record error\n");
 }
+
 
 $txt = $block[0]['txt'];
 
@@ -65,7 +70,7 @@ foreach ($blockList as $ipblock) {
         }
     }
 }
-
-function fork() {
-    
+if(function_exists('pcntl_wait')) {
+    pcntl_wait($start);
 }
+
