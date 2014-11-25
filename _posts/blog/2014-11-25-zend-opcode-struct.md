@@ -135,3 +135,31 @@ typedef union _zend_value {
 	zend_function    *func;
 } zend_value;
 ```
+`zend_execute_data`作为引擎存储的执行数据，该结构定义在`/php-src/Zend/zend_types.h`中:  
+
+```c
+typedef struct _zend_execute_data    zend_execute_data;
+```
+
+而`_zend_execute_data`定义在`/php-src/Zend/zend_compile.h`中，结构如下: 
+
+```c
+struct _zend_execute_data {
+	const zend_op       *opline;           /* executed opline                */
+	zend_execute_data   *call;             /* current call                   */
+	void               **run_time_cache;
+	zend_function       *func;             /* executed op_array              */
+	zval                 This;
+	zend_class_entry    *called_scope;
+	zend_execute_data   *prev_execute_data;
+	uint32_t             frame_info;
+	uint32_t             num_args;
+	zval                *return_value;
+	zend_class_entry    *scope;            /* function scope (self)          */
+	zend_array          *symbol_table;
+	const zend_op       *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	zend_object         *delayed_exception;
+	uint32_t             silence_op_num;
+	uint32_t             old_error_reporting;
+};
+```
