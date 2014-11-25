@@ -116,3 +116,21 @@ struct _zval_struct {
 	} u2;
 };
 ```
+`zend_value`定义如下,位于文件`/php-src/Zend/zend_types.h`中：
+```c
+typedef union _zend_value {
+	zend_long         lval;				/* long value */
+	double            dval;				/* double value */
+	zend_refcounted  *counted;
+	zend_string      *str;
+	zend_array       *arr;
+	zend_object      *obj;
+	zend_resource    *res;
+	zend_reference   *ref;
+	zend_ast_ref     *ast;
+	zval             *zv;
+	void             *ptr;
+	zend_class_entry *ce;
+	zend_function    *func;
+} zend_value;
+```
