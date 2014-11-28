@@ -25,6 +25,13 @@ $context = stream_context_create($opts);
 
 $fp = @fopen('http://proxy.toknot.com/down.php?url='.  urlencode($url).'&da='.urlencode($da).'&range='.  urlencode($range),'r', false, $context);
 
+if(!$fp) {
+    $err = error_get_last();
+    list(,$status) = explode('HTTP/1.1',$err['message']);
+    header("Status: $status");
+    echo $status;
+    die;
+}
 $stat = stream_get_meta_data($fp);
 
 if (isset($stat['wrapper_data'])) {
