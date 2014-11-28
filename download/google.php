@@ -28,7 +28,8 @@ $fp = @fopen('http://proxy.toknot.com/down.php?url='.  urlencode($url).'&da='.ur
 
 if(!$fp) {
     $err = error_get_last();
-    list(,$status) = explode('HTTP/1.1',$err['message']);
+    $status = explode('HTTP/1.1',$err['message']);
+	$status = end($status);
     @header("Status: $status");
     echo "PROXY:$status";
     die;
