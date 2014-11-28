@@ -31,6 +31,7 @@ $gstatic = fopen("{$stroe}gstatic.com.zone", 'w');
 $googleusercontent = fopen("{$stroe}googleusercontent.com.zone", 'w');
 $youtube = fopen("{$stroe}youtube.com.zone", 'w');
 $ggpht = fopen("{$stroe}ggpht.com.zone", 'w');
+$clientsgoogle = fopen("{$stroe}clients.google.com.zone", 'w');
 $default_zone = <<<EOF
 \$TTL    86400
 @       1D IN SOA @ root (
@@ -47,6 +48,7 @@ fwrite($gstatic, $default_zone);
 fwrite($googleusercontent, $default_zone);
 fwrite($youtube, $default_zone);
 fwrite($ggpht, $default_zone);
+fwrite($clientsgoogle, $default_zone);
 $g = stream_context_create(array("ssl" => array("capture_peer_cert" => true)));
 $disablefork = false;
 $childnum = 0;
@@ -65,7 +67,7 @@ foreach ($blockList as $ipblock) {
 	$startip = long2ip($start);
 	$endip = long2ip($maxip - 1);
 	$str = "IP BLOCK:{$ipblock} IN { {$startip} -- {$endip} }";
-	echo "\n\033[1m{$str}\033[0m\n";
+	//echo "\n\033[1m{$str}\033[0m\n";
 	fwrite($fp, "$str\n");
     for ($i = $start; $i < $maxip; $i++) {
         $ip = long2ip($i);
@@ -116,13 +118,27 @@ foreach ($blockList as $ipblock) {
 				if(in_array('m.google.com', $dms)) {
 					fwrite($upgoogle, "m A IN $ip\n");
 				}
+				if(in_array('checkout.google.com', $dms)) {
+					fwrite($upgoogle, "checkout A IN $ip\n");
+				}
+				if(in_array('talk.google.com', $dms)) {
+					fwrite($upgoogle, "talk A IN $ip\n");
+				}
 				if(in_array('*.google.com', $dms)) {
 					fwrite($upgoogle, "* A IN $ip\n");
+				}
+				if(in_array('*.clients.google.com', $dms)) {
+					fwrite($clientsgoogle, "@ A IN $ip\n");
 				}
 				if(in_array('gstatic.com', $dms)) {
 					fwrite($gstatic, "@ A IN $ip\n");
 				}
-				if(in_array('*.gstatic.com', $dms)) {
+				
+				if($d == '*.gstatic.com,*.metric.gstatic.com,gstatic.com') {
+					fwrite($gstatic, "ssl A IN $ip\n");
+					fwrite($gstatic, "fonts A IN $ip\n");
+					fwrite($gstatic, "csi A IN $ip\n");
+				} elseif(in_array('*.gstatic.com', $dms)) {
 					fwrite($gstatic, "* A IN $ip\n");
 				}
 				if(in_array('googleusercontent.com', $dms)) {
@@ -130,9 +146,6 @@ foreach ($blockList as $ipblock) {
 				}
 				if(in_array('*.googleusercontent.com', $dms)) {
 					fwrite($googleusercontent, "* A IN $ip\n");
-				}
-				if(in_array('youtube.com', $dms)) {
-					fwrite($youtube, "@ A IN $ip\n");
 				}
 				if(in_array('youtube.com', $dms)) {
 					fwrite($youtube, "@ A IN $ip\n");
@@ -149,7 +162,7 @@ foreach ($blockList as $ipblock) {
 			}
         } else {
             //echo "\n\033[1;31mCan not create SSL connect to {$ip}\033[0m\n";
-            echo '+';
+            //echo '+';
         }
         if ($ischild) {
             exit;

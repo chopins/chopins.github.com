@@ -1,4 +1,5 @@
 <?php
+
 set_time_limit(0);
 $url = 'http://'.$_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
 
@@ -29,22 +30,19 @@ if(!$fp) {
     $err = error_get_last();
     list(,$status) = explode('HTTP/1.1',$err['message']);
     @header("Status: $status");
-    echo $status;
+    echo "PROXY:$status";
     die;
 }
 $stat = @stream_get_meta_data($fp);
 
 if (isset($stat['wrapper_data'])) {
     foreach ($stat['wrapper_data'] as $i => $header) {
-        if ($i == 0) {
-            continue;
-        }
         @header($header);
     }
 } else {
     @header("Content-type: application/vnd.android.package-delta;charset=utf-8");
     @header("Accept-Ranges:bytes");
 }
-@header('Content-Disposition: attachment; filename="' . $filename . '"');
+@header('Content-Disposition: attachment; filename="' . $filename . '.apk"');
 @fpassthru($fp);
 @fclose($fp);
