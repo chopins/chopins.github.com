@@ -2,7 +2,14 @@
 <?php
 
 date_default_timezone_set('UTC');
-
+$GLOBALS['update'] = 0;
+$stroe = __DIR__.'/dnsdata/';
+if(!is_dir($stroe)) {
+	mkdir($stroe);
+}
+if(isset($argv[1]) && $argv[1] == 'dns') {
+	$GLOBALS['update'] = 1;
+}
 $block = dns_get_record('_netblocks.google.com', DNS_TXT);
 
 if(!$block && is_array($block)) {
@@ -18,7 +25,28 @@ $txt = $block[0]['txt'];
 
 $blockList = explode('ip4:', $txt);
 array_shift($blockList);
-$fp = fopen('./iplist.txt', 'w');
+$fp = fopen("{$stroe}iplist.txt", 'w');
+$upgoogle = fopen("{$stroe}google.com.zone", 'w');
+$gstatic = fopen("{$stroe}gstatic.com.zone", 'w');
+$googleusercontent = fopen("{$stroe}googleusercontent.com.zone", 'w');
+$youtube = fopen("{$stroe}youtube.com.zone", 'w');
+$ggpht = fopen("{$stroe}ggpht.com.zone", 'w');
+$default_zone = <<<EOF
+\$TTL    86400
+@       1D IN SOA @ root (
+                          42          ; serial (d. adams)
+                          3H          ; refresh 
+                          15M        ; retry      
+                          1W         ; expiry  
+                          1D )        ; minimum   
+                        1D IN NS         @
+
+EOF;
+fwrite($upgoogle, $default_zone);
+fwrite($gstatic, $default_zone);
+fwrite($googleusercontent, $default_zone);
+fwrite($youtube, $default_zone);
+fwrite($ggpht, $default_zone);
 $g = stream_context_create(array("ssl" => array("capture_peer_cert" => true)));
 $disablefork = false;
 $childnum = 0;
@@ -64,9 +92,61 @@ foreach ($blockList as $ipblock) {
         if ($r) {
             $cont = stream_context_get_params($r);
             $cerInfo = openssl_x509_parse($cont["options"]["ssl"]["peer_certificate"]);
-            $d = str_replace('DNS:', '', $cerInfo['extensions']['subjectAltName']);
-            echo "\n\033[1;32mIP $ip Valid Domain:\033[0m {$d}\n";
+            $d = str_replace(array('DNS:',' '), '', $cerInfo['extensions']['subjectAltName']);
+            //echo "\n\033[1;32mIP $ip Valid Domain:\033[0m {$d}\n";
 			fwrite($fp, "IP $ip Valid Domain: {$d}\n");
+			if($GLOBALS['update']) {
+				$dms = explode(',', $d);
+				
+				if(in_array('google.com', $dms)) {
+					fwrite($upgoogle, "@ A IN $ip\n");
+				}
+				if(in_array('www.google.com', $dms)) {
+					fwrite($upgoogle, "www A IN $ip\n");
+				}
+				if(in_array('mail.google.com', $dms)) {
+					fwrite($upgoogle, "mail A IN $ip\n");
+				}
+				if(in_array('inbox.google.com', $dms)) {
+					fwrite($upgoogle, "inbox A IN $ip\n");
+				}
+				if(in_array('accounts.google.com', $dms)) {
+					fwrite($upgoogle, "accounts A IN $ip\n");
+				}
+				if(in_array('m.google.com', $dms)) {
+					fwrite($upgoogle, "m A IN $ip\n");
+				}
+				if(in_array('*.google.com', $dms)) {
+					fwrite($upgoogle, "* A IN $ip\n");
+				}
+				if(in_array('gstatic.com', $dms)) {
+					fwrite($gstatic, "@ A IN $ip\n");
+				}
+				if(in_array('*.gstatic.com', $dms)) {
+					fwrite($gstatic, "* A IN $ip\n");
+				}
+				if(in_array('googleusercontent.com', $dms)) {
+					fwrite($googleusercontent, "@ A IN $ip\n");
+				}
+				if(in_array('*.googleusercontent.com', $dms)) {
+					fwrite($googleusercontent, "* A IN $ip\n");
+				}
+				if(in_array('youtube.com', $dms)) {
+					fwrite($youtube, "@ A IN $ip\n");
+				}
+				if(in_array('youtube.com', $dms)) {
+					fwrite($youtube, "@ A IN $ip\n");
+				}
+				if(in_array('*.youtube.com', $dms)) {
+					fwrite($youtube, "* A IN $ip\n");
+				}
+				if(in_array('ggpht.com', $dms)) {
+					fwrite($ggpht, "@ A IN $ip\n");
+				}
+				if(in_array('*.ggpht.com', $dms)) {
+					fwrite($ggpht, "* A IN $ip\n");
+				}
+			}
         } else {
             //echo "\n\033[1;31mCan not create SSL connect to {$ip}\033[0m\n";
             echo '+';
