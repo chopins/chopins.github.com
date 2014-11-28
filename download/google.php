@@ -28,23 +28,23 @@ $fp = @fopen('http://proxy.toknot.com/down.php?url='.  urlencode($url).'&da='.ur
 if(!$fp) {
     $err = error_get_last();
     list(,$status) = explode('HTTP/1.1',$err['message']);
-    header("Status: $status");
+    @header("Status: $status");
     echo $status;
     die;
 }
-$stat = stream_get_meta_data($fp);
+$stat = @stream_get_meta_data($fp);
 
 if (isset($stat['wrapper_data'])) {
     foreach ($stat['wrapper_data'] as $i => $header) {
         if ($i == 0) {
             continue;
         }
-        header($header);
+        @header($header);
     }
 } else {
-    header("Content-type: application/vnd.android.package-delta;charset=utf-8");
-    header("Accept-Ranges:bytes");
+    @header("Content-type: application/vnd.android.package-delta;charset=utf-8");
+    @header("Accept-Ranges:bytes");
 }
-header('Content-Disposition: attachment; filename="' . $filename . '"');
-fpassthru($fp);
-fclose($fp);
+@header('Content-Disposition: attachment; filename="' . $filename . '"');
+@fpassthru($fp);
+@fclose($fp);
