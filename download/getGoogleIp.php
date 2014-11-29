@@ -62,6 +62,7 @@ fwrite($youtube, $default_zone);
 fwrite($ggpht, $default_zone);
 fwrite($clientsgoogle, $default_zone);
 fwrite($googleapis, $default_zone);
+fwrite($appspot, $default_zone);
 $g = stream_context_create(array("ssl" => array("capture_peer_cert" => true)));
 $disablefork = false;
 $childnum = 0;
