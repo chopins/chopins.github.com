@@ -97,44 +97,47 @@ foreach ($blockList as $ipblock) {
             $d = str_replace(array('DNS:',' '), '', $cerInfo['extensions']['subjectAltName']);
             //echo "\n\033[1;32mIP $ip Valid Domain:\033[0m {$d}\n";
 			fwrite($fp, "IP $ip Valid Domain: {$d}\n");
+			$ipkey = $cerInfo['extensions']['subjectKeyIdentifier'];
 			if($GLOBALS['update']) {
 				$dms = explode(',', $d);
-				
-				if(in_array('google.com', $dms)) {
+				if(in_array('google.com', $dms) && $ipkey == 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30') {
 					fwrite($upgoogle, "@ A IN $ip\n");
 				}
-				if(in_array('www.google.com', $dms)) {
+				if(in_array('www.google.com', $dms) && $ipkey == '1C:9B:D9:53:86:31:BD:BA:2E:84:20:34:4C:94:08:42:61:4F:BC:A5') {
 					fwrite($upgoogle, "www A IN $ip\n");
 				}
-				if(in_array('mail.google.com', $dms)) {
+				if(in_array('mail.google.com', $dms) && $ipkey == 'AD:34:D3:F1:AB:19:A3:A6:F0:95:19:F3:11:FC:60:D0:03:30:F7:F2') {
 					fwrite($upgoogle, "mail A IN $ip\n");
 				}
-				if(in_array('inbox.google.com', $dms)) {
+				if(in_array('inbox.google.com', $dms) 
+						&& $ipkey == 'AD:34:D3:F1:AB:19:A3:A6:F0:95:19:F3:11:FC:60:D0:03:30:F7:F2') {
 					fwrite($upgoogle, "inbox A IN $ip\n");
 				}
-				if(in_array('accounts.google.com', $dms)) {
+				if(in_array('accounts.google.com', $dms) 
+						&& $ipkey == '52:22:A0:83:88:16:D5:6B:52:71:93:E5:A7:A3:4D:92:04:F4:B4:B5') {
 					fwrite($upgoogle, "accounts A IN $ip\n");
 				}
-				if(in_array('m.google.com', $dms)) {
+				if(in_array('m.google.com', $dms) && $ipkey == '4B:B0:88:82:B5:30:D2:70:51:F7:A7:36:E2:0A:23:24:89:56:1F:09') {
 					fwrite($upgoogle, "m A IN $ip\n");
 				}
-				if(in_array('checkout.google.com', $dms)) {
+				if(in_array('checkout.google.com', $dms) && $ipkey == '4C:95:00:A2:42:BE:C4:46:FB:30:87:00:BB:E9:0E:0F:44:1C:31:CA') {
 					fwrite($upgoogle, "checkout A IN $ip\n");
 				}
-				if(in_array('talk.google.com', $dms)) {
+				if(in_array('talk.google.com', $dms) && $ipkey == '23:A9:E5:D1:E0:C4:FC:C5:4B:AB:2D:DA:DC:9E:BC:B1:30:1B:C9:82') {
 					fwrite($upgoogle, "talk A IN $ip\n");
 				}
-				if(in_array('*.google.com', $dms)) {
+				if(in_array('*.google.com', $dms) && $ipkey == 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30') {
 					fwrite($upgoogle, "* A IN $ip\n");
-				}
-				if(in_array('*.clients.google.com', $dms)) {
+				} 
+				
+				if(in_array('*.clients.google.com', $dms) && $ipkey == '50:A8:01:DB:AF:1B:F2:C9:E4:DF:9D:B0:F2:26:AB:F3:31:48:32:81') {
 					fwrite($clientsgoogle, "@ A IN $ip\n");
 				}
-				if(in_array('gstatic.com', $dms)) {
+				if(in_array('gstatic.com', $dms) && $ipkey == '86:48:A7:95:30:1B:24:A6:E5:D8:E2:50:1E:A1:9B:C0:03:FE:C3:9C') {
 					fwrite($gstatic, "@ A IN $ip\n");
 				}
 				
-				if($d == '*.gstatic.com,*.metric.gstatic.com,gstatic.com') {
+				if($d == '*.gstatic.com,*.metric.gstatic.com,gstatic.com' && $ipkey == '86:48:A7:95:30:1B:24:A6:E5:D8:E2:50:1E:A1:9B:C0:03:FE:C3:9C') {
 					fwrite($gstatic, "ssl A IN $ip\n");
 					fwrite($gstatic, "fonts A IN $ip\n");
 					fwrite($gstatic, "csi A IN $ip\n");
@@ -144,20 +147,20 @@ foreach ($blockList as $ipblock) {
 				if(in_array('googleusercontent.com', $dms)) {
 					fwrite($googleusercontent, "@ A IN $ip\n");
 				}
-				if(in_array('*.googleusercontent.com', $dms)) {
-					fwrite($googleusercontent, "* A IN $ip\n");
-				}
+				
 				if(in_array('youtube.com', $dms)) {
 					fwrite($youtube, "@ A IN $ip\n");
 				}
 				if(in_array('*.youtube.com', $dms)) {
 					fwrite($youtube, "* A IN $ip\n");
 				}
+				
 				if(in_array('ggpht.com', $dms)) {
 					fwrite($ggpht, "@ A IN $ip\n");
 				}
-				if(in_array('*.ggpht.com', $dms)) {
+				if(in_array('*.ggpht.com', $dms) && $ipkey == 'F3:68:50:66:D5:73:D0:1E:35:B9:33:B7:E1:54:7F:6C:73:AB:E8:F0') {
 					fwrite($ggpht, "* A IN $ip\n");
+					fwrite($googleusercontent, "* A IN $ip\n");
 				}
 			}
         } else {
