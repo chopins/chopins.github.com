@@ -32,6 +32,7 @@ $googleusercontent = fopen("{$stroe}googleusercontent.com.zone", 'w');
 $youtube = fopen("{$stroe}youtube.com.zone", 'w');
 $ggpht = fopen("{$stroe}ggpht.com.zone", 'w');
 $clientsgoogle = fopen("{$stroe}clients.google.com.zone", 'w');
+$googleapis = fopen("{$stroe}googleapis.com.zone", 'w');
 $default_zone = <<<EOF
 \$TTL    86400
 @       1D IN SOA @ root (
@@ -49,6 +50,7 @@ fwrite($googleusercontent, $default_zone);
 fwrite($youtube, $default_zone);
 fwrite($ggpht, $default_zone);
 fwrite($clientsgoogle, $default_zone);
+fwrite($googleapis, $default_zone);
 $g = stream_context_create(array("ssl" => array("capture_peer_cert" => true)));
 $disablefork = false;
 $childnum = 0;
@@ -72,7 +74,7 @@ foreach ($blockList as $ipblock) {
     for ($i = $start; $i < $maxip; $i++) {
         $ip = long2ip($i);
         if (!$disablefork && function_exists('pcntl_fork')) {
-            if ($childnum >= 20) {
+            if ($childnum >= 100) {
                 while ($childnum > 0) {
                     pcntl_wait($status);
                     $childnum--;
@@ -141,9 +143,8 @@ foreach ($blockList as $ipblock) {
 					fwrite($gstatic, "ssl A IN $ip\n");
 					fwrite($gstatic, "fonts A IN $ip\n");
 					fwrite($gstatic, "csi A IN $ip\n");
-				} elseif(in_array('*.gstatic.com', $dms)) {
 					fwrite($gstatic, "* A IN $ip\n");
-				}
+				} 
 				if(in_array('googleusercontent.com', $dms)) {
 					fwrite($googleusercontent, "@ A IN $ip\n");
 				}
@@ -151,7 +152,7 @@ foreach ($blockList as $ipblock) {
 				if(in_array('youtube.com', $dms)) {
 					fwrite($youtube, "@ A IN $ip\n");
 				}
-				if(in_array('*.youtube.com', $dms)) {
+				if(in_array('*.youtube.com', $dms) && $ipkey == 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30') {
 					fwrite($youtube, "* A IN $ip\n");
 				}
 				
@@ -161,6 +162,10 @@ foreach ($blockList as $ipblock) {
 				if(in_array('*.ggpht.com', $dms) && $ipkey == 'F3:68:50:66:D5:73:D0:1E:35:B9:33:B7:E1:54:7F:6C:73:AB:E8:F0') {
 					fwrite($ggpht, "* A IN $ip\n");
 					fwrite($googleusercontent, "* A IN $ip\n");
+				}
+				if(in_array('*.googleapis.com', $dms) 
+						&& $ipkey == '71:E5:C2:3A:56:1F:2C:AE:19:CB:51:FD:FD:FF:C4:45:D2:DD:EB:75') {
+					fwrite($googleapis, "* A IN $ip\n");
 				}
 			}
         } else {
