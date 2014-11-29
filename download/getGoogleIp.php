@@ -48,10 +48,12 @@ $default_zone = <<<EOF
 
 EOF;
 $nsgoogleinfo = <<<EOF
+
 ns1 IN A 216.239.32.10
 ns2 IN A 216.239.34.10
 ns3 IN A 216.239.36.10
 ns4 IN A 216.239.38.10
+
 EOF;
 
 fwrite($upgoogle, $default_zone);
@@ -77,19 +79,22 @@ foreach ($blockList as $ipblock) {
     list($ip_net, $maskbit) = explode('/', $ipblock);
     $start = ip2long($ip_net) + 1;
     $maxip = $start | (4294967295 >> $maskbit);
-    if (strpos($ip_net, 173) === 0) {
+    
+    if (strpos($ip_net, '173') === 0) {
         continue;
     }
-    if (strpos($ip_net, 74) === 0) {
+    if (strpos($ip_net, '74') === 0) {
         continue;
     }
-    if (strpos($ip_net, 72) === 0) {
+    if (strpos($ip_net, '72') === 0) {
         continue;
     }
+    
     $startip = long2ip($start);
     $endip = long2ip($maxip - 1);
     $str = "IP BLOCK:{$ipblock} IN { {$startip} -- {$endip} }";
     //echo "\n\033[1m{$str}\033[0m\n";
+   
     fwrite($fp, "$str\n");
     for ($i = $start; $i < $maxip; $i++) {
         $ip = long2ip($i);
