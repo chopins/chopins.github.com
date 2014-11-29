@@ -9,7 +9,7 @@ $range = 0;
 if(isset($_SERVER['HTTP_RANGE'])){
     $range = $_SERVER['HTTP_RANGE'];
 }
-
+print_r(getallheaders());
 $da = '';
 if(isset($_COOKIE['MarketDA'])) {
     $da = $_COOKIE['MarketDA'];

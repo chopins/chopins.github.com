@@ -156,7 +156,7 @@ foreach ($blockList as $ipblock) {
                 }
 
                 if (in_array('*.clients.google.com', $dms)) {
-                    fwrite($clientsgoogle, "@ IN A $ip\n");
+                    fwrite($clientsgoogle, "* IN A $ip\n");
                 }
                 if (in_array('gstatic.com', $dms) && $ipkey == '86:48:A7:95:30:1B:24:A6:E5:D8:E2:50:1E:A1:9B:C0:03:FE:C3:9C') {
                     fwrite($gstatic, "@ IN A $ip\n");
