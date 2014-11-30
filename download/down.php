@@ -23,6 +23,12 @@ if (empty($url_info['scheme'])) {
 
 $header = '';
 foreach($_SERVER as  $field => $fv) {
+    if ($field == 'HTTP_HOST') {
+        continue;
+    }
+    if ($field == 'HTTP_REFERER') {
+        continue;
+    }
     if(strpos($field, 'HTTP_') === 0) {
         $filename = str_replace(' ','-',ucwords(strtolower(str_replace(array('HTTP_','_'), array('',' '), $field))));
         $header .= "$filename: $fv\r\n";
@@ -38,7 +44,8 @@ $opts = array(
         'method' => "GET",
         'header' => $header,
         'content' => $body,
-        'ignore_errors' => true
+        'ignore_errors' => true,
+        'follow_location'=>true
     )
 );
 
@@ -60,18 +67,18 @@ while (!$fp) {
 
     if (isset($stat['wrapper_data'])) {
         foreach ($stat['wrapper_data'] as $i => $header) {
-            if (trim($header) == 'HTTP/1.1 302 Found') {
-                foreach ($stat['wrapper_data'] as $i => $header) {
-                    if (strpos(trim($header), 'Location') === 0) {
-                        list(, $url) = explode(':', $header);
-                        $url = trim($url);
-                        break;
-                    }
-                }
-
-                fclose($fp);
-                continue;
-            }
+//            if (trim($header) == 'HTTP/1.1 302 Found') {
+//                foreach ($stat['wrapper_data'] as $i => $header) {
+//                    if (strpos(trim($header), 'Location') === 0) {
+//                        list(, $url) = explode(':', $header);
+//                        $url = trim($url);
+//                        break;
+//                    }
+//                }
+//
+//                fclose($fp);
+//                continue;
+//            }
             if(strpos($header, 'Content-Type: text') !== false) {
                 $is_text = true;
             }
@@ -86,6 +93,7 @@ while (!$fp) {
 if($is_text) {
     ob_start();
 }
+
 @fpassthru($fp);
 
 if($is_text) {
