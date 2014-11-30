@@ -66,12 +66,20 @@ $g = stream_context_create(array("ssl" => array("capture_peer_cert" => true)));
 $disablefork = false;
 $childnum = 0;
 $ischild = $skip = false;
-if (function_exists('pcntl_fork')) {
-    pcntl_signal(SIGCHLD, function() {
-        echo 'cld';
-        $GLOBALS['childnum'] --;
-    });
+declare(ticks = 1);
+
+function childexit($signo) {
+    $GLOBALS['childnum'] --;
+    pcntl_wait($status);
 }
+
+if (function_exists('pcntl_fork')) {
+    pcntl_signal(SIGCHLD, 'childexit');
+    pcntl_signal(SIGUSR1, 'childexit');
+    pcntl_signal(SIGCLD, 'childexit');
+}
+
+$pool = array();
 foreach ($blockList as $ipblock) {
     list($ip_net, $maskbit) = explode('/', $ipblock);
     $start = ip2long($ip_net) + 1;
@@ -96,15 +104,17 @@ foreach ($blockList as $ipblock) {
     for ($i = $start; $i < $maxip; $i++) {
         $ip = long2ip($i);
         if (!$disablefork && function_exists('pcntl_fork')) {
-            if ($childnum >= 200) {
-                while ($childnum > 0) {
-                    pcntl_wait($status);
-                    $childnum--;
-                }
+            while ($childnum >= 200) {
+                pcntl_wait($status);
+                $childnum--;
+                usleep(100000);
             }
+
             $pid = pcntl_fork();
+            $pool[] = $pid;
             if ($pid > 0) {
                 $childnum++;
+                
                 $ischild = false;
                 continue;
             } else if ($pid < 0) {
@@ -114,6 +124,7 @@ foreach ($blockList as $ipblock) {
                 $ischild = true;
             }
         }
+
         $r = @stream_socket_client("ssl://$ip:443", $errno, $errstr, 2, STREAM_CLIENT_CONNECT, $g);
         if ($r) {
             $cont = stream_context_get_params($r);
@@ -164,7 +175,7 @@ foreach ($blockList as $ipblock) {
             check_ip_list($gstatic, 'mt', 0, 7, '.gstatic.com', '*.gstatic.com', $gst_check_key);
             check_ip_list($gstatic, 't', 0, 3, '.gstatic.com', '*.gstatic.com', $gst_check_key);
             check_ip_list($gstatic, 'encrypted-tbn', 0, 3, '.gstatic.com', '*.gstatic.com', $gst_check_key);
-            writer_a_rec($gstatic, '*.gstatic.com', '*',$gst_check_key);
+            writer_a_rec($gstatic, '*.gstatic.com', '*', $gst_check_key);
 
             writer_a_rec($googleusercontent, 'googleusercontent.com', '@');
             writer_a_rec($googleusercontent, '*.googleusercontent.com', '*', 'F3:68:50:66:D5:73:D0:1E:35:B9:33:B7:E1:54:7F:6C:73:AB:E8:F0');
@@ -182,7 +193,7 @@ foreach ($blockList as $ipblock) {
             check_ip_list($ggpht, 'lh', 1, 6, '.ggpht.com', '*.ggpht.com', $gst_check_key);
             check_ip_list($ggpht, 'gm', 1, 4, '.ggpht.com', '*.ggpht.com', $gst_check_key);
             check_ip_list($ggpht, 'geo', 1, 3, '.ggpht.com', '*.ggpht.com', $gst_check_key);
-            writer_a_rec($ggpht, '*.ggpht.com', '*',$gst_check_key);
+            writer_a_rec($ggpht, '*.ggpht.com', '*', $gst_check_key);
 
             $gapi_check_key = '71:E5:C2:3A:56:1F:2C:AE:19:CB:51:FD:FD:FF:C4:45:D2:DD:EB:75';
             check_ip_domain($googleapis, 'ajax.googleapis.com', '*.googleapis.com', $gapi_check_key);
@@ -218,7 +229,9 @@ foreach ($blockList as $ipblock) {
 
             writer_a_rec($ytimg, '*.ytimg.com', '*', 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30');
         }
+        fclose($r);
         if ($ischild) {
+            posix_kill(posix_getppid(), SIGUSR1);
             exit;
         }
     }
@@ -292,7 +305,7 @@ function check_ip_domain(&$fp, $check, $domain = null, $key = null) {
     } else {
         $rec = $domain_split[0];
     }
-    
+
     check_ip($check);
     writer_a_rec($fp, $domain, $rec, $key);
 }
