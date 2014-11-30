@@ -1,5 +1,5 @@
-#!/bin/env php
 <?php
+
 date_default_timezone_set('UTC');
 
 $stroe = __DIR__ . '/dnsdata/';
@@ -64,12 +64,12 @@ $ytimg = writer_default('ytimg.com');
 
 $g = stream_context_create(array("ssl" => array("capture_peer_cert" => true)));
 $disablefork = false;
-$childnum = 0;
+static $childnum = 0;
 $ischild = $skip = false;
+
 declare(ticks = 1);
 
-function childexit($signo) {
-    $GLOBALS['childnum'] --;
+function childexit() {
     pcntl_wait($status);
 }
 
@@ -78,8 +78,8 @@ if (function_exists('pcntl_fork')) {
     pcntl_signal(SIGUSR1, 'childexit');
     pcntl_signal(SIGCLD, 'childexit');
 }
+$msg = msg_get_queue(posix_getpid());
 
-$pool = array();
 foreach ($blockList as $ipblock) {
     list($ip_net, $maskbit) = explode('/', $ipblock);
     $start = ip2long($ip_net) + 1;
@@ -103,23 +103,36 @@ foreach ($blockList as $ipblock) {
     fwrite($fp, "$str\n");
     for ($i = $start; $i < $maxip; $i++) {
         $ip = long2ip($i);
+        
         if (!$disablefork && function_exists('pcntl_fork')) {
-            while ($childnum >= 200) {
-                pcntl_wait($status);
-                $childnum--;
-                usleep(100000);
+            if ($childnum >= 200) {
+                echo 'MO'.$childnum . PHP_EOL;
+                while ($childnum >= 10) {
+                    echo "check" . PHP_EOL;
+                    $num = trim(shell_exec('ps ux| grep getGoogle | wc -l'));
+                    $childnum = $num;
+                    usleep(10000);
+                    echo 'NOW'.$childnum. PHP_EOL;
+                }
             }
 
             $pid = pcntl_fork();
-            $pool[] = $pid;
+
             if ($pid > 0) {
                 $childnum++;
                 
+                msg_receive($msg, 1, $msgtype, 1, $childpid);
+                $queue = msg_stat_queue($msg);
+                $childnum = $queue['msg_qnum'];
+                
                 $ischild = false;
+                usleep(10000);
                 continue;
             } else if ($pid < 0) {
                 $disablefork = true;
                 $ischild = false;
+                echo 'err';
+                die;
             } else {
                 $ischild = true;
             }
@@ -231,7 +244,7 @@ foreach ($blockList as $ipblock) {
         }
         fclose($r);
         if ($ischild) {
-            posix_kill(posix_getppid(), SIGUSR1);
+            msg_send($msg, 1, posix_getpid());
             exit;
         }
     }
@@ -253,7 +266,7 @@ function writer_a_rec(&$fp, $domain, $rec = '*', $key = null) {
         $skip = false;
         return;
     }
-
+    //echo posix_getpid() .'|' . time() .PHP_EOL;
     if ($key === null) {
         if (in_array($domain, $dms)) {
             fwrite($fp, "$rec IN A $ip\n");
