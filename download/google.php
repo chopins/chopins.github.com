@@ -36,7 +36,8 @@ $opts = array(
         'method' => "GET",
         'header' => $header,
         'content' => $body,
-        'ignore_errors' => true
+        'ignore_errors' => true,
+        'follow_location' => 0
     )
 );
 $context = stream_context_create($opts);

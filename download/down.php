@@ -45,7 +45,8 @@ $opts = array(
         'header' => $header,
         'content' => $body,
         'ignore_errors' => true,
-        'follow_location'=>true
+        'follow_location' => 0
+        
     )
 );
 
@@ -57,6 +58,7 @@ while (!$fp) {
     $fp = fopen($url, 'r', false, $context);
     
     if ($fp === false) {
+        var_dump($fp);die;
         $err = error_get_last();
         list(, $status) = explode('HTTP/1.1', $err['message']);
         @header("Status: $status", true, 419);
@@ -66,19 +68,21 @@ while (!$fp) {
     $stat = @stream_get_meta_data($fp);
 
     if (isset($stat['wrapper_data'])) {
+        
         foreach ($stat['wrapper_data'] as $i => $header) {
-//            if (trim($header) == 'HTTP/1.1 302 Found') {
-//                foreach ($stat['wrapper_data'] as $i => $header) {
-//                    if (strpos(trim($header), 'Location') === 0) {
-//                        list(, $url) = explode(':', $header);
-//                        $url = trim($url);
-//                        break;
-//                    }
-//                }
-//
-//                fclose($fp);
-//                continue;
-//            }
+            if (strpos($header, 'HTTP/1.1 302') !== false) {
+                foreach ($stat['wrapper_data'] as $i => $header) {
+                    if (strpos($header, 'Location: ') !== false) {
+                        list(, $url) = explode(':', $header,2);
+                        $url = trim($url);
+                        break;
+                    }
+                }
+                
+                fclose($fp);
+                $fp  = false;
+                break;
+            }
             if(strpos($header, 'Content-Type: text') !== false) {
                 $is_text = true;
             }
