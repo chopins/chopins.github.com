@@ -35,7 +35,8 @@ $opts = array(
     'http' => array(
         'method' => "GET",
         'header' => $header,
-        'content' => $body
+        'content' => $body,
+        'ignore_errors' => true
     )
 );
 $context = stream_context_create($opts);
