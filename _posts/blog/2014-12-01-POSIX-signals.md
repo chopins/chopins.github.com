@@ -12,6 +12,7 @@ __Core__  默认终止进程并将内存信息转储到硬盘
 __Stop__  默认停止进程  
 __Cont__  如果进程停止，默认继续执行进程  
 
+```
 Signal     Value    Action   Comment
 ──────────────────────────────────────────────────────────────────────
 __SIGHUP__        1      Term     控制终端挂断或控制进程死掉时会收到这个信号  
@@ -53,5 +54,6 @@ __SIGINFO__      29,-,-             与 SIGPWR 类似
 __SIGLOST__      -,-,-      Term    文件锁丢失 (unused)  
 __SIGWINCH__    28,28,20    Ign     窗口尺寸改变信号 (4.3BSD, Sun)，比如终端大小改变时  
 __SIGUNUSED__    -,31,-     Core    与 SIGSYS 相同  
+```
 
 其他信息见`$ man 7 signal`
