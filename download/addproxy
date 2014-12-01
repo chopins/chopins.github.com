@@ -5,8 +5,9 @@ echo 'enter one domain'
 echo "Usage:$0 test.com"
 exit
 fi
+read -s -p "Enter Password:" PASS
 su <<EOF
-arxccv
+$PASS
 sleep 1
 str=\$(cat /etc/named/other.zone.conf |grep 'zone "'$1'" IN')
 echo "\n"

@@ -58,8 +58,8 @@ while (!$fp) {
     $fp = fopen($url, 'r', false, $context);
     
     if ($fp === false) {
-        var_dump($fp);die;
         $err = error_get_last();
+        print_r($err);die();
         list(, $status) = explode('HTTP/1.1', $err['message']);
         @header("Status: $status", true, 419);
         echo "Proxy:$status";
@@ -70,7 +70,10 @@ while (!$fp) {
     if (isset($stat['wrapper_data'])) {
         
         foreach ($stat['wrapper_data'] as $i => $header) {
-            if (strpos($header, 'HTTP/1.1 302') !== false) {
+            $header_split = explode(' ', $header,3);
+            
+            if (strpos($header_split[0], 'HTTP') === 0 
+                    && ($header_split[1] == '302')) {
                 foreach ($stat['wrapper_data'] as $i => $header) {
                     if (strpos($header, 'Location: ') !== false) {
                         list(, $url) = explode(':', $header,2);
@@ -86,6 +89,7 @@ while (!$fp) {
             if(strpos($header, 'Content-Type: text') !== false) {
                 $is_text = true;
             }
+            
             @header($header);
         }
     } else {
@@ -94,6 +98,7 @@ while (!$fp) {
     }
 }
 //@header('Content-Disposition: attachment; filename="' . $filename . '"');
+
 if($is_text) {
     ob_start();
 }

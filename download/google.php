@@ -56,7 +56,8 @@ if (!$fp) {
 }
 
 $stat = @stream_get_meta_data($fp);
- $is_text = false;
+
+$is_text = false;
 if (isset($stat['wrapper_data'])) {
     foreach ($stat['wrapper_data'] as $i => $header) {
         @header($header);
@@ -68,7 +69,7 @@ if (isset($stat['wrapper_data'])) {
     @header("Content-type: application/vnd.android.package-delta;charset=utf-8");
     @header("Accept-Ranges:bytes");
 }
-//@header('Content-Disposition: attachment; filename="' . $filename . '.apk"');
+
 if($is_text) {
     ob_start();
 }
