@@ -2,6 +2,7 @@
 <?php
 date_default_timezone_set('UTC');
 
+
 $stroe = __DIR__ . '/dnsdata/';
 if (!is_dir($stroe)) {
     mkdir($stroe);
@@ -63,24 +64,30 @@ $googlevideo = writer_default('googlevideo.com');
 $ytimg = writer_default('ytimg.com');
 
 $g = stream_context_create(array("ssl" => array("capture_peer_cert" => true)));
+
 $disablefork = false;
 static $childnum = 0;
 $ischild = $skip = false;
-
+$child_pool = array_fill(0, 200, 0);
 declare(ticks = 1);
-$exit_child = array();
+
+function tick_handler() {
+    pcntl_signal_dispatch();
+}
 
 function childexit($signo) {
-    global $exit_child;
     pcntl_wait($status);
-    $key = md5(microtime() . mt_rand(0, 1000000));
-    $exit_child[$key] = $signo;
 }
 
 if (function_exists('pcntl_fork')) {
     pcntl_signal(SIGCHLD, 'childexit');
     pcntl_signal(SIGCLD, 'childexit');
+    pcntl_signal(SIGUSR1, 'childexit');
 }
+
+list($parent_sock, $child_sock) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+stream_set_blocking($parent_sock, 0);
+//stream_set_blocking($child_sock, 0);
 
 foreach ($blockList as $ipblock) {
     list($ip_net, $maskbit) = explode('/', $ipblock);
@@ -107,23 +114,39 @@ foreach ($blockList as $ipblock) {
         $ip = long2ip($i);
 
         if (!$disablefork && function_exists('pcntl_fork')) {
-            if ($childnum >= 250) {
-                
-                while (($count_exit = count($exit_child)) < 50) {
-                    time_nanosleep(0, 10000);
+
+            $isfull = true;
+            do {
+                $read = array($parent_sock);
+                if (@stream_select($read, $write, $e, 0, 10000) > 0) {
+                    foreach ($read as $chread) {
+                        if (($pid = fgets($chread))) {
+                            foreach ($child_pool as $pk => $v) {
+                                if ($v == $pid) {
+                                    $child_pool[$pk] = 0;
+                                }
+                            }
+                        }
+                    }
                 }
-                foreach ($exit_child as $k => $v) {
-                    unset($exit_child[$k]);
-                    $childnum--;
-                }
                 
-            }
+                foreach ($child_pool as $pk => $v) {
+                    if ($v === 0) {
+                        $isfull = false;
+                        $emptykey = $pk;
+                        break;
+                    }
+                }
+                usleep(10000);
+            } while ($isfull);
 
             $pid = pcntl_fork();
 
             if ($pid > 0) {
                 $childnum++;
                 $ischild = false;
+                
+                $child_pool[$emptykey] = $pid;
                 usleep(10000);
                 continue;
             } else if ($pid < 0) {
@@ -132,6 +155,7 @@ foreach ($blockList as $ipblock) {
                 echo 'err';
                 die;
             } else {
+                //fclose($parent_sock);
                 $ischild = true;
             }
         }
@@ -243,6 +267,8 @@ foreach ($blockList as $ipblock) {
         }
 
         if ($ischild) {
+            fwrite($child_sock, posix_getpid() . PHP_EOL);
+            //fgets($child_sock);
             exit;
         }
     }
