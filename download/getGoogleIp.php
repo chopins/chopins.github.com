@@ -1,5 +1,5 @@
+#!/bin/env php
 <?php
-
 date_default_timezone_set('UTC');
 
 $stroe = __DIR__ . '/dnsdata/';
@@ -68,17 +68,19 @@ static $childnum = 0;
 $ischild = $skip = false;
 
 declare(ticks = 1);
+$exit_child = array();
 
-function childexit() {
+function childexit($signo) {
+    global $exit_child;
     pcntl_wait($status);
+    $key = md5(microtime() . mt_rand(0, 1000000));
+    $exit_child[$key] = $signo;
 }
 
 if (function_exists('pcntl_fork')) {
     pcntl_signal(SIGCHLD, 'childexit');
-    pcntl_signal(SIGUSR1, 'childexit');
     pcntl_signal(SIGCLD, 'childexit');
 }
-$msg = msg_get_queue(posix_getpid());
 
 foreach ($blockList as $ipblock) {
     list($ip_net, $maskbit) = explode('/', $ipblock);
@@ -103,28 +105,24 @@ foreach ($blockList as $ipblock) {
     fwrite($fp, "$str\n");
     for ($i = $start; $i < $maxip; $i++) {
         $ip = long2ip($i);
-        
+
         if (!$disablefork && function_exists('pcntl_fork')) {
-            if ($childnum >= 200) {
-                echo 'MO'.$childnum . PHP_EOL;
-                while ($childnum >= 10) {
-                    echo "check" . PHP_EOL;
-                    $num = trim(shell_exec('ps ux| grep getGoogle | wc -l'));
-                    $childnum = $num;
-                    usleep(10000);
-                    echo 'NOW'.$childnum. PHP_EOL;
+            if ($childnum >= 250) {
+                
+                while (($count_exit = count($exit_child)) < 50) {
+                    time_nanosleep(0, 10000);
                 }
+                foreach ($exit_child as $k => $v) {
+                    unset($exit_child[$k]);
+                    $childnum--;
+                }
+                
             }
 
             $pid = pcntl_fork();
 
             if ($pid > 0) {
                 $childnum++;
-                
-                msg_receive($msg, 1, $msgtype, 1, $childpid);
-                $queue = msg_stat_queue($msg);
-                $childnum = $queue['msg_qnum'];
-                
                 $ischild = false;
                 usleep(10000);
                 continue;
@@ -170,8 +168,8 @@ foreach ($blockList as $ipblock) {
             check_ip_domain($upgoogle, 'upload.google.com', '*.google.com', $gc_check_key);
             check_ip_domain($upgoogle, 'drive.google.com', '*.google.com', $gc_check_key);
             check_ip_domain($upgoogle, 'encrypted.google.com', '*.google.com', $gc_check_key);
-            check_ip_list($upgoogle, 'encrypted-tbn', 0, 3, '.google.com', '*.google.com', $gst_check_key);
-            check_ip_list($upgoogle, 'drive', 0, 9, '.google.com', '*.google.com', $gst_check_key);
+            check_ip_list($upgoogle, 'encrypted-tbn', 0, 3, '.google.com', '*.google.com', $gc_check_key);
+            check_ip_list($upgoogle, 'drive', 0, 9, '.google.com', '*.google.com', $gc_check_key);
             writer_a_rec($upgoogle, '*.google.com', '*', 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30');
 
             writer_a_rec($clientsgoogle, '*.clients.google.com', '*');
@@ -241,10 +239,10 @@ foreach ($blockList as $ipblock) {
             check_ip_domain($ytimg, 's.ytimg.com', '*.ytimg.com', $gc_check_key);
 
             writer_a_rec($ytimg, '*.ytimg.com', '*', 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30');
+            fclose($r);
         }
-        fclose($r);
+
         if ($ischild) {
-            msg_send($msg, 1, posix_getpid());
             exit;
         }
     }
@@ -290,6 +288,10 @@ function check_ip($domain) {
     );
     $context = stream_context_create($opts);
     $fp = @fopen("https://$ip/", 'r', false, $context);
+    if (!$fp) {
+        $skip = true;
+        return false;
+    }
     $meta = stream_get_meta_data($fp);
     fclose($fp);
     if (strpos($meta['wrapper_data'][0], 'HTTP/1.0 200') === false && strpos($meta['wrapper_data'][0], 'HTTP/1.0 302') === false && strpos($meta['wrapper_data'][0], 'HTTP/1.0 301') === false) {
