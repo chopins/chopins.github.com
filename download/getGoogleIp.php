@@ -80,9 +80,8 @@ function childexit($signo) {
 }
 
 if (function_exists('pcntl_fork')) {
-    pcntl_signal(SIGCHLD, 'childexit');
-    pcntl_signal(SIGCLD, 'childexit');
-    pcntl_signal(SIGUSR1, 'childexit');
+    pcntl_signal(SIGCHLD, SIG_IGN);
+    pcntl_signal(SIGCLD, SIG_IGN);
 }
 
 list($parent_sock, $child_sock) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
