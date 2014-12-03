@@ -7,7 +7,7 @@ categories: blog
 很长一段时间，我的Linux都无法通过公司网络访问公司网站，还发现Andriod系统也无法访问。
 
 经过查询，发现是 Linux net.ipv4.tcp\_timestamps 设置导致的问题。
-我查询到的原因是有人在linux 2.6.32内核源码中发现tcp_\tw\_recycle/tcp\_timestamps都开启的条件下，60s内同一源ip主机的socket connect请求中的timestamp必须是递增的。
+我查询到的原因是有人在linux 2.6.32内核源码中发现tcp\_tw\_recycle/tcp\_timestamps都开启的条件下，60s内同一源ip主机的socket connect请求中的timestamp必须是递增的。
 
 >主机client1和client2通过NAT网关（1个ip地址）访问serverN，由于timestamp时间为系统启动到当前的时间，因此，client1和client2的timestamp不相同；根据上述syn包处理源码，在tcp\_tw\_recycle和tcp\_timestamps同时开启的条件下，timestamp大的主机访问serverN成功，而timestmap小的主机访问失败
 
