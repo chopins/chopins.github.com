@@ -261,6 +261,11 @@ class QRCode {
         return $capacityTable[$index];
     }
 
+    /**
+     * 获取数字数据实际容量
+     * 
+     * @return int
+     */
     public function getNumericDataCapacity() {
         $capacityTable = [
             41, 34, 27, 17,
@@ -307,7 +312,11 @@ class QRCode {
         $index = ($this->version - 1) * 4 + $this->getECCLevelIndex($this->ecclevel);
         return $capacityTable[$index];
     }
-
+    /**
+     * 获取字母数字实际存储容量
+     * 
+     * @return int
+     */
     public function getAlphanumericDataCapacity() {
         $capacityTable = [
             25, 20, 16, 10,
@@ -355,7 +364,7 @@ class QRCode {
         return $capacityTable[$index];
     }
 
-    public function getECCNumber($type = 'ecc') {
+    public function getECCNumber() {
         $eccTable = [['L', 7, 1, [26, 19, 2]],
         ['M', 10, 1, [26, 16, 4]],
         ['Q', 13, 1, [26, 13, 6]],
