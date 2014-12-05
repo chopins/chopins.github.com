@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ $# -gt 0 ];then
+ n=$1
+else
+n=20
+fi
+if [[ $# -gt 0  &&  $1 == "-c"  ]];then
+watch "netstat -nt | tr \":\" \" \" | awk '{ALL++;if(\$8==\"ESTABLISHED\"){A++}if(\$8==\"TIME_WAIT\"){T++}}END{print \"ESTABLISHED:\"A,\"TIME_WAIT:\"T,\"ALL:\"ALL}'"
+else
+watch "netstat -nt | tr \":\" \" \" | awk '{if(\$8==\"ESTABLISHED\"){A[\$6]++}}END{for(i in A){print A[i],i}}'|sort -n -r |head -n $n" 
+fi
