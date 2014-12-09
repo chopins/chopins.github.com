@@ -332,6 +332,7 @@ categories: tutorials
         * scroll    页面滚动事件
         * resize    页面尺寸改变时间
         * load        页面加载事件
+        * 对于注册的匿名函数将会拥有`eventId`属性与`clear()`方法，通过在匿名函数内部调用`this.clear()`来清除本次注册事件
 
     * `TK.$(element).getChilds()` 获取所有子节点,只会获取 ELEMENT_NODE 节点,并且递归获取所有子节点的子节点
 
