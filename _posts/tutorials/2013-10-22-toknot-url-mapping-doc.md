@@ -11,9 +11,9 @@ PATH模式是指类似下列的URL的请求:
 
 	http://localhost/User/Login
 
-QUERY模式类似下面：
+QUERY模式类似下面,控制器名字必须以`/`开头，并且位于第一个参数：
 
-	http://localhost/index.php?c=User/Login
+	http://localhost/index.php?/User/Login
 
 MAP_TABLE模式，是用配置文件来规定所有控制器的路由规则，配置文件为 MyApp/Config/router_map.ini 文件
 
@@ -27,13 +27,13 @@ MAP_TABLE模式，是用配置文件来规定所有控制器的路由规则，�
 对于HTTP请求有各种模式（方法），比如通常使用的GET和POST模式，Toknot的路由器将会把不同请求模式映射到控制器的与请求模式同名类方法上，例如：
 
 	GET http://localhost/User/Login
-	GET http://localhost/index.php?c=User/Login
+	GET http://localhost/index.php?/User/Login
 
 上面的请求将会被映射到控制器`\MyApp\Controller\User\Login::GET()`上
 同理：
 
 	POST http://localhost/User/Login
-	POST http://localhost/index.php?c=User/Login
+	POST http://localhost/index.php?/User/Login
 
 将会被映射到控制器`\MyApp\Controller\User\Login::POST()`上
 特殊情况的是当在名命令行下运行一个控制器时执行的是`CLI()`方法，命令行下运行通常可以直接如下面所示:
