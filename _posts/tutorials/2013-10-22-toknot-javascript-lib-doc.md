@@ -288,6 +288,9 @@ categories: tutorials
     * `TK.$(element).getChildNodeByAttr(attr,value)` 根据指定属性及属性值找子元素,返回一个数组
 
     * `TK.$(element).getParentNodeByAttr(attr,value)`根据指定属性及属性值找上级元素,最多查找到body
+
+    * `TK.$(element).getParentByClass(cls)`根据指定样式找上级元素,最多查找到body
+
     * `TK.$(element).getFirstNode()` 获取第一个 ELEMENT_NODE 子元素,忽略文本或注释等节点
 
     * `TK.$(element).getLastNode()`    获取最后一个 ELEMENT_NODE 子元素
