@@ -1,7 +1,7 @@
 ---
 layout: blog_contents
 title: FMAI框架访问接口类文档
-categories: blog
+categories: tutorials
 ---
 
 FMAI类为Toknot框架快速访问接口，提供了模块及常用功能的快速访问方法。这些方法按照配置文件帮助应用做了很多初始化工作,以及提供了常用功能快速调用工作。  
