@@ -12,7 +12,7 @@ categories: blog
 
 ###路由器
   框架支持三种路由规则，包括HTTP参数模式，URL路径模式以及自定义规则。在HTTP参数模式中，框架默认路由控制器会提起第一个GET参数的KEY值信息来作为调用路径，按规则调用应用的业务类，并分离到HTTP请求方法对于的类方法上去。URL路径模式与HTTP参数模式类似，调用路径为URL中的路径，此方法需要WEB服务器的支持。自定义模式为用户自定义URI来映射业务类，并且支持正则匹配。下面是运行逻辑：
-[img](http://toknot.com/download/toknot-router-process.png)
+![router-process](http://toknot.com/download/toknot-router-process.png)
     
 
 ###应用的业务类
