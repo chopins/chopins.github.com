@@ -1,7 +1,7 @@
 ---
 layout: blog_contents
 title: ToKnot 框架说明
-categories: blog
+categories: tutorials
 ---
 
 ###主要应用场景  
