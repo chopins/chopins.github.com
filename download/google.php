@@ -2,8 +2,12 @@
 
 date_default_timezone_set('Etc/GMT-8');
 set_time_limit(0);
-$url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
+if(PHP_SAPI == 'cli') {
+    $url = $argv[1];
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+} else {
+    $url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+}
 $dir = pathinfo($url);
 $filename = basename($dir['dirname']);
 $range = 0;
@@ -33,13 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 $opts = array(
     'http' => array(
-        'method' => "GET",
+        'method' => $_SERVER['REQUEST_METHOD'],
         'header' => $header,
         'content' => $body,
         'ignore_errors' => true,
         'follow_location' => 0
     )
 );
+
 $context = stream_context_create($opts);
 $t = time();
 $url = openssl_encrypt($url, 'aes128', md5('th3is#pas)(#3swodfrd@key'.date('(#Y--m-d-@--H-i%)')), 0, md5($t . '#this@ivEDkey', true));

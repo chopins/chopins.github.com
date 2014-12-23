@@ -41,7 +41,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 $filename = basename($dir['dirname']);
 $opts = array(
     'http' => array(
-        'method' => "GET",
+        'method' => $_SERVER['REQUEST_METHOD'],
         'header' => $header,
         'content' => $body,
         'ignore_errors' => true,
