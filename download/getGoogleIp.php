@@ -169,16 +169,16 @@ foreach ($blockList as $ipblock) {
             $ipkey = $cerInfo['extensions']['subjectKeyIdentifier'];
 
             $dms = explode(',', $d);
-            writer_a_rec($upgoogle, 'google.com', '@', 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30');
-            check_ip_domain($upgoogle, 'www.google.com', null, '1C:9B:D9:53:86:31:BD:BA:2E:84:20:34:4C:94:08:42:61:4F:BC:A5');
-            $gm_check_key = 'AD:34:D3:F1:AB:19:A3:A6:F0:95:19:F3:11:FC:60:D0:03:30:F7:F2';
+            writer_a_rec($upgoogle, 'google.com', '@', '07:9A:CE:FB:13:97:D9:C7:E2:8E:DD:3B:F2:16:36:B5:9A:EF:B6:99');
+            check_ip_domain($upgoogle, 'www.google.com', null, '9E:9F:AE:7B:6E:20:8A:68:22:ED:81:36:DA:97:5E:50:2A:73:A3:C3');
+            $gm_check_key = '4A:38:1F:6A:25:E2:0A:C9:4A:EC:05:0E:17:3C:32:FA:89:56:28:B6';
             check_ip_domain($upgoogle, 'mail.google.com', null, $gm_check_key);
             check_ip_domain($upgoogle, 'inbox.google.com', null, $gm_check_key);
-            check_ip_domain($upgoogle, 'accounts.google.com', null, '52:22:A0:83:88:16:D5:6B:52:71:93:E5:A7:A3:4D:92:04:F4:B4:B5');
-            check_ip_domain($upgoogle, 'm.google.com', null, '4B:B0:88:82:B5:30:D2:70:51:F7:A7:36:E2:0A:23:24:89:56:1F:09');
-            check_ip_domain($upgoogle, 'checkout.google.com', null, '4C:95:00:A2:42:BE:C4:46:FB:30:87:00:BB:E9:0E:0F:44:1C:31:CA');
-            check_ip_domain($upgoogle, 'talk.google.com', null, '23:A9:E5:D1:E0:C4:FC:C5:4B:AB:2D:DA:DC:9E:BC:B1:30:1B:C9:82');
-            $gc_check_key = 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30';
+            check_ip_domain($upgoogle, 'accounts.google.com', null, '58:1E:61:FF:39:01:FD:E1:43:02:05:6C:84:95:2F:2A:10:32:BD:4C');
+            check_ip_domain($upgoogle, 'm.google.com', null, '27:42:2D:12:83:34:C4:88:EE:68:1C:71:FF:E7:31:B7:5E:CA:4B:F0');
+            check_ip_domain($upgoogle, 'checkout.google.com', null, '42:2B:E3:5B:05:9F:74:E6:E5:EB:84:B9:0A:34:9D:C6:79:08:2C:F9');
+            check_ip_domain($upgoogle, 'talk.google.com', null, '07:9A:CE:FB:13:97:D9:C7:E2:8E:DD:3B:F2:16:36:B5:9A:EF:B6:99');
+            $gc_check_key = '07:9A:CE:FB:13:97:D9:C7:E2:8E:DD:3B:F2:16:36:B5:9A:EF:B6:99';
             check_ip_domain($upgoogle, 'plus.google.com', '*.google.com', $gc_check_key);
             check_ip_domain($upgoogle, 'play.google.com', '*.google.com', $gc_check_key);
             check_ip_domain($upgoogle, 'id.google.com', '*.google.com', $gc_check_key);
@@ -191,13 +191,14 @@ foreach ($blockList as $ipblock) {
             check_ip_domain($upgoogle, 'upload.google.com', '*.google.com', $gc_check_key);
             check_ip_domain($upgoogle, 'drive.google.com', '*.google.com', $gc_check_key);
             check_ip_domain($upgoogle, 'encrypted.google.com', '*.google.com', $gc_check_key);
+            check_ip_domain($upgoogle, 'translate.google.com', '*.google.com', $gc_check_key);
             check_ip_list($upgoogle, 'encrypted-tbn', 0, 3, '.google.com', '*.google.com', $gc_check_key);
             check_ip_list($upgoogle, 'drive', 0, 9, '.google.com', '*.google.com', $gc_check_key);
             writer_a_rec($upgoogle, '*.google.com', '*', 'B2:2F:73:DA:F5:BA:E8:29:2A:CF:46:FD:ED:94:86:7E:1D:D7:C6:30');
 
             writer_a_rec($clientsgoogle, '*.clients.google.com', '*');
 
-            $gst_check_key = '86:48:A7:95:30:1B:24:A6:E5:D8:E2:50:1E:A1:9B:C0:03:FE:C3:9C';
+            $gst_check_key = 'A5:F4:B3:DD:B9:29:9C:2E:50:A1:2A:17:45:3C:9C:70:01:EF:56:2A';
             writer_a_rec($gstatic, 'gstatic.com', '@', $gst_check_key);
             check_ip_domain($gstatic, 'ssl.gstatic.com', '*.gstatic.com', $gst_check_key);
             check_ip_domain($gstatic, 'fonts.gstatic.com', '*.gstatic.com', $gst_check_key);
@@ -229,7 +230,7 @@ foreach ($blockList as $ipblock) {
             check_ip_list($ggpht, 'geo', 1, 3, '.ggpht.com', '*.ggpht.com', $gst_check_key);
             writer_a_rec($ggpht, '*.ggpht.com', '*', $gst_check_key);
 
-            $gapi_check_key = '71:E5:C2:3A:56:1F:2C:AE:19:CB:51:FD:FD:FF:C4:45:D2:DD:EB:75';
+            $gapi_check_key = 'C5:88:7C:4C:4D:AC:7F:AA:48:B5:D6:2B:AA:34:DD:97:B4:2A:3B:5E';
             check_ip_domain($googleapis, 'ajax.googleapis.com', '*.googleapis.com', $gapi_check_key);
             check_ip_domain($googleapis, 'fonts.googleapis.com', '*.googleapis.com', $gapi_check_key);
             check_ip_domain($googleapis, 'chart.googleapis.com', '*.googleapis.com', $gapi_check_key);
