@@ -5,6 +5,7 @@ import thread,os
 import socket
 import struct 
 import ssl
+import pprint
  
 socket.setdefaulttimeout(2)
 
@@ -109,7 +110,7 @@ def ip2long(ipstr):
     return struct.unpack("!I", socket.inet_aton(ipstr))[0]
 
 def long2ip(ip):
-    return socket.inet_ntoa(struct.pack("!I", ip))
+    return socket.inet_ntoa(struct.pack("!L", ip))
 
 def getIpRange(iptxt):
     (ip_net, maskbit) = iptxt.split('/');
@@ -123,17 +124,25 @@ def getIpRange(iptxt):
 def connect_network(start,maxip):
     connip = start
     while connip < maxip:
-        host = long2ip(connip)
         try:
-            ca = ssl.get_server_certificate((host, 443))
-            print ca
+            host = long2ip(connip)
         except:
             pass
+        print host
+        #        try:
+        #            ca = ssl.get_server_certificate((host, 443))
+        #            print ca
+        #        except:
+        #            pass
+        #        finally:
+        
         connip = connip + 1
+        print connip
 
 def getGoogleIp():
     global ipfs,gfs,gsfs,gufs,ybfs,ggfs,cgfs,gafs,apfs,gvfs,ygfs
     blocklist = getnetblocks()
+    
     checkstroedir()
     init_write_zone()
     
@@ -143,6 +152,7 @@ def getGoogleIp():
         str = "IP BLOCK:{%s} IN { {%s} -- {%s} }" % (iptxt,startip,endip);
         ipfs.write(str)
         try:
+            print str
             thread.start_new_thread(connect_network,(start,maxip))
         except:
             pass
