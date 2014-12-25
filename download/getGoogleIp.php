@@ -166,6 +166,9 @@ foreach ($blockList as $ipblock) {
             $d = str_replace(array('DNS:', ' '), '', $cerInfo['extensions']['subjectAltName']);
             //echo "\n\033[1;32mIP $ip Valid Domain:\033[0m {$d}\n";
             fwrite($fp, "IP $ip Valid Domain: {$d}\n");
+            if(empty($cerInfo['extensions']['subjectKeyIdentifier'])) {
+                continue;
+            }
             $ipkey = $cerInfo['extensions']['subjectKeyIdentifier'];
 
             $dms = explode(',', $d);
