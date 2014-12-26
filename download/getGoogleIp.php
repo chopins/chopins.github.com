@@ -25,23 +25,25 @@ $blockList = explode('ip4:', $txt);
 array_shift($blockList);
 
 $fp = fopen("{$stroe}iplist.txt", 'w');
-
+$serid = date('YmdH');
 $default_zone = <<<EOF
 \$TTL    86400
-@       1D IN SOA @ root (
-                          42          ; serial (d. adams)
-                          3H          ; refresh 
-                          15M        ; retry      
-                          1W         ; expiry  
-                          1D )        ; minimum   
-                        1D IN NS         ns1.google.com
-                        1D IN NS         ns2.google.com
-                        1D IN NS         ns3.google.com
-                        1D IN NS         ns4.google.com
+@ 1D IN SOA @ root ( $serid  7200 36000 604800  86400 )
+@ 1D IN NS         ns1.google.com
+@ 1D IN NS         ns2.google.com
+@ 1D IN NS         ns3.google.com
+@ 1D IN NS         ns4.google.com
 
 EOF;
-$nsgoogleinfo = <<<EOF
 
+$nsgoogleinfo = <<<EOF
+\$TTL    86400
+@ 1D IN SOA @ root ( $serid  7200 36000 604800  86400 )
+@ 1D IN NS         ns1
+@ 1D IN NS         ns2
+@ 1D IN NS         ns3
+@ 1D IN NS         ns4
+        
 ns1 IN A 216.239.32.10
 ns2 IN A 216.239.34.10
 ns3 IN A 216.239.36.10
@@ -50,8 +52,8 @@ ns4 IN A 216.239.38.10
 EOF;
 
 
-$upgoogle = writer_default('google.com');
-fwrite($upgoogle, $nsgoogleinfo);
+$upgoogle = writer_google_default();
+
 
 $gstatic = writer_default('gstatic.com');
 $googleusercontent = writer_default('googleusercontent.com');
@@ -284,6 +286,13 @@ function writer_default($domain) {
     global $stroe, $default_zone;
     $writerfp = fopen("{$stroe}{$domain}.zone", 'w');
     fwrite($writerfp, $default_zone);
+    return $writerfp;
+}
+
+function writer_google_default() {
+    global $stroe, $nsgoogleinfo;
+    $writerfp = fopen("{$stroe}google.com.zone", 'w');
+    fwrite($writerfp, $nsgoogleinfo);
     return $writerfp;
 }
 
