@@ -96,4 +96,5 @@ $ORIGIN google.com.
 配置完毕后启动`named`服务，在root用户下面执行`systemctl start named`  
 这样就在本地可以把DNS服务器改成`127.0.0.1`了，如果需要给其他机器提供服务，需要打开防火墙的相关配置
 
-下载[getGoogleIp.php](http://toknot.com/download/getGoogleIp.php)获取google可用IP信息，本脚本需要系统安装有PHP并且带有PCNTL与POSIX扩展，脚本将自动生成named zone配置。
+下载[getGoogleIp.php](http://toknot.com/download/getGoogleIp.php)获取google可用IP信息，本脚本需要系统安装有PHP并且带有PCNTL与POSIX扩展，脚本将自动生成named zone配置。   
+python版本获取Google可用IP信息[getGoogleIp.py](http://toknot.com/download/getGoogleIp.py)
