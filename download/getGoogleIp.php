@@ -3,7 +3,7 @@
 date_default_timezone_set('UTC');
 
 
-$stroe = __DIR__ . '/dnsdata/';
+$stroe = $_SERVER['PWD'] . '/dnsdata/';
 if (!is_dir($stroe)) {
     mkdir($stroe);
 }

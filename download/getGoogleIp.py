@@ -286,6 +286,9 @@ def checkCert(hostip):
         
     if not cert_info:
         return
+    domain_str = str(cert_info[1])
+    ipfs.write("IP %s Valid Domain: %s\n" % (hostip, domain_str))
+    ipfs.flush()
     gr = GenerateRecord(cert_info, hostip)
     
     gcomm_sn = '8924155373108256736'
