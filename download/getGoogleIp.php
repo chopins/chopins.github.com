@@ -176,8 +176,7 @@ foreach ($blockList as $ipblock) {
             if ($r) {
                 $cont = stream_context_get_params($r);
                 $cerInfo = openssl_x509_parse($cont["options"]["ssl"]["peer_certificate"]);
-                $d = str_replace(array('DNS:', ' '), '', $cerInfo['extensions']['subjectAltName']);
-
+                
                 if (empty($cerInfo['extensions']['subjectKeyIdentifier'])) {
                     fwrite($ban_ip_fp, $ip . PHP_EOL);
                     return;
@@ -186,6 +185,8 @@ foreach ($blockList as $ipblock) {
                     fwrite($ban_ip_fp, $ip . PHP_EOL);
                     return;
                 }
+                
+                $d = str_replace(array('DNS:', ' '), '', $cerInfo['extensions']['subjectAltName']);
                 fwrite($ip_list_fp, "IP $ip Valid Domain: {$d}\n");
                 $ipkey = $cerInfo['extensions']['subjectKeyIdentifier'];
                 fclose($r);
