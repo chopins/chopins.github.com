@@ -118,7 +118,6 @@ foreach ($blockList as $ipblock) {
     stream_set_blocking($parent_sock, 0);
     for ($i = $start; $i < $maxip; $i = $i + 100) {
         if($i > 0 && $i % 1000 == 0 && all_record_ok()) {
-            print("check".PHP_EOL);
             break;
         }
         $longip_list = range($i, $i + 100);
