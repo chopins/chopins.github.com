@@ -117,6 +117,10 @@ foreach ($blockList as $ipblock) {
     list($parent_sock, $child_sock) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
     stream_set_blocking($parent_sock, 0);
     for ($i = $start; $i < $maxip; $i = $i + 100) {
+        if($i > 0 && $i % 1000 == 0 && all_record_ok()) {
+            print("check".PHP_EOL);
+            break;
+        }
         $longip_list = range($i, $i + 100);
         $dif_iplist = array_map('long2ip', $longip_list);
         $available_ip = array_diff($dif_iplist, $ban_ip_list);
@@ -171,7 +175,6 @@ foreach ($blockList as $ipblock) {
 
             $r = @stream_socket_client("ssl://$ip:443", $errno, $errstr, 3, STREAM_CLIENT_CONNECT, $g);
             if ($r) {
-
                 $cont = stream_context_get_params($r);
                 $cerInfo = openssl_x509_parse($cont["options"]["ssl"]["peer_certificate"]);
                 $d = str_replace(array('DNS:', ' '), '', $cerInfo['extensions']['subjectAltName']);
@@ -213,7 +216,7 @@ foreach ($blockList as $ipblock) {
 
 if (function_exists('pcntl_wait')) {
     $sum_ip_num = $sum_ip_num - $ban_ip_count;
-    $start_time_date = date('Y-m-d H:i:s',$start_time);
+    $start_time_date = date('Y-m-d H:i:s', $start_time);
     echo "Count Ip:$sum_ip_num,Start time:$start_time_date\n";
     file_put_contents("{$stroe}ipcount", $sum_ip_num);
     pcntl_wait($start);
@@ -244,13 +247,13 @@ function check_cert_info() {
     check_ip_domain($upgoogle, 'm.google.com', null, $google_m_key);
     check_ip_domain($upgoogle, 'checkout.google.com', null, $checkout_key);
 
-    $gc_list = array('talk', 'plus', 'play', 'id', 'groups', 'images', 'code', 'map', 'maps', 'news', 'upload', 'dirve', 'encrypted', 'translate');
+    $gc_list = array('talk', 'plus', 'play', 'id', 'groups', 'images', 'code', 'map', 'maps', 'news', 'upload', 'dirve', 'encrypted', 'translate','clients2');
     foreach ($gc_list as $domain_pre) {
         check_ip_domain($upgoogle, "{$domain_pre}.google.com", '*.google.com', $gc_check_key);
     }
 
     check_ip_list($upgoogle, 'encrypted-tbn', 0, 3, '.google.com', '*.google.com', $gc_check_key);
-    check_ip_list($upgoogle, 'drive', 0, 9, '.google.com', '*.google.com', $gc_check_key);
+
     writer_a_rec($upgoogle, '*.google.com', '*', $gc_check_key);
 
     writer_a_rec($clientsgoogle, '*.clients.google.com', '*');
@@ -320,6 +323,61 @@ function writer_google_default() {
     $writerfp = fopen("{$stroe}google.com.zone", 'w');
     fwrite($writerfp, $nsgoogleinfo);
     return $writerfp;
+}
+
+function all_record_ok() {
+    extract($GLOBALS);
+    $google_pre = array('@', '*', 'www', 'mail', 'inbox', 'accounts', 'm', 'checkout', 'talk', 'plus', 'play', 'id', 'groups', 'images', 'code', 'map', 'maps', 'news', 'upload', 'dirve', 'encrypted', 'translate','clients2');
+    $gstatic_pre = array('@', '*', 'ssl', 'fonts', 'csi', 'maps', 'www');
+    
+    foreach ($google_pre as $rec) {
+        if(!check_record_num($upgoogle, $rec)) {
+            return false;
+        }
+    }
+    foreach ($gstatic_pre as $rec) {
+        if(!check_record_num($gstatic, $rec)) {
+            return false;
+        }
+    }
+    $guc = array('@', '*');
+    foreach ($guc as $rec) {
+        if(!check_record_num($googleusercontent, $rec)){
+            return false;
+        }
+    }
+    $youtube_pre = array('@','*','www', 'accounts', 'help', 'm', 'insight');
+    foreach($youtube_pre as $rec) {
+        if(!check_record_num($youtube, $rec)) {
+            return false;
+        }
+    }
+    
+    if(!check_record_num($ggpht,'*')) {
+        return false;
+    }
+    if(!check_record_num($ggpht,'@')) {
+        return false;
+    }
+    if(!check_record_num($clientsgoogle,'*')) {
+        return false;
+    }
+    $api_pre = array('*','@','ajax', 'fonts', 'chart', 'maps', 'www', 'play', 'translate', 'youtube', 'content', 'bigcache', 'storage', 'android', 'redirector-bigcache', 'commondatastorage');
+    foreach($api_pre as $rec) {
+        if(!check_record_num($googleapis, $rec)) {
+            return false;
+        }
+    }
+    if(!check_record_num($appspot,'*')) {
+        return false;
+    }
+    if(!check_record_num($googlevideo,'*')) {
+        return false;
+    }
+    if(!check_record_num($ytimg,'*')) {
+        return false;
+    }
+    return true;
 }
 
 function writer_a_rec(&$fp, $domain, $rec = '*', $key = null) {
