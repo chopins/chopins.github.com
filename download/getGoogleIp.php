@@ -113,7 +113,7 @@ foreach ($blockList as $ipblock) {
     } else if ($pid < 0) {
         exit('pcntl error');
     }
-    $child_pool = array_fill(0, 4, 0);
+    $child_pool = array_fill(0, 5, 0);
     list($parent_sock, $child_sock) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
     stream_set_blocking($parent_sock, 0);
     for ($i = $start; $i < $maxip; $i = $i + 100) {
