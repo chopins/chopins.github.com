@@ -49,9 +49,9 @@ $context = stream_context_create($opts);
 $t = time();
 $url = openssl_encrypt($url, 'aes128', md5('th3is#pas)(#3swodfrd@key'.date('(#Y--m-d-@--H-i%)')), 0, md5($t . '#this@ivEDkey', true));
 
-$fp = fopen('http://proxy.toknot.com/down.php?url=' . urlencode(base64_encode($url)) . '&t=' . $t, 'r', false, $context);
+$ip_list_fp = fopen('http://proxy.toknot.com/down.php?url=' . urlencode(base64_encode($url)) . '&t=' . $t, 'r', false, $context);
 
-if (!$fp) {
+if (!$ip_list_fp) {
     $err = error_get_last();
     $status = explode('HTTP/1.1', $err['message']);
     $status = end($status);
@@ -60,7 +60,7 @@ if (!$fp) {
     die;
 }
 
-$stat = @stream_get_meta_data($fp);
+$stat = @stream_get_meta_data($ip_list_fp);
 
 $is_text = false;
 if (isset($stat['wrapper_data'])) {
@@ -82,7 +82,7 @@ $dkey = date('(#Y--m-d-@--H-i%)');
 $predkey = date('(#Y--m-d-@--H-i%)', strtotime('-1 Minute'));
 $nextdkey = date('(#Y--m-d-@--H-i%)', strtotime('+1 Minute'));
 
-@fpassthru($fp);
+@fpassthru($ip_list_fp);
 if($is_text) {
     $body = @openssl_decrypt(ob_get_contents(),'aes128',md5('this body passowrd'.$dkey),0,  md5($t.'this body iv', true));
     if(!$body) {
@@ -94,4 +94,4 @@ if($is_text) {
     ob_end_clean();
     echo $body;
 }
-@fclose($fp);
+@fclose($ip_list_fp);

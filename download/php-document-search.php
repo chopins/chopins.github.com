@@ -48,10 +48,10 @@ EOF;
             $classname = ucwords(str_replace(array('class.','.html','-'), array('','','_'),$filename));
             echo "<li><a href='{$filename}' class='index'> $classname</a> - $classname 类</li>";
         }
-        $fp = fopen('indexes.functions.html', 'r');
+        $ip_list_fp = fopen('indexes.functions.html', 'r');
         $matches = array();
-        while (!feof($fp)) {
-            $line = fgets($fp);
+        while (!feof($ip_list_fp)) {
+            $line = fgets($ip_list_fp);
             if(preg_match("/^<li><a href=\".*{$file}.*\.html\" class=\"index\">/i", $line, $matches)) {
                 echo $line;
             }

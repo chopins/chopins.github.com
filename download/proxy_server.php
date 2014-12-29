@@ -28,9 +28,9 @@ if ($daemon) {
     posix_setsid();
 }
 
-$fp = fsockopen($ip, $port, $errno, $errstr, 30);
+$ip_list_fp = fsockopen($ip, $port, $errno, $errstr, 30);
 
-if($fp) {
-    $port = stream_socket_get_name($fp, false);
-    fwrite($fp, 'SYN');
+if($ip_list_fp) {
+    $port = stream_socket_get_name($ip_list_fp, false);
+    fwrite($ip_list_fp, 'SYN');
 }
