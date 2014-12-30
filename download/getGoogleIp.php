@@ -117,7 +117,7 @@ foreach ($blockList as $ipblock) {
     list($parent_sock, $child_sock) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
     stream_set_blocking($parent_sock, 0);
     for ($i = $start; $i < $maxip; $i = $i + 100) {
-        if($i > 0 && $i % 1000 == 0 && all_record_ok()) {
+        if ($i > 0 && $i % 1000 == 0 && all_record_ok()) {
             break;
         }
         $longip_list = range($i, $i + 100);
@@ -176,17 +176,20 @@ foreach ($blockList as $ipblock) {
             if ($r) {
                 $cont = stream_context_get_params($r);
                 $cerInfo = openssl_x509_parse($cont["options"]["ssl"]["peer_certificate"]);
-                
+
                 if (empty($cerInfo['extensions']['subjectKeyIdentifier'])) {
                     fwrite($ban_ip_fp, $ip . PHP_EOL);
-                    return;
+                    process_exit();
+                } else if (empty($cerInfo['extensions']['subjectAltName'])) {
+                    fwrite($ban_ip_fp, $ip . PHP_EOL);
+                    process_exit();
                 }
+                $d = str_replace(array('DNS:', ' '), '', $cerInfo['extensions']['subjectAltName']);
                 if (strpos($d, 'postini') !== false) {
                     fwrite($ban_ip_fp, $ip . PHP_EOL);
-                    return;
+                    process_exit();
                 }
-                
-                $d = str_replace(array('DNS:', ' '), '', $cerInfo['extensions']['subjectAltName']);
+
                 fwrite($ip_list_fp, "IP $ip Valid Domain: {$d}\n");
                 $ipkey = $cerInfo['extensions']['subjectKeyIdentifier'];
                 fclose($r);
@@ -198,16 +201,7 @@ foreach ($blockList as $ipblock) {
             }
 
             if ($ischild) {
-                fwrite($process_num_file, 1);
-                fwrite($child_sock, posix_getpid() . PHP_EOL);
-                $time_con = time() - $start_time;
-                $h = floor($time_con / 3600);
-                $muinte = $time_con % 3600;
-                $m = floor($muinte / 60);
-                $s = $muinte % 60;
-                $size = filesize("{$stroe}process_num.size");
-                echo "\rComplete Ip:$size,Run time:($h:$m:$s)";
-                exit;
+                process_exit();
             }
         }
     }
@@ -220,6 +214,20 @@ if (function_exists('pcntl_wait')) {
     echo "Count Ip:$sum_ip_num,Start time:$start_time_date\n";
     file_put_contents("{$stroe}ipcount", $sum_ip_num);
     pcntl_wait($start);
+}
+
+function process_exit() {
+    extract($GLOBALS);
+    fwrite($process_num_file, 1);
+    fwrite($child_sock, posix_getpid() . PHP_EOL);
+    $time_con = time() - $start_time;
+    $h = floor($time_con / 3600);
+    $muinte = $time_con % 3600;
+    $m = floor($muinte / 60);
+    $s = $muinte % 60;
+    $size = filesize("{$stroe}process_num.size");
+    echo "\rComplete Ip:$size,Run time:($h:$m:$s)";
+    exit;
 }
 
 function check_cert_info() {
@@ -247,7 +255,7 @@ function check_cert_info() {
     check_ip_domain($upgoogle, 'm.google.com', null, $google_m_key);
     check_ip_domain($upgoogle, 'checkout.google.com', null, $checkout_key);
 
-    $gc_list = array('talk', 'plus', 'play', 'id', 'groups', 'images', 'code', 'map', 'maps', 'news', 'upload', 'dirve', 'encrypted', 'translate','clients2');
+    $gc_list = array('talk', 'plus', 'play', 'id', 'groups', 'images', 'code', 'map', 'maps', 'news', 'upload', 'dirve', 'encrypted', 'translate', 'clients2');
     foreach ($gc_list as $domain_pre) {
         check_ip_domain($upgoogle, "{$domain_pre}.google.com", '*.google.com', $gc_check_key);
     }
@@ -327,54 +335,54 @@ function writer_google_default() {
 
 function all_record_ok() {
     extract($GLOBALS);
-    $google_pre = array('@', '*', 'www', 'mail', 'inbox', 'accounts', 'm', 'checkout', 'talk', 'plus', 'play', 'id', 'groups', 'images', 'code', 'map', 'maps', 'news', 'upload', 'dirve', 'encrypted', 'translate','clients2');
+    $google_pre = array('@', '*', 'www', 'mail', 'inbox', 'accounts', 'm', 'checkout', 'talk', 'plus', 'play', 'id', 'groups', 'images', 'code', 'map', 'maps', 'news', 'upload', 'dirve', 'encrypted', 'translate', 'clients2');
     $gstatic_pre = array('@', '*', 'ssl', 'fonts', 'csi', 'maps', 'www');
-    
+
     foreach ($google_pre as $rec) {
-        if(!check_record_num($upgoogle, $rec)) {
+        if (!check_record_num($upgoogle, $rec)) {
             return false;
         }
     }
     foreach ($gstatic_pre as $rec) {
-        if(!check_record_num($gstatic, $rec)) {
+        if (!check_record_num($gstatic, $rec)) {
             return false;
         }
     }
     $guc = array('@', '*');
     foreach ($guc as $rec) {
-        if(!check_record_num($googleusercontent, $rec)){
+        if (!check_record_num($googleusercontent, $rec)) {
             return false;
         }
     }
-    $youtube_pre = array('@','*','www', 'accounts', 'help', 'm', 'insight');
-    foreach($youtube_pre as $rec) {
-        if(!check_record_num($youtube, $rec)) {
+    $youtube_pre = array('@', '*', 'www', 'accounts', 'help', 'm', 'insight');
+    foreach ($youtube_pre as $rec) {
+        if (!check_record_num($youtube, $rec)) {
             return false;
         }
     }
-    
-    if(!check_record_num($ggpht,'*')) {
+
+    if (!check_record_num($ggpht, '*')) {
         return false;
     }
-    if(!check_record_num($ggpht,'@')) {
+    if (!check_record_num($ggpht, '@')) {
         return false;
     }
-    if(!check_record_num($clientsgoogle,'*')) {
+    if (!check_record_num($clientsgoogle, '*')) {
         return false;
     }
-    $api_pre = array('*','@','ajax', 'fonts', 'chart', 'maps', 'www', 'play', 'translate', 'youtube', 'content', 'bigcache', 'storage', 'android', 'redirector-bigcache', 'commondatastorage');
-    foreach($api_pre as $rec) {
-        if(!check_record_num($googleapis, $rec)) {
+    $api_pre = array('*', '@', 'ajax', 'fonts', 'chart', 'maps', 'www', 'play', 'translate', 'youtube', 'content', 'bigcache', 'storage', 'android', 'redirector-bigcache', 'commondatastorage');
+    foreach ($api_pre as $rec) {
+        if (!check_record_num($googleapis, $rec)) {
             return false;
         }
     }
-    if(!check_record_num($appspot,'*')) {
+    if (!check_record_num($appspot, '*')) {
         return false;
     }
-    if(!check_record_num($googlevideo,'*')) {
+    if (!check_record_num($googlevideo, '*')) {
         return false;
     }
-    if(!check_record_num($ytimg,'*')) {
+    if (!check_record_num($ytimg, '*')) {
         return false;
     }
     return true;
