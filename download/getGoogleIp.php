@@ -218,7 +218,7 @@ foreach ($blockList as $ipblock) {
 
 if (function_exists('pcntl_wait')) {
     $sum_ip_num = $sum_ip_num - $ban_ip_count;
-    $start_time_date = date('Y-m-d H:i:s', $start_time);
+    $start_time_date = date('Y-m-d H:i:s GMT', $start_time);
     echo "Count Ip:$sum_ip_num,Start time:$start_time_date\n";
     file_put_contents("{$stroe}ipcount", $sum_ip_num);
     pcntl_wait($start);
