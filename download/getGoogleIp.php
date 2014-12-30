@@ -2,6 +2,8 @@
 <?php
 date_default_timezone_set('UTC');
 
+$per_ip_block_process_num = 5;
+
 if (!extension_loaded('openssl')) {
     exit('need openssl extension to support https' . PHP_EOL);
 }
@@ -121,7 +123,7 @@ foreach ($blockList as $ipblock) {
     } else if ($pid < 0) {
         exit('pcntl error');
     }
-    $child_pool = array_fill(0, 5, 0);
+    $child_pool = array_fill(0, $per_ip_block_process_num, 0);
     list($parent_sock, $child_sock) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
     stream_set_blocking($parent_sock, 0);
     for ($i = $start; $i < $maxip; $i = $i + 100) {
@@ -218,7 +220,7 @@ foreach ($blockList as $ipblock) {
 
 if (function_exists('pcntl_wait')) {
     $sum_ip_num = $sum_ip_num - $ban_ip_count;
-    $start_time_date = date('Y-m-d H:i:s GMT', $start_time);
+    $start_time_date = date('Y-m-d H:i:s T', $start_time);
     echo "Count Ip:$sum_ip_num,Start time:$start_time_date\n";
     file_put_contents("{$stroe}ipcount", $sum_ip_num);
     pcntl_wait($start);
