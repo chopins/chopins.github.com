@@ -399,6 +399,7 @@ function all_record_ok() {
 
 function writer_a_rec(&$fp, $domain, $rec = '*', $key = null) {
     extract($GLOBALS);
+    checkavg();
     if ($all_skip) {
         return;
     }
@@ -486,7 +487,7 @@ function check_record_num(&$fp, $rec) {
 
 function check_ip_domain(&$fp, $check, $domain = null, $key = null) {
     extract($GLOBALS);
-    usleep(100000);
+    checkavg();
     if ($all_skip) {
         return;
     }
@@ -509,5 +510,12 @@ function check_ip_domain(&$fp, $check, $domain = null, $key = null) {
     }
     if (check_ip($check)) {
         writer_a_rec($fp, $domain, $rec, $key);
+    }
+}
+
+function checkavg() {
+    $load = sys_getloadavg();
+    if($load > 95) {
+        sleep(1);
     }
 }
