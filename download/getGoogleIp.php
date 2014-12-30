@@ -2,6 +2,14 @@
 <?php
 date_default_timezone_set('UTC');
 
+if(!extension_loaded('openssl')) {
+    exit('need openssl extension to support https' . PHP_EOL);
+}
+
+if(!extension_loaded('pcntl')) {
+    exit('need pcntl extension to support multi-process'. PHP_EOL);
+}
+
 $start_time = time();
 $stroe = $_SERVER['PWD'] . '/dnsdata/';
 if (!is_dir($stroe)) {
