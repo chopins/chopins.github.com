@@ -253,6 +253,7 @@ function check_cert_info() {
     $guc_sn = '1423458468341525840';
     $gst_sn = '4629298540228774186';
     $gapi_sn = '9025913279998864902';
+    $gv_sn = '4336585734249060099';
     writer_a_rec($upgoogle, 'google.com', '@', $gc_sn);
 
     check_ip_domain($upgoogle, 'www.google.com', null, $www_sn);
@@ -317,9 +318,9 @@ function check_cert_info() {
     writer_a_rec($googleapis, '*.googleapis.com', '*', $gapi_sn);
 
     writer_a_rec($appspot, '*.appspot.com');
-
-    writer_a_rec($googlevideo, '*.googlevideo.com', '*', $gc_sn);
-
+    if(check_ip('r15---sn-i3b7sn76.googlevideo.com')) {
+        writer_a_rec($googlevideo, '*.googlevideo.com', '*', $gv_sn);
+    }
     writer_a_rec($ytimg, 'ytimg.com', '@');
     check_ip_domain($ytimg, 'i.ytimg.com', '*.ytimg.com', $gc_sn);
     check_ip_list($ytimg, 'i', 1, 4, '.ytimg.com', '*.ytimg.com', $gc_sn);
@@ -417,7 +418,16 @@ function writer_a_rec(&$fp, $domain, $rec = '*', $key = null) {
         fwrite($fp, "$rec IN A $ip\n");
     }
 }
-
+function get_domain_test_uri($domain) {
+    $test_list = array(
+        'r14---sn-i3b7sn7d.googlevideo.com'=>'crossdomain.xml',
+        'i.ytimg.com'=>'vi/3s5KDzFwRgM/default.jpg'
+    );
+    if(isset($test_list[$domain])) {
+        return $test_list[$domain];
+    }
+    return '';
+}
 function check_ip($domain) {
     extract($GLOBALS);
     $opts = array(
@@ -432,7 +442,8 @@ function check_ip($domain) {
         )
     );
     $context = stream_context_create($opts);
-    $fp = @fopen("https://$ip/", 'r', false, $context);
+    $uri = get_domain_test_uri($domain);
+    $fp = @fopen("https://$ip/$uri", 'r', false, $context);
     if (!$fp) {
         return false;
     }

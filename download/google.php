@@ -2,12 +2,13 @@
 
 date_default_timezone_set('Etc/GMT-8');
 set_time_limit(0);
-if(PHP_SAPI == 'cli') {
+if (PHP_SAPI == 'cli') {
     $url = $argv[1];
     $_SERVER['REQUEST_METHOD'] = 'GET';
 } else {
-    $url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $url = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 }
+
 $dir = pathinfo($url);
 $filename = basename($dir['dirname']);
 $range = 0;
@@ -17,7 +18,7 @@ if (isset($_SERVER['HTTP_RANGE'])) {
 
 
 $da = $connect = $cookie = '';
-$header = '';
+$header = "Host: proxy.toknot.com\r\n";
 foreach ($_SERVER as $field => $fv) {
     if ($field == 'HTTP_HOST') {
         continue;
@@ -47,10 +48,17 @@ $opts = array(
 
 $context = stream_context_create($opts);
 $t = time();
-$url = openssl_encrypt($url, 'aes128', md5('th3is#pas)(#3swodfrd@key'.date('(#Y--m-d-@--H-i%)')), 0, md5($t . '#this@ivEDkey', true));
+$key = md5('th3is#pas)(#3swodfrd@key' . date('(#Y--m-d-@--H-i%)'));
+$vi = md5($t . '#this@ivEDkey', true);
+$url = openssl_encrypt($url, 'aes128', $key , 0, $vi);
+$referer = '';
+if (isset($_SERVER['HTTP_REFERER'])) {
+    $referer = base64_encode(openssl_encrypt($_SERVER['HTTP_REFERER'], 'aes128', $key, 0, $vi));
+}
 
-$ip_list_fp = fopen('http://proxy.toknot.com/down.php?url=' . urlencode(base64_encode($url)) . '&t=' . $t, 'r', false, $context);
+$query = urlencode(base64_encode($url)) . '&t=' . $t . '&r='.$referer;
 
+$ip_list_fp = fopen('http://184.168.233.1/down.php?url=' . $query , 'r', false, $context);
 if (!$ip_list_fp) {
     $err = error_get_last();
     $status = explode('HTTP/1.1', $err['message']);
@@ -63,10 +71,11 @@ if (!$ip_list_fp) {
 $stat = @stream_get_meta_data($ip_list_fp);
 
 $is_text = false;
+
 if (isset($stat['wrapper_data'])) {
     foreach ($stat['wrapper_data'] as $i => $header) {
         @header($header);
-        if(strpos($header, 'Content-Type: text') !== false) {
+        if (strpos($header, 'Content-Type: text') !== false) {
             $is_text = true;
         }
     }
@@ -74,8 +83,7 @@ if (isset($stat['wrapper_data'])) {
     @header("Content-type: application/vnd.android.package-delta;charset=utf-8");
     @header("Accept-Ranges:bytes");
 }
-
-if($is_text) {
+if ($is_text) {
     ob_start();
 }
 $dkey = date('(#Y--m-d-@--H-i%)');
@@ -83,14 +91,14 @@ $predkey = date('(#Y--m-d-@--H-i%)', strtotime('-1 Minute'));
 $nextdkey = date('(#Y--m-d-@--H-i%)', strtotime('+1 Minute'));
 
 @fpassthru($ip_list_fp);
-if($is_text) {
-    $body = @openssl_decrypt(ob_get_contents(),'aes128',md5('this body passowrd'.$dkey),0,  md5($t.'this body iv', true));
-    if(!$body) {
-        $body = @openssl_decrypt(ob_get_contents(),'aes128',md5('this body passowrd'.$predkey),0,  md5($t.'this body iv', true));
-        if(!$body) {
-            $body = @openssl_decrypt(ob_get_contents(),'aes128',md5('this body passowrd'.$nextdkey),0,  md5($t.'this body iv', true));
+if ($is_text) {
+    $body = @openssl_decrypt(ob_get_contents(), 'aes128', md5('this body passowrd' . $dkey), 0, md5($t . 'this body iv', true));
+    if (!$body) {
+        $body = @openssl_decrypt(ob_get_contents(), 'aes128', md5('this body passowrd' . $predkey), 0, md5($t . 'this body iv', true));
+        if (!$body) {
+            $body = @openssl_decrypt(ob_get_contents(), 'aes128', md5('this body passowrd' . $nextdkey), 0, md5($t . 'this body iv', true));
         }
-    } 
+    }
     ob_end_clean();
     echo $body;
 }
