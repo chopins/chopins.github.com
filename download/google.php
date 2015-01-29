@@ -8,7 +8,9 @@ if (PHP_SAPI == 'cli') {
 } else {
     $url = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 }
-
+if(strpos($_SERVER['HTTP_HOST'],'google') !== false) {
+    file_put_contents(__DIR__.'/proxy_url.log',$url.PHP_EOL, FILE_APPEND);
+}
 $dir = pathinfo($url);
 $filename = basename($dir['dirname']);
 $range = 0;
