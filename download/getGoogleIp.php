@@ -236,7 +236,7 @@ function process_exit() {
     $m = floor($muinte / 60);
     $s = $muinte % 60;
     $size = filesize("{$stroe}process_num.size");
-    echo "\rComplete Ip:$size,Run time:($h:$m:$s)";
+    echo "Complete Ip:$size,Run time:($h:$m:$s)\r";
     exit;
 }
 
