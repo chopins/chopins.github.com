@@ -8,18 +8,21 @@ function gstat() {
     fi
     echo 'FALSE'
     FILE=$(realpath "${line:8}")
-    echo "\"$FILE\""
+    echo "\"$(basename $FILE)\""
     stat="${line:0:1}"
     if [ "$stat" == '?' ];then
         echo 'No'
-    else
-        echo "$stat"
+    elif [ "$stat" == 'M' ];then
+        echo "\"Location Modify\""
+    elif [ "$stat" == 'D' ];then
+	echo "\"Location Delete\""
     fi
     if [ -d "$FILE" ];then
         echo "Dir"
     else
         echo "File"
     fi
+    echo "\"$FILE\""
     done
 }
 LIST=$(gstat | tr -t '\n' ' ')
@@ -27,9 +30,8 @@ if [ -z "$LIST" ];then
     exit
 fi
 function gmsg() {
-    MSG=$(zenity --entry --title="Enter commit message" --text="commit message:" --entry-text "")
+    MSG=$(zenity --text-info --editable --title="Enter commit message" --text="commit message:" "")
     MST=$?
-    echo $MST
     if [ $MST -eq 1 ];then
         echo "cancel"
         return 1
@@ -56,10 +58,11 @@ function commit() {
     LIST=${LIST//|/ }
     cmd="svn ci --force-log $LIST -m\"$MSG\""
     echo "Exec:$cmd"
-    eval $cmd
+    eval $cmd;echo "100"
 }
 
-GET_EVAL="zenity --width=600 --height=500 --list --text='Commit file' --separator='|' --column='' --column='File' --column='Status' --column='File Type' --checklist --multiple $LIST"
+GET_EVAL="zenity --print-column=5 --title='Commit Change' --width=600 --height=500 --list --text='Select Commit File' --separator='|' --column='Commit' --column='File' --column='Status' --column='File Type' --column='Path' --checklist --multiple $LIST"
+
 FILE_LIST=$(eval $GET_EVAL)
 FST=$?
 
@@ -67,7 +70,7 @@ if [ $FST -eq 1 ];then
     echo "cancel"
     exit
 fi
-
+echo $FILE_LIST
 if [ -z "$FILE_LIST" ];then
     zenity --error  --text="没有选择文件,将退出"
     exit
