@@ -28,7 +28,7 @@ continue;
 fi
 
 echo -n "$DELETE_LINE : connect $IP"
-timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo " Success" || (bash -c "sed -i '${DELETE_LINE}d' $1";DELETE_LINE=$(($DELETE-1)); echo -e "\033[1;31m Timeout\033[0m")
+timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo " Success" || (bash -c "sed -i '${DELETE_LINE}d' $1";DELETE_LINE=$(($DELETE_LINE-1)); echo -e "\033[1;31m Timeout\033[0m")
 wait
 done < $1
 wait
