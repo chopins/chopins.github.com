@@ -13,7 +13,7 @@ function replace_url($matchs) {
             $matchs[2] = $fetch_info['scheme'] . '://' . $fetch_info['host'] . $path . '/' . $matchs[2];
         }
     }
-
+    $matchs[2] = date('YmdHis--') . $matchs[2];
     return $matchs[1] . $proxy_url . base64_encode($matchs[2]) . $matchs[3];
 }
 
@@ -46,7 +46,7 @@ if (isset($_GET['d'])) {
     );
     $context = stream_context_create($opts);
     $proxy_url = 'http://proxy.toknot.com/url.php?d=';
-    $fetch_url = base64_decode($_GET['d']);
+    $fetch_url = substr(base64_decode($_GET['d']), 16);
     if (strpos($fetch_url, 'http://') !== 0 && strpos($fetch_url, 'https://') !== 0) {
         $fetch_url = 'http://'.$fetch_url;
     }
@@ -114,17 +114,20 @@ if (isset($_GET['d'])) {
     <head>
         <title>Toknot Proxy</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     </head>
     <body>
         <h3><a href="http://toknot.com">Toknot</a></h3>
-        输入域名或IP:<input type="text" value="" id="d" style="width:600px;">
+        输入域名或IP:<input type="text" value="" id="d" style="width:80%;">
         <input type="button" value="Query" onclick="getIP(this);"><br />
         <script type="text/javascript">
             if (typeof btoa != 'function') {
                 alert('你的浏览器不支持 btoa 函数请更换最新版本浏览器');
             }
             function getIP(obj) {
-                var d = document.getElementById('d').value;
+                
+                var d = '<?php echo date('YmdHis--')?>' +  document.getElementById('d').value;
                 d = encodeURIComponent(btoa(d));
                 window.location.href = 'url.php?d=' + d;
             }
