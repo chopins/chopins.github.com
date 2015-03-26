@@ -1,11 +1,12 @@
 #!/bin/sh
 sttime=`date +%s`
+randstr=`cat /proc/sys/kernel/random/uuid`
 trap 'rm -rf $F1;rm -rf $F2;rm -rf $F3;wait;exit' INT 
 trap 'rm -rf $F1;rm -rf $F2;rm -rf $F3;wait;exit' TERM
 ME=`whoami`
-F1="/home/$ME/.iotest.tmp"
-F2='/tmp/.iotest.tmp'
-F3='/var/tmp/.iotest.tmp'
+F1="/home/$ME/.iotest.tmp.$randstr"
+F2="/tmp/.iotest.tmp.$randstr"
+F3="/var/tmp/.iotest.tmp.$randstr"
 size=0
 filesize=0
 LOG="/home/$ME/iotest.log"
