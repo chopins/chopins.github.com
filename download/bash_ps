@@ -1,0 +1,1 @@
+PS1="\e[44m\h \e[0m\e[45m \A \e[m\e[42m \u \e[m\e[0;34;46m \w \e[0m\`if [ \$? == 0 ];then echo \[\e[40m\] \$ \[\e[0m\];else echo \[\e[41m\] \$ \[\e[0m\];fi\` "
