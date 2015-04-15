@@ -27,7 +27,7 @@ if (!$block && is_array($block)) {
 } elseif ($block === false) {
     die("Get Google DNS record error\n");
 }
-
+print_r($block);
 
 $txt = $block[0]['txt'];
 
