@@ -27,3 +27,4 @@ categories: blog
 
 ![身份证正面](http://toknot.com/download/20141018_220627_1.jpg)   
 ![身份证背面](http://toknot.com/download/20141018_215412.jpg)
+![彩色照](http://toknot.com/download/IMG_1160.jpg)
