@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ $# -eq 0 ];then
+    echo 'error'
+    exit
+fi
+
+if [ $# -eq 1 ];then
+    D='www.google.com'
+    N=$1
+else
+   D=$1
+   N=$2
+fi
+
+RES=`nslookup $D $N`
+A=0
+for i in $RES
+do
+case $i in
+    *"#"*) A=0;continue;;
+esac
+if [ $i == 'Address:' ];then
+    A=1 
+    continue
+fi
+if [ $A -eq 1 ];then
+A=0
+echo -n "connect $i"
+timeout 5 bash -c "echo >/dev/tcp/$i/443" >/dev/null 2>&1 && echo " Success" ||  echo -e "\033[1;31m Timeout\033[0m"
+wait
+fi
+done
