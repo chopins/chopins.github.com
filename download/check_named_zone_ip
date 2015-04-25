@@ -5,7 +5,6 @@ tmp="/tmp/checkzone.tmp.$randstr"
 trap 'rm -rf $tmp;wait;exit' INT 
 trap 'rm -rf $tmp;wait;exit' TERM
 
-echo '' > $tmp
 while IFS=' ' read -ra LINE;do
 case ${LINE[0]} in
   ns1)
@@ -51,5 +50,7 @@ wait
 done < $1
 wait
 mv $tmp $1
+ef=`getenforce`
+if [ $ef != 'Disabled' ];then
 chcon -t named_zone_t $1
-
+fi
