@@ -1,0 +1,44 @@
+#!/bin/bash
+trap 'exit' INT 
+trap 'exit' TERM
+echo '' > ./cacheip.txt
+if [ $# -eq 1 ];then
+    ds=$1
+else
+    ds='www.gogle.com'
+fi
+curl -s http://public-dns.tk/nameservers.txt | while read -ra LINE;do
+    ns=$LINE
+    
+    dig $ds @$ns | while read -ra LINE;do
+        cont=0
+        F=${LINE[0]:0:1} 
+        case $F in
+            ';')
+            continue
+            ;;
+        esac
+
+        if [ -z $F ];then
+            continue
+        fi
+
+        if [ ${LINE[3]} == 'A' ];then
+            IP=${LINE[4]}
+            while read -ra LINE;do
+                 if [ "$e" == "$IP" ];then
+                    cont=1
+                fi
+            done < ./cacheip.txt
+            if [ $cont -eq 1 ];then
+                cont=0
+                continue
+            fi
+            echo $IP >> ./cacheip.txt
+            timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$IP Success"
+            wait
+        fi
+
+    done
+    wait
+done
