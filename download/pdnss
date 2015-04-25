@@ -1,6 +1,7 @@
 #!/bin/bash
-trap 'exit' INT 
-trap 'exit' TERM
+trap 'EX=1;exit' INT 
+trap 'EX=1;exit' TERM
+EX=0
 echo '' > ./cacheip.txt
 if [ $# -eq 1 ];then
     ds=$1
@@ -38,7 +39,12 @@ curl -s http://public-dns.tk/nameservers.txt | while read -ra LINE;do
             timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$IP Success"
             wait
         fi
-
+        if [ $EX -eq 1 ];then
+            exit
+        fi
     done
     wait
+    if [ $EX -eq 1 ];then
+        exit
+    fi
 done
