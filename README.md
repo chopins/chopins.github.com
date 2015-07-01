@@ -16,7 +16,9 @@ firefox nightly 版本在浏览器选项中去掉了“禁用或替换上下文�
 只能年在about:config中修改dom.event.contextmenu.enabled项来实现
 
 终端提示字符：
-`PS1="\[\033[1;32m\][\u@\h:\w]\$ \[\033[0m\]"`
+```bash
+PS1="\`if [ \$? == 0 ];then echo \#;else echo \e[41m \# \e[0m;fi\`\e[44m\h \e[0m\e[45m \A \e[m\e[42m \u \e[0m\e[46m \w \e[0m \$ "
+```
 
 firefox 禁止页面 “屏蔽鼠标选择与鼠标导航” 脚本
 ```javascript
