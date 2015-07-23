@@ -20,6 +20,13 @@ firefox nightly 版本在浏览器选项中去掉了“禁用或替换上下文�
 PS1="\`if [ \$? == 0 ];then echo \#;else echo \e[41m \# \e[0m;fi\`\e[44m\h \e[0m\e[45m \A \e[m\e[42m \u \e[0m\e[46m \w \e[0m \$ "
 ```
 
+根据文件innode删除文件:
+```bash
+ls -il  #查看目录下文件的innode号
+find ./ -inum 1234 -delete  #删除innode号为1234的文件
+```
+
+
 firefox 禁止页面 “屏蔽鼠标选择与鼠标导航” 脚本
 ```javascript
 // ==UserScript==
