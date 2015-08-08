@@ -38,5 +38,8 @@ firefox 禁止页面 “屏蔽鼠标选择与鼠标导航” 脚本
 // ==/UserScript==
 
 document.body.onselectstart = true;
-document.body.style = '-moz-user-select: text !important';
+var st = document.createElement('style');
+st.type = 'text/css';
+st.innerHTML = " * {-moz-user-select: text !important;}";
+document.getElementsByTagName('HEAD').item(0).appendChild(st);
 ```
