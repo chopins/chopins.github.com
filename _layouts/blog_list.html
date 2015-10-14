@@ -28,14 +28,7 @@
         <section id="content-list">
             <h2>全部文章</h2>
             <div>
-                <p>
-                    {% for post in site.posts %}
-                    {% if post.group != page.group %}
-                    {% capture this_year %}{{ post.date | date: "%Y" }}{% endcapture %}
-                    {% capture this_month %}{{ post.date | date: "%m" }}{% endcapture %}
-                    {% capture next_year %}{{ post.previous.date | date: "%Y" }}{% endcapture %}
-                    {% capture next_month %}{{ post.previous.date | date: "%m" }}{% endcapture %}
-                    {% if forloop.first == true %}
+                <p>{% for post in site.posts %} {% if post.group != page.group %} {% capture this_year %}{{ post.date | date: "%Y" }}{% endcapture %}{% capture this_month %}{{ post.date | date: "%m" }}{% endcapture %}{% capture next_year %}{{ post.previous.date | date: "%Y" }}{% endcapture %}{% capture next_month %}{{ post.previous.date | date: "%m" }}{% endcapture %}{% if forloop.first == true %}
                     <h3>{{this_year}}年{{this_month}}月</h3><ul>
                         {% endif %}
                         <li><a href="{{post.url}}">{{ post.title }}</a>  <small>{{ post.date | date:  "%Y-%m-%d"  }}</small></li>
@@ -51,18 +44,12 @@
                         {% if this_month != next_month %}
                     </ul>
                     <h3>{{next_year}}年{{next_month}}月</h3>
-                    <ul>
-                        {% endif %}
-                        {% endif %}
-                        {% endif %}
-                        {% endif %}
-                        {% endfor %}
+                    <ul>{% endif %}{% endif %}{% endif %} {% endif %}{% endfor %}
                     </ul></p>
             </div>
         </section>
         <footer>
-            <div style="float:right;"><a href="http://page.toknot.com/getIp.php">IP查询</a>
-				| <a href="http://page.toknot.com/ssl.php">域名SSL证书信息查询</a>
+            <div style="float:right;"><a href="http://page.toknot.com/getIp.php">IP查询</a> | <a href="http://page.toknot.com/ssl.php">域名SSL证书信息查询</a>
              
         </div>
             <p>
