@@ -35,12 +35,12 @@
                     {% capture this_month %}{{ post.date | date: "%m" }}{% endcapture %}
                     {% capture next_year %}{{ post.previous.date | date: "%Y" }}{% endcapture %}
                     {% capture next_month %}{{ post.previous.date | date: "%m" }}{% endcapture %}
-                    {% if forloop.first %}
+                    {% if forloop.first == true %}
                     <h3>{{this_year}}年{{this_month}}月</h3><ul>
                         {% endif %}
                         <li><a href="{{post.url}}">{{ post.title }}</a>  <small>{{ post.date | date:  "%Y-%m-%d"  }}</small></li>
 
-                        {% if forloop.last %}
+                        {% if forloop.last == true %}
                     </ul>
                     {% else %}
                     {% if this_year != next_year %}
