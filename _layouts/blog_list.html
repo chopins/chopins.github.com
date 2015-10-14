@@ -28,7 +28,7 @@
         <section id="content-list">
             <h2>全部文章</h2>
             <div>
-                <p><ul>
+                <p>
                     {% for post in site.posts %}
                     {% if post.group != page.group %}
                     {% capture this_year %}{{ post.date | date: "%Y" }}{% endcapture %}
@@ -51,6 +51,7 @@
                         {% if this_month != next_month %}
                     </ul>
                     <h3>{{next_year}}年{{next_month}}月</h3>
+                    <ul>
                         {% endif %}
                         {% endif %}
                         {% endif %}
