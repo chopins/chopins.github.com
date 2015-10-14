@@ -1,0 +1,7 @@
+---
+layout: category_index
+title: 齐家治国
+categories: category
+group: navigation
+pagename: story
+---
