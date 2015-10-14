@@ -32,7 +32,7 @@
                     <h3>{{this_year}}年{{this_month}}月</h3><ul>
                         {% endif %}
                         <li><a href="{{post.url}}">{{ post.title }}</a>  <small>{{ post.date | date:  "%Y-%m-%d"  }}</small></li>
-{{forloop.first}}
+{{forloop.index0}}
                         {% if forloop.last == true %}
                     </ul>
                     {% else %}
