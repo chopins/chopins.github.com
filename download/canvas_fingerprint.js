@@ -1,3 +1,10 @@
+/*
+get the browser fingerprint string
+
+@param text string
+@param basetext string
+@return string length 30 string or 0
+*/
 function getfingerprint(text,basetext) {
     try {
         var canvas = document.createElement('canvas');
@@ -14,7 +21,7 @@ function getfingerprint(text,basetext) {
         ctx.fillText(txt, 4, 17);
         var b64 = canvas.toDataURL().replace("data:image/png;base64,","");
         var bin = atob(b64);
-        var crc = encodeURIComponent(bin.slice(-16,-12)).replace(/%/g,'');
+        var crc = encodeURIComponent(bin.slice(-23,-12)).replace(/%/g,'');
         return crc;
     } catch(e) {
         return 0;
