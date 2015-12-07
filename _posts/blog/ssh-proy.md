@@ -1,0 +1,22 @@
+---
+layout: blog_contents
+title: SSH 跳板代理
+categories: blog
+---
+
+
+1. SSH 普通代理
+   ｀ssh -D7070 -N user@serveraddress｀
+    
+2. SSH 应用代理
+   当无法直接访问MySQL服务器时，可通过SSH代理来作为跳板。
+   SSH代理服务器IP是 192.168.110.1
+   MySQL服务器IP是 10.10.52.1 端口是3306
+   SSH本地代理端口是 3369
+   执行以下命令：
+   `ssh -f username@192.168.110.1 -L 3369:10.10.52.1:3306 -N`
+   以上命令是：
+   `ssh -f user-name@ssh-server-ip -L local-proxy-port:MySQL-server-ip:MySQL-server-port -N`
+   MySQL连接时使用`mysql -P 3369 -u qa -p –protocol=TCP`或者`mysql -h 127.0.0.1 -P 2001 -u qa -p`来进行连接
+   
+    
