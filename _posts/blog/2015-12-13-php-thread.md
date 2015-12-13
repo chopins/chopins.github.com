@@ -160,9 +160,10 @@ class PoolManager extends SplObjectStorage
 }
 ```
 
-用法：
+用法： 
 
 ```php
+<?php
 class myThread extends Threading
 {
     public function run()
@@ -186,6 +187,5 @@ $w->workerCall(function () { //你的业务逻辑}, $pool);
 
 //等待所有线程执行结束
 $pool->loop();
-
 
 ```
