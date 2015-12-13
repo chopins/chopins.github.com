@@ -59,7 +59,7 @@ class Threading extends Thread
      * 
      * @param mixed $value            
      */
-    final public function setData(mixed $value)
+    final public function setData($value)
     {
         $this->data = serialize($value);
     }
