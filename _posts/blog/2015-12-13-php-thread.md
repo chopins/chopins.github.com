@@ -161,6 +161,7 @@ class PoolManager extends SplObjectStorage
 ```
 
 用法：
+
 ```php
 class myThread extends Threading
 {
