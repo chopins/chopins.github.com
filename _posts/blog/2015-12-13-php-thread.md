@@ -1,5 +1,5 @@
 ---
-layout: blog_contents$
+layout: blog_contents
 title: PHP 线程管理
 categories: blog
 ---
