@@ -19,7 +19,7 @@ if(!extension_loaded('pthreads')) {
  *
  * @author chopin
  */
-class Threading extends Thead
+class Threading extends Thread
 {
 
     private $complete = false;
