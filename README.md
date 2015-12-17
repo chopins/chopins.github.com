@@ -15,6 +15,8 @@ SVN 查询脚本, 根据用户名查询指定日期或版本号以后该用户�
 firefox nightly 版本在浏览器选项中去掉了“禁用或替换上下文菜单”修改功能，
 只能在about:config中修改dom.event.contextmenu.enabled项来实现
 
+PHP 中文匹配正则,UTF-8编码 `/[\x{4e00}-\x{9fa5}]+/u`
+
 终端提示字符：
 ```bash
 PS1=" \$? \[\e[44m\] \h \[\e[0m\e[45m\] \A \[\e[m\e[42m\] \u \[\e[0m\e[46m\] \w \[\e[0m\] \$ "
