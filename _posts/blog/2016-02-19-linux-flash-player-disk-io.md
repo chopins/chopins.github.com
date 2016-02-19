@@ -10,6 +10,6 @@ categories: blog
 
   * `~/.macromedia` 目录,此为官方版本时
   * `~/.config/freshwrapper-data/` 目录，此为使用freshplayerplugin时
-  * `~/.config/google-chrome/Default/Pepper Data/Shockwave Flash/目录，此为google chrome
+  * `~/.config/google-chrome/Default/Pepper Data/Shockwave Flash/`目录，此为google chrome
   
-这这些目录软链到/dev/shm下
+将这些目录软链到/dev/shm下
