@@ -13,3 +13,5 @@ categories: blog
   * `~/.config/google-chrome/Default/Pepper Data/Shockwave Flash/`目录，此为google chrome
   
 将这些目录软链到/dev/shm下
+
+另外对于Firefox同样可以通过修改缓存到内存实现加速，方法是将在`about:config`中添加或修改`browser.cache.disk.parent_directory`项目，将其值设置成`/dev/shm/firefox-cache`即可
