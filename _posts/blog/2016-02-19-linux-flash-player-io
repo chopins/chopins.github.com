@@ -1,3 +1,0 @@
-
-解决linux flash player io 问题
-找到 ~/.macromedia 目录 或者 ~/.config/freshwrapper-data/ 目录，将这两个目录软链到/dev/shm下
