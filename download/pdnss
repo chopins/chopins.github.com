@@ -36,7 +36,7 @@ curl -s http://public-dns.tk/nameservers.txt | while read -ra LINE;do
                 continue
             fi
             echo $IP >> ./cacheip.txt
-            timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$IP Success"
+            timeout 3 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$IP Success"
             wait
         fi
         if [ $EX -eq 1 ];then

@@ -8,6 +8,8 @@ categories: blog
 
 在线程中，需要避免直接使用主线程中静态变量保存的外部资源句柄（比如mysql的长连接资源），否则容易导致段错误。对于pthreads扩展，提供了一个Pool类做此类操作
 
+[下载 threading.php 文件](http://toknot.com/download/threading.php)
+
 ```php
 <?php
 
@@ -184,7 +186,9 @@ $pool->addWorker(new myThread);
 $pool->addWorker(new myThread);
 
 $w = new Threading;
-$w->workerCall(function () { //你的业务逻辑}, $pool);
+function callFunc() {
+}
+$w->workerCall('callFunc', $pool);
 
 //等待所有线程执行结束
 $pool->loop();
