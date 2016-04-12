@@ -8,10 +8,11 @@ if [ $# -eq 1 ];then
 else
     ds='www.gogle.com'
 fi
-curl -s http://public-dns.tk/nameservers.txt | while read -ra LINE;do
+curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
     ns=$LINE
     
     dig $ds @$ns | while read -ra LINE;do
+{
         cont=0
         F=${LINE[0]:0:1} 
         case $F in
@@ -36,12 +37,13 @@ curl -s http://public-dns.tk/nameservers.txt | while read -ra LINE;do
                 continue
             fi
             echo $IP >> ./cacheip.txt
-            timeout 3 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$IP Success"
+            timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$IP Success"
             wait
         fi
         if [ $EX -eq 1 ];then
             exit
         fi
+}&
     done
     wait
     if [ $EX -eq 1 ];then
