@@ -1,10 +1,10 @@
 Toknot.com网站页面
 
 systemd 修改默认启动级别  
-修改为3运行级别  
-`ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target` 
-修改为5运行级别  
-`ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target`
+ * 修改为3运行级别  
+  `ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target` 
+ * 修改为5运行级别  
+  `ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target`
 
 
 
