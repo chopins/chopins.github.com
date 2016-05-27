@@ -1,5 +1,13 @@
 Toknot.com网站页面
 
+systemd 修改默认启动级别  
+修改为3运行级别  
+`ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target` 
+修改为5运行级别  
+`ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target`
+
+
+
 AOL reader 字体及收卷脚本
 [aol-reader-font-color.js](https://github.com/chopins/chopins.github.com/blob/master/aol-reader-font-color.js)
 
