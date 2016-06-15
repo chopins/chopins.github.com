@@ -10,7 +10,7 @@ VirtualBox 的`VBoxManage guestcontrol`能在主机上执行客户机中的命�
 
 下面以VirtualBox 5.0.16来举例说明使用方法，例如执行修改Linux Guest主机名命令方法的例子如下： 
 
-```
+```bash
 VBoxManage guestcontrol "$1" run --exe "/bin/hostname" --username root --password 123456 -- -l $1
 ```
 
@@ -29,8 +29,8 @@ VBoxManage guestcontrol "$1" run --exe "/bin/hostname" --username root --passwor
 
   以下命令是使用bash执行修改文件的操作：
   
-  ```
-  VBoxManage guestcontrol "$1" run --exe "/bin/bash" --username root --password 123456  -- -l -c "echo $1 >/etc/hostname"
-  ```
-  
+```bash
+VBoxManage guestcontrol "$1" run --exe "/bin/bash" --username root --password 123456  -- -l -c "echo $1 >/etc/hostname"
+```
+
 与上一个例子一样，`$1`是主机名，这里的命令是使用bash的`echo`命令重定向修改文件
