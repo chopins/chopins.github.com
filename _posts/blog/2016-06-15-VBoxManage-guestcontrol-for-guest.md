@@ -15,6 +15,7 @@ VBoxManage guestcontrol "$1" run --exe "/bin/hostname" --username root --passwor
 ```
 
 上面命令说明如下：
+
   * VBoxManage guestcontrol 客户机管理控制子命令
   * `"$1"`是虚拟机名字，可以通过`VBoxManage list vms`,
   * `run`是执行客户机的子命令
@@ -25,6 +26,7 @@ VBoxManage guestcontrol "$1" run --exe "/bin/hostname" --username root --passwor
      增加`-l`参数只是本人测试成功（注意:Linux `hostname`实际并没有`-l`参数），不保证任何时候都正确
   * 最后一个`$1`即为命令参数
   
+
   以下命令是使用bash执行修改文件的操作：
   
   ```
