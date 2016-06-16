@@ -38,7 +38,7 @@ VBoxManage guestcontrol "$1" run --exe "/bin/bash" --username root --password 12
 #VBoxManage其他常用命令使用  
 
 ```bash
-#完全克隆一个现有的名叫 CopyServer 虚拟机，新虚拟机名叫 NewServer
+#完全克隆一个现有的名叫 CopyServer 虚拟机，该虚拟机当前没有运行，新虚拟机名叫 NewServer
 VBoxManage clonevm "CopyServer" --mode all --name "NewServer" --register
 
 #关闭一个名叫RunningServer正在运行的虚拟机,使用高级电源管理模式关闭，这种模式会向虚拟机系统发送电源关闭信号
