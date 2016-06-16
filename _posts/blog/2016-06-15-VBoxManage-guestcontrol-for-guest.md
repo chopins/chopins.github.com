@@ -53,4 +53,10 @@ VBoxManage startvm "OneServer" --type headless
 #彻底删除一个名为 OneServer 的虚拟机
 VBoxManage unregistervm 'OneServer' --delete
 
+#显示虚拟 OneVM 的硬件信息
+ VBoxManage showvminfo OneVM
+ 
+#挂在镜像文件到虚拟机 OneServer 的光驱上，当前控制器信息可用上一个命令获取
+VBoxManage storageattach OneServer --storagectl storage_controller_1 --type dvddrive --port 1 --device 0 --medium /yourpath/VBoxGuestAdditions.iso
+
 ```
