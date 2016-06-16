@@ -34,3 +34,23 @@ VBoxManage guestcontrol "$1" run --exe "/bin/bash" --username root --password 12
 ```
 
 与上一个例子一样，`$1`是主机名，这里的命令是使用bash的`echo`命令重定向修改文件
+
+#VBoxManage其他常用命令使用  
+
+```bash
+#完全克隆一个现有的名叫 CopyServer 虚拟机，新虚拟机名叫 NewServer
+VBoxManage clonevm "CopyServer" --mode all --name "NewServer" --register
+
+#关闭一个名叫RunningServer正在运行的虚拟机,使用高级电源管理模式关闭，这种模式会向虚拟机系统发送电源关闭信号
+VBoxManage controlvm "RunningServer" acpipowerbutton
+
+#直接断电关闭一个名为 RunningServer 的虚拟机
+VBoxManage controlvm "RunningServer" poweroff
+
+#无界面启动一个名为 OneServer 虚拟机
+VBoxManage startvm "OneServer" --type headless
+
+#彻底删除一个名为 OneServer 的虚拟机
+VBoxManage unregistervm 'OneServer' --delete
+
+```
