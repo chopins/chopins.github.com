@@ -79,7 +79,7 @@ sudo rm -f /EMPTY
 
 
 Windows系统： 
-需要下载Sysinternals Suite（https://technet.microsoft.com/en-us/sysinternals/bb842062.aspx），也可以单独下载SDelete v1.61（https://technet.microsoft.com/en-us/sysinternals/bb897443），下载完成后，将Sysinternals Suite放在虚拟机内
+需要下载[Sysinternals Suite](https://technet.microsoft.com/en-us/sysinternals/bb842062.aspx)，也可以单独[下载SDelete v1.61](https://technet.microsoft.com/en-us/sysinternals/bb897443)，下载完成后，将Sysinternals Suite放在虚拟机内
 
 ```
 sdelete –z （可将Sysinternals Suite里面的sdelete.exe放在虚拟机的C盘，然后CMD运行 “c:\ sdelete –z”）
