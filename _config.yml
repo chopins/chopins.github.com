@@ -3,5 +3,3 @@ auto: true
 markdown: kramdown
 pygments: true
 permalink: /:categories/:title.html
-paginate: 20
-paginate_path: /blog:num.html
