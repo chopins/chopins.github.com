@@ -10,7 +10,12 @@ else
 fi
 curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
     ns=$LINE
-    
+    NS_IPV6=`echo $ns | grep ':'`
+    NS_CHK_IPV6=$?
+    if [ $NS_CHK_IPV6 -eq 0 ];then
+        continue
+    fi
+
     dig $ds @$ns | while read -ra LINE;do
 {
         cont=0
@@ -27,8 +32,13 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
 
         if [ ${LINE[3]} == 'A' ];then
             IP=${LINE[4]}
+            IPV6=`echo $IP | grep ':'`
+            CHK_IPV6=$?
+            if [ $CHK_IPV6 -eq 0 ];then
+               continue
+            fi
             while read -ra LINE;do
-                 if [ "$e" == "$IP" ];then
+                 if [ "$LINE" == "$IP" ];then
                     cont=1
                 fi
             done < ./cacheip.txt
