@@ -85,5 +85,9 @@ Windows系统：
 sdelete –z （可将Sysinternals Suite里面的sdelete.exe放在虚拟机的C盘，然后CMD运行 “c:\ sdelete –z”）
 ```
 
+最后执行下面的命令压缩虚拟机磁盘文件：
 
+```
 VBoxManage modifyhd mydisk.vdi –compact 
+```
+
