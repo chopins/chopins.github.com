@@ -2,4 +2,4 @@ baseurl: /
 auto: true
 markdown: kramdown
 pygments: true
-
+permalink: /:categories/:title.html
