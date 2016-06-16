@@ -1,6 +1,6 @@
 ---
 layout: blog_contents
-title: VirtualBox 的 VBoxManage guestcontrol 命令使用
+title: VirtualBox 的 VBoxManage 相关命令的使用方法
 categories: blog
 ---
 
@@ -35,7 +35,7 @@ VBoxManage guestcontrol "$1" run --exe "/bin/bash" --username root --password 12
 
 与上一个例子一样，`$1`是主机名，这里的命令是使用bash的`echo`命令重定向修改文件
 
-#VBoxManage其他常用命令使用  
+__VBoxManage其他常用命令使用__ 
 
 ```bash
 #完全克隆一个现有的名叫 CopyServer 虚拟机，该虚拟机当前没有运行，新虚拟机名叫 NewServer
@@ -61,7 +61,7 @@ VBoxManage storageattach OneServer --storagectl storage_controller_1 --type dvdd
 
 ```
 
-#如何减小VirtualBox虚拟硬盘文件的大小 
+__如何减小VirtualBox虚拟硬盘文件的大小__ 
 
 
 
