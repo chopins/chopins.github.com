@@ -60,3 +60,30 @@ VBoxManage unregistervm 'OneServer' --delete
 VBoxManage storageattach OneServer --storagectl storage_controller_1 --type dvddrive --port 1 --device 0 --medium /yourpath/VBoxGuestAdditions.iso
 
 ```
+
+#如何减小VirtualBox虚拟硬盘文件的大小 
+
+
+
+1. 碎片整理
+
+第一步要做的是碎片整理，打开虚拟机，执行下面的命令：
+
+Linux系统：
+
+```
+sudo dd if=/dev/zero of=/EMPTY bs=1M
+
+sudo rm -f /EMPTY
+```
+
+
+Windows系统： 
+需要下载Sysinternals Suite（https://technet.microsoft.com/en-us/sysinternals/bb842062.aspx），也可以单独下载SDelete v1.61（https://technet.microsoft.com/en-us/sysinternals/bb897443），下载完成后，将Sysinternals Suite放在虚拟机内
+
+```
+sdelete –z （可将Sysinternals Suite里面的sdelete.exe放在虚拟机的C盘，然后CMD运行 “c:\ sdelete –z”）
+```
+
+
+VBoxManage modifyhd mydisk.vdi –compact 
