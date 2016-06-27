@@ -88,6 +88,6 @@ sdelete –z （可将Sysinternals Suite里面的sdelete.exe放在虚拟机的C�
 最后执行下面的命令压缩虚拟机磁盘文件：
 
 ```
-VBoxManage modifyhd mydisk.vdi –compact 
+VBoxManage modifyhd mydisk.vdi --compact 
 ```
 
