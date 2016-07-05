@@ -26,9 +26,9 @@
         </header>
         {% include themes/nav.html %}
         <section>
-            <h2>{{page.title}}</h2>
+            <h2 class="blog-title">{{page.title}}</h2>
            
-            <p>{{ page.date | date:  "%Y-%m-%d"  }}</p>
+            <p class="blog-base-info">{{ page.date | date:  "%Y-%m-%d"  }}/ {{ page.category }}</p>
             <div id="content">
                 {{ content }}
             </div>
