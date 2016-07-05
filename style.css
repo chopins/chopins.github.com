@@ -136,3 +136,4 @@ header ul {list-style: none;display: inline-block;font-size: 18px;font-weight: b
 header ul li {display: inline;margin: 2px 10px;}
 blockquote {padding-left: 8px;background-color: #EFFFFF; border-left: 5px solid #0099cc; margin:5px;}
 #content,#disqus_thread {  padding: 15px 50px;}
+#index section div { padding 10px 20px}
