@@ -70,7 +70,16 @@ section div {
 section div + div {
     margin-top: 20px;
 }
-
+body section h2 {
+    background: #ffffff none repeat scroll 0 0;
+    border: 1px solid #ccc;
+    margin: 4px;
+    padding: 20px 10px;
+}
+body section p {
+    margin: 2px;
+    padding: 5px 15px;
+}
 footer {
     margin-top: 16px;
 }
