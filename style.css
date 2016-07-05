@@ -12,9 +12,9 @@ body {
     color: #444444;
     font-family: 'Trebuchet MS','Geneva CE',lucida,sans-serif;
     font-size: 14px;
-    line-height: 200%;
+    line-height: 150%;
 }
-br {line-height: 40px;}
+br {line-height: 60px;}
 nav {
     position: fixed;
     top: 0;
