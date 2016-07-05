@@ -70,7 +70,7 @@ section div {
 section div + div {
     margin-top: 20px;
 }
-#content-list + h2,.blog-title {
+#content-list > h2,.blog-title {
     background-color: #e6f9fa;
     border: 1px solid #c6f9fc;
     margin: 0;
@@ -137,4 +137,4 @@ header ul {list-style: none;display: inline-block;font-size: 18px;font-weight: b
 header ul li {display: inline;margin: 2px 10px;}
 blockquote {padding-left: 8px;background-color: #EFFFFF; border-left: 5px solid #0099cc; margin:5px;}
 #content,#disqus_thread {  padding: 15px 50px;}
-#content-list + div,#index section div { padding:10px 20px;}
+#content-list > div,#index section div { padding:10px 20px;}
