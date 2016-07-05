@@ -70,7 +70,7 @@ section div {
 section div + div {
     margin-top: 20px;
 }
-.blog-title {
+#content-list h2,.blog-title {
     background-color: #e6f9fa;
     border: 1px solid #c6f9fc;
     margin: 0;
