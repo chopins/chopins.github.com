@@ -12,8 +12,9 @@ body {
     color: #444444;
     font-family: 'Trebuchet MS','Geneva CE',lucida,sans-serif;
     font-size: 14px;
-    line-height: 24px;
+    line-height: 200%;
 }
+br {line-height: 40px;}
 nav {
     position: fixed;
     top: 0;
