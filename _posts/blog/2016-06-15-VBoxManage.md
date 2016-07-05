@@ -71,7 +71,7 @@ __如何减小VirtualBox虚拟硬盘文件的大小__
 
 Linux系统：
 
-```
+```bash
 sudo dd if=/dev/zero of=/EMPTY bs=1M
 
 sudo rm -f /EMPTY
