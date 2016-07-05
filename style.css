@@ -76,6 +76,7 @@ body section h2 {
     margin: 4px;
     padding: 20px 10px;
     color:#555;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 body section p {
     margin: 2px;
