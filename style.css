@@ -70,7 +70,7 @@ section div {
 section div + div {
     margin-top: 20px;
 }
-body section h2 {
+.blog-title {
     background: #cceaf4 none repeat scroll 0 0;
     border: 1px solid #ccc;
     margin: 4px;
@@ -78,7 +78,7 @@ body section h2 {
     color:#555;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
-body section p {
+.blog-base-info {
     margin: 2px;
     padding: 5px 15px;
 }
