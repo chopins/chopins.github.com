@@ -61,7 +61,7 @@ function clearTimeout(Generator $gen) {
  * 
  * @global SplObjectStorage $timeoutQueue
  * @param callable $callback
- * @param int $time
+ * @param int $time millisecond
  * @return Generator
  */
 function setTimeout(callable $callback, int $time) : Generator{
@@ -81,6 +81,10 @@ function setTimeout(callable $callback, int $time) : Generator{
     $timeoutQueue->attach($gen);
     return $gen;
 }
+
+setTimeout(function() {
+echo '3 second call';
+},3000);
 ```
 
 
