@@ -4,12 +4,12 @@ title: php setTimeout 函数
 categories: blog
 ---
 
-#技术要点
+==技术依赖==
 
  * 需要PHP 5.5 以上，支持生成器
  * 需要支持 ticks
  
-#实现代码
+==实现代码==
 
 ```php
 
@@ -67,6 +67,6 @@ function setTimeout(callable $callback, int $time) : Generator{
     $timeoutQueue->attach($gen);
     return $gen;
 }
-
+```
 
 
