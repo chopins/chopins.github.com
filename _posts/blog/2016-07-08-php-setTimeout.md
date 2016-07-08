@@ -4,12 +4,12 @@ title: php setTimeout 函数
 categories: blog
 ---
 
-==技术依赖==
+__技术依赖__
 
  * 需要PHP 5.5 以上，支持生成器
  * 需要支持 ticks
  
-==实现代码==
+__实现代码__
 
 ```php
 
