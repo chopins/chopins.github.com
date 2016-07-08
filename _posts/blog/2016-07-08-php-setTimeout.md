@@ -31,6 +31,20 @@ register_tick_function(function() {
     }
 });
 
+register_shutdown_function(function() {
+    global $timeoutQueue;
+    while($timeoutQueue->count()) {
+        foreach ($timeoutQueue as $gen) {
+            $v = $gen->current();
+            if (is_callable($v)) {
+                $v();
+                $timeoutQueue->detach($gen);
+            }
+            $gen->next();
+        }
+        usleep(1000);
+    }
+});
 
 /**
  * 
