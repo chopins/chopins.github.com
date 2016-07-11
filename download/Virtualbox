@@ -1,0 +1,90 @@
+#!/bin/bash
+# template must install VirtualBox VBoxGuestAdditions
+
+CopyServerPWD='123456'
+
+function template()
+{
+    exit
+}
+function vmlist()
+{
+    echo 'Current has running vm:'
+    running=`VBoxManage list runningvms`
+    echo $running
+    echo 'Current has closed vm:'
+    all=`VBoxManage list vms`
+    if [ ! -z $running ];then
+        running="\n$running"
+    fi
+    echo -e "$all$running"|sort|uniq -u
+}
+function usage()
+{
+    echo "specify one vm name, usage $1 $2 VM_NAME"
+}
+function clone()
+{
+    if [ $# -eq 0 ];then
+        echo 'clone template VM that name is "CopyServer"'
+        usage $0 $FUNCNAME
+        exit
+    fi
+    VBoxManage clonevm "CopyServer" --mode all --name "$1" --register
+}
+
+function close()
+{
+    if [ $# -eq 0 ];then
+        echo 'close a VM'
+        usage $0 $FUNCNAME
+        echo 'Current has running vms:'
+        VBoxManage list runningvms
+        exit
+    fi
+    VBoxManage controlvm "$1" acpipowerbutton
+}
+
+function ip()
+{
+    if [ $# -eq 0 ];then
+        echo 'Get a VM ip address list'
+        usage $0 $FUNCNAME
+        vmlist
+        exit
+    fi
+    VBoxManage guestcontrol "$1" run --exe "/bin/hostname" --username root --password $CopyServerPWD -- -l -I
+}
+
+function chgname()
+{
+    if [ $# -eq 0 ];then
+        echo 'modify host name for vm'
+        usage $0 $FUNCNAME
+        vmlist
+        exit
+    fi
+    VBoxManage guestcontrol "$1" run --exe "/bin/hostname" --username root --password $CopyServerPWD -- -l $1
+    VBoxManage guestcontrol "$1" run --exe "/bin/bash" --username root --password $CopyServerPWD  -- -l -c "echo $1 >/etc/hostname"
+}
+
+function start()
+{
+    if [ $# -eq 0 ];then
+        echo 'start one vm'
+        usage $0 $FUNCNAME
+        vmlist
+        exit
+    fi
+
+    VBoxManage startvm "$1" --type headless >> /home/dev/bin/startvm.log
+}
+if [ $# -lt 1 ];then
+    echo "Usage: $0 clone|close|ip|chgname|start"
+    exit
+fi
+case $1 in
+    *)
+    $1 $2
+    ;;
+esac
