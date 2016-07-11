@@ -1,0 +1,22 @@
+---
+layout: blog_contents
+title: 无运维企业代码上线部署脚本
+categories: blog
+---
+
+脚本功能：
+
+ * 脚本提供多服务器部署功能
+ * 提供按 svn 版本号进行部署
+ * 提供部署日志记录
+
+配置（修改脚本）：
+
+  * `rev_url` svn 服务器地址，不包括路径
+  * `suser` 部署所使用的用户，需要能SSH登录并进行操作，需要能读写部署目标文件夹
+  * `deploy` 部署文件上传文件夹，必须预先建立，`suser` 能够读写,并且在该目录下创建`suser`同名目录
+  * `sip`   部署服务器IP列表，这些服务器需要有相同的配置
+  * `approot`   部署目标路径
+  * `svn_start_path` 部署路径在SVN库中的起始路径，避免部署多较多层级的路径中
+
+[脚本下载](http://toknot.com/download/fileup.py)
