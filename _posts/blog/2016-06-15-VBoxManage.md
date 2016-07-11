@@ -91,3 +91,4 @@ sdelete –z （可将Sysinternals Suite里面的sdelete.exe放在虚拟机的C�
 VBoxManage modifyhd mydisk.vdi --compact 
 ```
 
+[一个Virtualbox常用功能管理集合脚本](http://toknot.com/download/Virtualbox)
