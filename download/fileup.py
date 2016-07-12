@@ -8,6 +8,9 @@ rev_url ='svn://127.0.0.1'
 #ssh user
 suser='root'
 
+#upload file after run this program
+deploy_exec=''
+
 #upload file directroy in deploy server
 deploy = '/'
 #deploy server ip
@@ -148,5 +151,8 @@ for ip in sip:
     scmd = 'tar xfz %s -C %s' % (remote_file, approot)
     st = callcmd('ssh %s %s' % (suh, scmd))
     logs.w('deploy file '+ st)
+    if deploy_exec:
+        st = callcmd('ssh %s %s' % (suh, deploy_exec))
+        logs.w('run deploy process '+ st)
 
 logs.w('deploy end')
