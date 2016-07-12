@@ -3,7 +3,7 @@
 import sys,os,time,getpass
 
 #subversion revision url address
-rev_url ='svn://123.57.181.139'
+rev_url ='svn://127.0.0.1'
 
 #ssh user
 suser='root'
