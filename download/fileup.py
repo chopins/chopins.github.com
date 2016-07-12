@@ -28,7 +28,7 @@ approot='/var/www/allread'
 #
 # approot = '/var/www/siteapp/pcweb'
 # svn_start_path = 'commpany/site/pcweb'
-svn_start_path = 'b2b2c'
+svn_start_path = 'web'
 
 LOCAL_DOW_PATH= '/'+ getpass.getuser() +'/.svndeploy'
 SVN_PATH = ''
