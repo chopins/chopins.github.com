@@ -18,6 +18,9 @@ Toknot PHP 网站开发框架
 # 联系
 
 Email:[hark110@163.com](mailto:hark110@163.com) 
+<style>
+img {width:100px;height:100px;}
+</style>
 微信号：![weixin-qr](http://toknot.com/download/weixin-qr.jpeg)
 
 或在本页面留言
