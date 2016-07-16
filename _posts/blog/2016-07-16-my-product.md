@@ -6,7 +6,8 @@ categories: blog
 
 # 产品
 
-Toknot 多用户商城:类天猫站产品
+Toknot 多用户商城:类天猫站产品 
+Toknot PHP 网站开发框架
 
 # 服务
 
@@ -16,6 +17,7 @@ Toknot 多用户商城:类天猫站产品
 
 # 联系
 
-Email:hark110@163.com
+Email:[hark110@163.com](mailto:hark110@163.com) 
+微信号：![weixin-qr](http://toknot.com/download/weixin-qr.jpeg)
 
 或在本页面留言
