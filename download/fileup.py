@@ -3,21 +3,21 @@
 import sys,os,time,getpass
 
 #subversion revision url address
-rev_url ='svn://127.0.0.1'
+rev_url ='svn://123.57.181.139'
 
 #ssh user
-suser='root'
+suser='xiaoxx'
 
 #upload file after run this program
 deploy_exec=''
 
 #upload file directroy in deploy server
-deploy = '/'
+deploy = '/home'
 #deploy server ip
-sip = ['192.168.1.58']
+sip = ['115.28.20.130']
 
 #deploy root directroy
-approot='/var/www/allread'
+approot='/data/www/'
 
 #your web root code in revision directroy, it is relative path
 # eg: webroot  /var/www/siteapp/pcweb
@@ -28,9 +28,10 @@ approot='/var/www/allread'
 #
 # approot = '/var/www/siteapp/pcweb'
 # svn_start_path = 'commpany/site/pcweb'
-svn_start_path = 'web'
-
-LOCAL_DOW_PATH= '/'+ getpass.getuser() +'/.svndeploy'
+svn_start_path = 'b2b2c'
+user = getpass.getuser()
+home = '/root' if user is 'root' else '/home/'+user
+LOCAL_DOW_PATH= home +'/.svndeploy'
 SVN_PATH = ''
 if not SVN_PATH:
     for p in ['usr/bin/svn','/usr/local/subversion/bin/svn','/opt/subversion/bin/svn','/bin/svn','/usr/local/bin/svn']:
@@ -62,8 +63,13 @@ def callcmd(cmd):
 
 def savelast(v):
     lastfile = LOCAL_DOW_PATH+'/last50'
-    lines = open(lastfile).readlines()
-    rl = len(lines)
+    if os.path.isfile(lastfile):
+        lines = open(lastfile,'r+').readlines()
+        rl = len(lines)
+    else:
+        rl = 0
+        lines = []
+
     if rl >= 50:
         lines = lines[1:]
         lines.append(v)
@@ -81,6 +87,8 @@ class savelog():
     def w(self,msg):
         txt = '[ %s ] %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S'),msg)
         self.fp.write(txt)
+    def p(self,msg):
+        print(msg)
 
 logs = savelog()
 
@@ -124,7 +132,7 @@ for r in rev:
         if not os.path.isdir(localpath):
             os.makedirs(localpath)
 
-        cmd = '%s export --depth=empty %s%s@%s %s%s' % (SVN_PATH,rev_url,filepath,r,localwk,filepath)
+        cmd = '%s export --force --depth=empty %s%s@%s %s%s' % (SVN_PATH,rev_url,filepath,r,localwk,filepath)
         st = callcmd(cmd)
 
         logs.w('export %s %s' % (filepath, st))
@@ -136,7 +144,7 @@ tarfile = os.path.join(LOCAL_DOW_PATH, nowtime+'.tar.gz')
 if svn_start_path:
     tar_work = os.path.join(localwk,svn_start_path)
 os.chdir(tar_work)
-
+callcmd('chmod -R 777 ./')
 st = callcmd('tar cfz %s *' % tarfile)
 logs.w('tar file %s %s' % (tarfile,st))
 
@@ -145,14 +153,17 @@ remote_file = os.path.join(deploy_path, nowtime + '.tar.gz')
 savelast(nowtime)
 for ip in sip:
     suh = '%s@%s' % (suser,ip)
+    logs.p('start upload file(maybe need password for ssh user)')
     st = callcmd('scp %s %s:%s' % (tarfile,suh, remote_file))
     logs.w('scp %s to %s %s' % (tarfile,remote_file, st))
 
-    scmd = 'tar xfz %s -C %s' % (remote_file, approot)
-    st = callcmd('ssh %s %s' % (suh, scmd))
+    scmd = 'sudo tar xfz %s -C %s' % (remote_file, approot)
+    logs.p('start decompresssion file(maybe need password for ssh user)')
+    st = callcmd('ssh -t %s %s' % (suh, scmd))
     logs.w('deploy file '+ st)
     if deploy_exec:
-        st = callcmd('ssh %s %s' % (suh, deploy_exec))
+        logs.p('start exec your server script(maybe need password for ssh user)')
+        st = callcmd('ssh -t %s %s' % (suh, deploy_exec))
         logs.w('run deploy process '+ st)
 
 logs.w('deploy end')
