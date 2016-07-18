@@ -3,7 +3,7 @@
 import sys,os,time,getpass
 
 #subversion revision url address
-rev_url ='svn://123.57.181.139'
+rev_url ='svn://127.0.0.1'
 
 #ssh user
 suser='xiaoxx'
@@ -14,10 +14,10 @@ deploy_exec=''
 #upload file directroy in deploy server
 deploy = '/home'
 #deploy server ip
-sip = ['115.28.20.130']
+sip = ['192.168.1.1']
 
 #deploy root directroy
-approot='/data/www/'
+approot='/your-servr/path'
 
 #your web root code in revision directroy, it is relative path
 # eg: webroot  /var/www/siteapp/pcweb
@@ -28,7 +28,7 @@ approot='/data/www/'
 #
 # approot = '/var/www/siteapp/pcweb'
 # svn_start_path = 'commpany/site/pcweb'
-svn_start_path = 'b2b2c'
+svn_start_path = 'your-path'
 user = getpass.getuser()
 home = '/root' if user is 'root' else '/home/'+user
 LOCAL_DOW_PATH= home +'/.svndeploy'
