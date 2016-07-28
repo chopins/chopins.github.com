@@ -17,7 +17,7 @@ deploy = '/home'
 sip = ['192.168.1.1']
 
 #deploy root directroy
-approot='/your-servr/path'
+approot='/data/www/'
 
 #your web root code in revision directroy, it is relative path
 # eg: webroot  /var/www/siteapp/pcweb
@@ -28,7 +28,7 @@ approot='/your-servr/path'
 #
 # approot = '/var/www/siteapp/pcweb'
 # svn_start_path = 'commpany/site/pcweb'
-svn_start_path = 'your-path'
+svn_start_path = 'website'
 user = getpass.getuser()
 home = '/root' if user is 'root' else '/home/'+user
 LOCAL_DOW_PATH= home +'/.svndeploy'
@@ -119,12 +119,14 @@ os.chdir(LOCAL_DOW_PATH)
 
 for r in rev:
     cmd = '%s log -v -r %s %s' % (SVN_PATH,r,rev_url)
+    logs.p(cmd)
     tmp = os.popen(cmd).readlines()
     log = tmp[3:(len(tmp)-3)]
     for logline in log:
-        reverse = logline.strip()[::-1]
-        idx = reverse.find(' ')
-        filepath = reverse[0:idx][::-1]
+        reverse = logline.strip().split(' ')
+        if reverse[0] == 'D':
+            continue
+        filepath = reverse[1]
         dirpath = os.path.dirname(filepath)
 
         localpath = localwk+dirpath
