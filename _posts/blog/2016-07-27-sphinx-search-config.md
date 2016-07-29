@@ -5,7 +5,7 @@ categories: blog
 ---
 
 sphinx 是一个全文搜索引擎，按官方文档，其支持mysql mssql等数据源。
-官方文档地址(http://sphinxsearch.com/docs/current.html)
+[官方文档地址](http://sphinxsearch.com/docs/current.html)
 
 #sphinx 运行机制
 sphinx 主要包括两部分：搜索服务与索引创建工具。运行安装目录下的`bin/searchd`即可启动搜索的后台运行服务。运行安装目录下的`bin/indexer`即可开始创建索引。
