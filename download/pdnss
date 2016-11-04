@@ -2,11 +2,20 @@
 trap 'EX=1;exit' INT 
 trap 'EX=1;exit' TERM
 EX=0
-echo '' > ./cacheip.txt
+CACHE=$(dirname $(realpath $0))/cacheip.txt
+echo '' > $CACHE
 if [ $# -eq 1 ];then
     ds=$1
+    IFS='.' read -ra NSP <<< "$ds"
+    if [ ${#NSP[@]} -lt 3 ];then
+        A= '@'
+    else
+       SUB=$[${#NS[@]} - 2]
+       A=${NSP[@]:0:$SUB}
+    fi
 else
     ds='www.gogle.com'
+    A='*'
 fi
 curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
     ns=$LINE
@@ -16,7 +25,7 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
         continue
     fi
 
-    dig $ds @$ns | while read -ra LINE;do
+    dig $ds @$ns +tcp | while read -ra LINE;do
 {
         cont=0
         F=${LINE[0]:0:1} 
@@ -37,17 +46,14 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
             if [ $CHK_IPV6 -eq 0 ];then
                continue
             fi
-            while read -ra LINE;do
-                 if [ "$LINE" == "$IP" ];then
-                    cont=1
-                fi
-            done < ./cacheip.txt
-            if [ $cont -eq 1 ];then
-                cont=0
+            grep -q $IP $CACHE
+            RET=$?
+            if [ $RET -eq 0 ];then
                 continue
             fi
-            echo $IP >> ./cacheip.txt
-            timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$IP Success"
+            echo $IP >> $CACHE
+
+            timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$A IN A $IP"
             wait
         fi
         if [ $EX -eq 1 ];then

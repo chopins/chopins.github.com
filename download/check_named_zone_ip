@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if [ $# -eq 0 ];then
+echo "Error:no specify zone file"
+echo "Usage $0 /var/lib/named/check-domain.zone"
+exit
+fi
 randstr=`cat /proc/sys/kernel/random/uuid`
 tmp="/tmp/checkzone.tmp.$randstr"
 
