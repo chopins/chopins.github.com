@@ -10,7 +10,7 @@ if [ $# -eq 1 ];then
     if [ ${#NSP[@]} -lt 3 ];then
         A= '@'
     else
-       SUB=$[${#NS[@]} - 2]
+       SUB=$[${#NSP[@]} - 2]
        A=${NSP[@]:0:$SUB}
     fi
 else
