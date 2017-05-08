@@ -23,6 +23,7 @@ pagename: index
             <p><a id="fork"  href="https://github.com/chopins/toknot/"><span>Fork ToKnot</span></a></p>
             <p><a href="https://github.com/chopins/toknot/">Fork ToKnot on Github</a></p>
             <p>交流QQ群: 32461044</p>
+            <p><a href="javascript:void(0)" onmouseover="document.getElementById('qrcode').style.display='block';" onmouseout="document.getElementById('qrcode').style.display='none';">微信公众号</a><img id="qrcode" src="/download/qrcode_for_gh_0c1967ad80bf_258.jpg" style="display: none;position: absolute;margin-left: 80px;"></p>
             <p>联系我: <a id="m-c" href="javascript:void(0)" target="_blank">请升级浏览器</a></p>
         </div>
     </section>
@@ -31,13 +32,17 @@ pagename: index
         <div><p><a href="https://github.com/chopins/toknot/">下载框架</a>保存到一个目录，然后使用Toknot提供的工具在命令行下创建应用。命令创建方法如下:
 </p>
 <pre>
-php /your_path/Toknot/Toknot.php CreateApp
+php /your_path/vendor/toknot/initapp.php
 </pre>
-<p>上面的交互式命令会帮助创建一个应用框架</p>
+<p> 执行上面的交互式命令会帮助创建一个基本应用框架</p>
+<pre>
+php /your_path/app/tool/index.php
+</pre>
+<p> 通过执行上面的命令，可能进行数据库，模板等相关操作，默认显示帮助信息</p>
 <p>更多信息见<a href="/category/tutorials/">教程文档</a></p>
 </div>
     </section>
-    <section id="features">
+<!--    <section id="features">
         <h2>特性</h2>
         <div>
             <p><ul>
@@ -57,7 +62,7 @@ php /your_path/Toknot/Toknot.php CreateApp
             <li>Provided a javascript developement library and it lightweight, only a objec of javascript, fit programer</li>
 	    </ul></p>
         </div>
-    </section>
+    </section>-->
     <section id="requirements">
         <h2>Requirements</h2>
         <div>
