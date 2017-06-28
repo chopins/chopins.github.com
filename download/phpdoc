@@ -1,0 +1,53 @@
+#!/bin/bash
+
+#set your default locale language
+LAN='zh'
+
+if [ $# -eq 0 ];then
+   echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer'
+   echo '      phpdoc up [YOUR_PATH]  update local php doc'
+   echo '      phpdoc [YOUR_PATH]     update local php doc'
+   exit 255 
+fi
+if [ $# -eq 1 ];then
+    PHP_DOC_WEB=$(realpath $1)
+    OP='up'
+elif [ $# -ge 2 ];then
+    OP=$1
+    PHP_DOC_WEB=$(realpath $2)
+fi
+
+if [ $OP != 'up' ] && [ $OP != 'co' ];then
+   echo 'Usage phpdoc co [YOUR_PATH]     create local php doc viewer'
+   echo '      phpdoc up [YOUR_PATH]     update local php doc'
+   echo '      phpdoc [YOUR_PATH]        update local php doc'
+   exit 255 
+
+fi
+
+cd $PHP_DOC_WEB
+rsync -avzC --timeout=600 --delete --delete-after --exclude='manual/**' --exclude='distributions/**' --exclude='extra/**'  --exclude='backend/events/**' --exclude='backend/notes/**' rsync.php.net::phpweb ./webroot
+
+if [ $OP == 'co' ]; then
+    svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base
+    svn co http://svn.php.net/repository/phpdoc/en/trunk en
+    svn co http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN
+elif [ $OP == 'up' ];then
+    svn up doc-base
+    svn up en
+    svn up $LAN
+fi
+php doc-base/configure.php
+phd -d doc-base/.manual.xml -o output/en -f php -P PHP
+
+php doc-base/configure.php --with-lang=zh
+phd -d doc-base/.manual.xml -o output/zh -f php -P PHP
+if [ ! -e ./webroot/manual/en ];then
+ln -s $PHP_DOC_WEB/output/en/php-web ./webroot/manual/en
+fi
+if [ ! -e ./webroot/manual/$LAN ];then
+ln -s $PHP_DOC_WEB/output/zh/php-web ./webroot/manual/$LAN
+fi
+echo "<?php header(\"Location:{\$_GET['page']}\");" > ./webroot/manual/change.php
+
+echo "Web Root is: $PHP_DOC_WEB/webroot"

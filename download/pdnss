@@ -8,7 +8,7 @@ if [ $# -eq 1 ];then
     ds=$1
     IFS='.' read -ra NSP <<< "$ds"
     if [ ${#NSP[@]} -lt 3 ];then
-        A= '@'
+        A='@'
     else
        SUB=$[${#NSP[@]} - 2]
        A=${NSP[@]:0:$SUB}
