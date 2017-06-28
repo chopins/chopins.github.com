@@ -17,6 +17,15 @@ elif [ $# -ge 2 ];then
     PHP_DOC_WEB=$(realpath $2)
 fi
 
+if [ ! -e $PHP_DOC_WEB ];then
+    mkdir $PHP_DOC_WEB
+fi
+
+if [ ! -e $PHP_DOC_WEB ];then
+    echo "$PHP_DOC_WEB not exists"
+    exit 10
+fi
+
 if [ $OP != 'up' ] && [ $OP != 'co' ];then
    echo 'Usage phpdoc co [YOUR_PATH]     create local php doc viewer'
    echo '      phpdoc up [YOUR_PATH]     update local php doc'
