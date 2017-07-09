@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>配置文件说明 &mdash; toknot-doc 0.1 文档</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="索引"
+              href="../../genindex.html"/>
+        <link rel="search" title="搜索" href="../../search.html"/>
+    <link rel="top" title="toknot-doc 0.1 文档" href="../../index.html"/>
+        <link rel="next" title="主配置文件参考" href="main.html"/>
+        <link rel="prev" title="安装说明" href="../install/index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> toknot-doc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../general/welcome.html">欢迎使用 Toknot</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/credits.html">关于 Toknot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/requirements.html">服务器要求</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">安装说明</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">配置文件说明</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="main.html">主配置文件参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="router.html">路由配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="database.html">数据库结构配置</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">教程</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../libraries/index.html">类库参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../database/index.html">数据库参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../helpers/index.html">辅助函数参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../view/index.html">视图及页面模板</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">BSD License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">toknot-doc</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+    <li>配置文件说明</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/doc/configuration/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>配置文件说明<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>Toknot 配置文件保存在应用目录下面的 <em>config/</em> 文件夹内，通过应用初始化向导会默认创建 <strong>主配置文件</strong> ， <strong>路由配置文件</strong> 。
+目前的框架版本默认支持 <strong>ini</strong> 与简化版本的 <strong>yml</strong> 格式配置文件。如果需要支持其他格式类型的配置文件，需要在网站入口文件（通常是index.php）文件中包含解析该配置文件的PHP类文件，然后传入 <code class="docutils literal"><span class="pre">main()</span></code> 函数。</p>
+<p>入口文件例子如下:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">include</span> <span class="s1">&#39;yor_config_type_path/SelfConfigParse.php&#39;</span>
+<span class="n">main</span><span class="p">(</span><span class="s1">&#39;your_app_path&#39;</span><span class="p">,</span><span class="s1">&#39;my&#39;</span><span class="p">,</span><span class="s1">&#39;SelfConfigParse&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">PHP默认的 <strong>ini</strong> 文件只支持两个维度。</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">Toknot 框架的 <strong>ini</strong> 支持任意维度配置，在配置时可以使用 key 中的点来划分不同维度。</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">Toknot 框架的 <strong>yml</strong> 只支持简单格式，不支持数组等复杂格式，</p>
+</div>
+<div class="section" id="ini">
+<h2>ini 配置文件<a class="headerlink" href="#ini" title="永久链接至标题">¶</a></h2>
+<p>Toknot 框架可以解析出 <strong>ini</strong> 配置文件中按点来划分出的多维配置项目，例如如下配置:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">block</span><span class="o">.</span><span class="n">subblock</span><span class="p">]</span>
+<span class="n">item</span><span class="o">.</span><span class="n">subitem</span><span class="o">.</span><span class="n">sub</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>将会解析出数组:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">(</span>
+    <span class="n">block</span> <span class="o">=&gt;</span> <span class="n">array</span><span class="p">(</span>
+        <span class="n">subblock</span> <span class="o">=&gt;</span> <span class="n">array</span><span class="p">(</span>
+            <span class="n">item</span> <span class="o">=&gt;</span> <span class="n">array</span><span class="p">(</span>
+                <span class="n">subitem</span> <span class="o">=&gt;</span> <span class="n">array</span><span class="p">(</span>
+                    <span class="n">sub</span> <span class="o">=&gt;</span> <span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">);</span>
+</pre></div>
+</div>
+<p>数据类型与 PHP 默认支持类型相同</p>
+</div>
+<div class="section" id="yml">
+<h2>yml<a class="headerlink" href="#yml" title="永久链接至标题">¶</a></h2>
+<p>Toknot 支持的 <em>yml</em> 格式并不完全。配置项必须有严格的缩进，不能解析出用括号包含的块区域。
+目前可解析的类型有：<em>string</em>，<em>boolean</em>, <em>null</em>, <em>int</em>, <em>float</em> 类型。
+以下字符串值会被特殊处理：</p>
+<ul class="simple">
+<li><strong>yes</strong> , <strong>true</strong>  转换成布尔 true</li>
+<li><strong>no</strong> , <strong>false</strong>  转换成布尔 false</li>
+<li><strong>~</strong>             转换成 null</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>主要配置文件说明：<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main.html">主配置文件参考</a></li>
+<li class="toctree-l1"><a class="reference internal" href="router.html">路由配置</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">数据库结构配置</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="main.html" class="btn btn-neutral float-right" title="主配置文件参考" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../install/index.html" class="btn btn-neutral" title="安装说明" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, chopin.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>数据库表操作 &mdash; toknot-doc 0.1 文档</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="索引"
+              href="../../genindex.html"/>
+        <link rel="search" title="搜索" href="../../search.html"/>
+    <link rel="top" title="toknot-doc 0.1 文档" href="../../index.html"/>
+        <link rel="up" title="数据库参考" href="index.html"/>
+        <link rel="next" title="数据库维护工具" href="tool.html"/>
+        <link rel="prev" title="数据库操作" href="database.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> toknot-doc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../general/welcome.html">欢迎使用 Toknot</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/credits.html">关于 Toknot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/requirements.html">服务器要求</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">安装说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/index.html">配置文件说明</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">教程</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../libraries/index.html">类库参考</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">数据库参考</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="database.html">数据库操作</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">数据库表操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tool.html">数据库维护工具</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../helpers/index.html">辅助函数参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../view/index.html">视图及页面模板</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">BSD License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">toknot-doc</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">数据库参考</a> &raquo;</li>
+      
+    <li>数据库表操作</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/doc/database/table.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>数据库表操作<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>Toknot 框架会自动创建数据库表类映射。
+首先获取表映射实例</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$user = DBA::table(&#39;user&#39;);
+</pre></div>
+</div>
+<p>手动创建映射实例：</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>use AppNS\Model\Db1\User;
+$db = DBA::single(&#39;db1&#39;);
+$user = new User($db);
+</pre></div>
+</div>
+<p>#. 根据主键值查询</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$userId = 1;
+$user-&gt;findKeyRow($userId);
+</pre></div>
+</div>
+<p>#. 根据主键删除</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$userId = 1;
+$user-&gt;deleteKeyRow($userId);
+</pre></div>
+</div>
+<p>#. 创建过滤器实例，过滤器将会创建查询条件。使用方法见 <code class="docutils literal"><span class="pre">Toknot\Share\DB\QueryWhere</span></code></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$filter = $user-&gt;filter();
+</pre></div>
+</div>
+<p>#. 创建表字段映射实例，该实例将会创建字段条件。使用方法见 <code class="docutils literal"><span class="pre">Toknot\Share\DB\QueryColumn</span></code></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$cols = $user-&gt;cols(&#39;user_id&#39;);
+$cols = $user-&gt;userId;
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li>表映射实例的所有接受查询条件的参数的方法，均可接受过滤器实例与字段映射实例。</li>
+</ol>
+<p>#. 获取表所有记录</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$filter = 1;
+$user-&gt;getAllList($filter);
+</pre></div>
+</div>
+<p>#. 获取从第2行开始的前10行记录</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$filter = 1;
+$user-&gt;getList($filter, 10,2);
+</pre></div>
+</div>
+<p>#. 插入数据</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$data = [&#39;field&#39;=&gt; 1];
+$user-&gt;insert($data);
+</pre></div>
+</div>
+<p>#. 更新数据</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$filter = $user-&gt;cols(&#39;field2&#39;)-&gt;eq(2);
+$data = [&#39;field&#39;=&gt;1];
+$user-&gt;update($data,$filter,1,1);
+//update user set field = 1 where field2 = 2 limit 1,1
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tool.html" class="btn btn-neutral float-right" title="数据库维护工具" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="database.html" class="btn btn-neutral" title="数据库操作" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, chopin.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

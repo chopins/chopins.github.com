@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Toknot 用户指南 &mdash; toknot-doc 0.1 文档</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="索引"
+              href="genindex.html"/>
+        <link rel="search" title="搜索" href="search.html"/>
+    <link rel="top" title="toknot-doc 0.1 文档" href="#"/>
+        <link rel="next" title="欢迎使用 Toknot" href="doc/general/welcome.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> toknot-doc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/general/welcome.html">欢迎使用 Toknot</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc/general/credits.html">关于 Toknot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc/general/requirements.html">服务器要求</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/install/index.html">安装说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc/configuration/index.html">配置文件说明</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/tutorial/index.html">教程</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/libraries/index.html">类库参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/database/index.html">数据库参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/helpers/index.html">辅助函数参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/view/index.html">视图及页面模板</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc/license.html">BSD License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">toknot-doc</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Toknot 用户指南</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="toknot">
+<h1>Toknot 用户指南<a class="headerlink" href="#toknot" title="永久链接至标题">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="doc/license.html"><span class="doc">许可协议</span></a></li>
+</ul>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#id1" id="id9">欢迎</a></li>
+<li><a class="reference internal" href="#id2" id="id10">介绍</a></li>
+<li><a class="reference internal" href="#id3" id="id11">安装</a></li>
+<li><a class="reference internal" href="#id4" id="id12">教程</a></li>
+<li><a class="reference internal" href="#id5" id="id13">类库参考</a></li>
+<li><a class="reference internal" href="#id6" id="id14">数据库参考</a></li>
+<li><a class="reference internal" href="#id7" id="id15">辅助函数参考</a></li>
+<li><a class="reference internal" href="#id8" id="id16">模板函数参考</a></li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h2><a class="toc-backref" href="#id9">欢迎</a><a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/general/welcome.html">欢迎使用 Toknot</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id2">
+<h2><a class="toc-backref" href="#id10">介绍</a><a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc/general/credits.html">关于 Toknot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc/general/requirements.html">服务器要求</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id3">
+<h2><a class="toc-backref" href="#id11">安装</a><a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/install/index.html">安装说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc/configuration/index.html">配置文件说明</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="doc/configuration/main.html">主配置文件参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/configuration/router.html">路由配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/configuration/database.html">数据库结构配置</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id4">
+<h2><a class="toc-backref" href="#id12">教程</a><a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/tutorial/index.html">教程</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="doc/tutorial/class.html">类与方法操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/tutorial/console.html">命令行下参数访问</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/tutorial/control.html">流程控制操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/tutorial/decorator.html">装饰器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/tutorial/log.html">日志处理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/tutorial/pipe.html">管道操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/tutorial/route.html">自定义路由或业务调用逻辑</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id5">
+<h2><a class="toc-backref" href="#id13">类库参考</a><a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/libraries/index.html">类库参考</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="doc/libraries/simplexlsx.html">XLSX文件简单操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/libraries/process.html">进程管理操作类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/libraries/human.html">人类语言显示</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/libraries/file.html">文件操作类</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/libraries/command.html">命令行操作类</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id6">
+<h2><a class="toc-backref" href="#id14">数据库参考</a><a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/database/index.html">数据库参考</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="doc/database/database.html">数据库操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/database/table.html">数据库表操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doc/database/tool.html">数据库维护工具</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id7">
+<h2><a class="toc-backref" href="#id15">辅助函数参考</a><a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/helpers/index.html">辅助函数参考</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id8">
+<h2><a class="toc-backref" href="#id16">模板函数参考</a><a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="doc/view/index.html">视图及页面模板</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="doc/general/welcome.html" class="btn btn-neutral float-right" title="欢迎使用 Toknot" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, chopin.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

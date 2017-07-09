@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>数据库操作 &mdash; toknot-doc 0.1 文档</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="索引"
+              href="../../genindex.html"/>
+        <link rel="search" title="搜索" href="../../search.html"/>
+    <link rel="top" title="toknot-doc 0.1 文档" href="../../index.html"/>
+        <link rel="up" title="数据库参考" href="index.html"/>
+        <link rel="next" title="数据库表操作" href="table.html"/>
+        <link rel="prev" title="数据库参考" href="index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> toknot-doc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../general/welcome.html">欢迎使用 Toknot</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/credits.html">关于 Toknot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/requirements.html">服务器要求</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">安装说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/index.html">配置文件说明</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">教程</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../libraries/index.html">类库参考</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">数据库参考</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">数据库操作</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">映射表的最简单方法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">多数据库使用方法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">建立一个新的数据库连接实例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">获取数据库连接实例</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="table.html">数据库表操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tool.html">数据库维护工具</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../helpers/index.html">辅助函数参考</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../view/index.html">视图及页面模板</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Toknot 概览</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">BSD License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">toknot-doc</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">数据库参考</a> &raquo;</li>
+      
+    <li>数据库操作</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/doc/database/database.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>数据库操作<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>Toknot 提供了一套简单而强大的数据库操作方法。
+<a class="reference internal" href="../configuration/main.html"><span class="doc">数据库配置</span></a> 后，无需其他操作，便可以对数据库表进行操作。
+数据库的表映射实例方法定义在：<code class="docutils literal"><span class="pre">Toknot\Share\DB\Table</span></code> 类中，操作见 <a class="reference internal" href="table.html"><span class="doc">数据库表操作</span></a></p>
+<div class="section" id="id2">
+<h2>映射表的最简单方法<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>以下数据库表映射实例，将会创建默认数据库配置项的数据库连接。默认配置项在主配置文件中设置。:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$table = DBA::table($tableName);
+</pre></div>
+</div>
+<p>以上代码将返回一个表 <code class="docutils literal"><span class="pre">$tableName</span></code> 映射的类实例。</p>
+</div>
+<div class="section" id="id3">
+<h2>多数据库使用方法<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>只需要调用不同的配置项，即可进行不同的独立的数据库连接。:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$table1 = DBA::table($tableName1,&#39;db1&#39;);
+$table2 = DBA::table($tableName2,&#39;db2&#39;);
+</pre></div>
+</div>
+<p>以上代码说明如下：</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">$table1</span></code> 是数据库 <cite>db1</cite> 的表 <code class="docutils literal"><span class="pre">$tableName1</span></code> 映射的类实例</li>
+<li><code class="docutils literal"><span class="pre">$table2</span></code> 是数据库 <cite>db2</cite> 的表 <code class="docutils literal"><span class="pre">$tableName2</span></code> 映射的类实例</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>建立一个新的数据库连接实例<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>每一个数据库配置项会有唯一的数据库连接实例，当需要重新连接时，通过以下方法将覆盖指定配置项的连接实例：:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$table1 = DBA::table($tableName, &#39;db1&#39;, true);
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>获取数据库连接实例<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>以下方法将会获取上一个数据库连接实例：:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$db = DBA::single();
+</pre></div>
+</div>
+<p>以下方法将会获取指定的数据库配置项的连接实例：:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$db = DBA::single(&#39;db1&#39;);
+</pre></div>
+</div>
+<p>关闭最近的一个数据库连接方法：:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$db = DBA::single();
+$db-&gt;close();
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="table.html" class="btn btn-neutral float-right" title="数据库表操作" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="数据库参考" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, chopin.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
