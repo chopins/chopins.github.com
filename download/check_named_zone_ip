@@ -45,7 +45,15 @@ case $IP in
   echo "${LINE[@]}" >> $tmp
   continue
    ;;
+   CNAME)
+  echo "${LINE[@]}" >> $tmp
+  continue
+  ;;
 esac
+if [ ${LINE[2]} == 'CNAME' ];then
+  echo "${LINE[@]}" >> $tmp
+  continue;
+fi
 if [ $IP == 'IN' ];then
   echo "${LINE[@]}" >> $tmp
 continue;
