@@ -53,7 +53,17 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
             fi
             echo $IP >> $CACHE
 
-            timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$A IN A $IP"
+            #timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$A IN A $IP"
+            OPENRE=`echo "\n" | timeout 5 openssl s_client -host $IP -port 443 -verify_hostname $ds -4 -quiet --verify 1 -prexit -crlf  2>&1`
+	        ORN=$?
+            if [ $ORN -gt 0 ];then
+    	    	continue
+	        fi
+	        echo $OPENRE |grep mismatch
+	        GRN=$?
+	        if [ $GRN -eq 0 ];then
+		        echo "$A IN A $IP"
+            fi
             wait
         fi
         if [ $EX -eq 1 ];then
