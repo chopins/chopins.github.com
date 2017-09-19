@@ -18,6 +18,9 @@ else
     A='*'
 fi
 curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
+    if [ $EX -eq 1 ];then
+        exit
+    fi
     ns=$LINE
     NS_IPV6=`echo $ns | grep ':'`
     NS_CHK_IPV6=$?
@@ -27,6 +30,9 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
 
     dig $ds @$ns +tcp | while read -ra LINE;do
 {
+        if [ $EX -eq 1 ];then
+            exit
+        fi
         cont=0
         F=${LINE[0]:0:1} 
         case $F in
@@ -39,7 +45,7 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
             continue
         fi
 
-        if [ ${LINE[3]} == 'A' ];then
+        if [ "${LINE[3]}" == 'A' ];then
             IP=${LINE[4]}
             IPV6=`echo $IP | grep ':'`
             CHK_IPV6=$?
@@ -59,20 +65,15 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
             if [ $ORN -gt 0 ];then
     	    	continue
 	        fi
-	        echo $OPENRE |grep mismatch
+	        echo $OPENRE |grep -q mismatch
 	        GRN=$?
-	        if [ $GRN -eq 0 ];then
+	        if [ $GRN -gt 0 ];then
 		        echo "$A IN A $IP"
             fi
             wait
         fi
-        if [ $EX -eq 1 ];then
-            exit
-        fi
+        
 }&
     done
     wait
-    if [ $EX -eq 1 ];then
-        exit
-    fi
 done

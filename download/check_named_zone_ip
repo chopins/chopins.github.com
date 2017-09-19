@@ -11,6 +11,8 @@ tmp="/tmp/checkzone.tmp.$randstr"
 trap 'rm -rf $tmp;wait;exit' INT 
 trap 'rm -rf $tmp;wait;exit' TERM
 
+ZONE=`basename $1 .zone`
+
 while IFS=' ' read -ra LINE;do
 case ${LINE[0]} in
   ns1)
@@ -56,14 +58,39 @@ if [ ${LINE[2]} == 'CNAME' ];then
 fi
 if [ $IP == 'IN' ];then
   echo "${LINE[@]}" >> $tmp
-continue;
+    continue;
 fi
 echo -n "connect $IP"
-timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && (echo "${LINE[@]}" >> $tmp;echo " Success") ||  echo -e "\033[1;31m Timeout\033[0m"
+
+#timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && (echo "${LINE[@]}" >> $tmp;echo " Success") ||  echo -e "\033[1;31m Timeout\033[0m"
+NS=${LINE[0]}
+
+if [ "$NS" == '*' ];then
+    NS='www'
+fi
+DS="$NS.$ZONE"
+
+OPENRE=`echo "\r\n" | timeout 5 openssl s_client -host $IP -port 443 -verify_hostname $DS -4 -quiet --verify 1 -prexit -crlf  2>&1`
+ORN=$?
+if [ $ORN -gt 0 ];then
+    echo -e "\033[1;31m Timeout\033[0m"
+	continue
+fi
+
+echo $OPENRE | grep -q mismatch
+GRN=$?
+if [ $GRN -gt 0 ];then
+    echo "${LINE[@]}" >> $tmp;
+    echo " Success"
+else
+    echo -e "\033[1;31m Mismatch for $DS\033[0m"
+fi
+
 wait
 done < $1
 wait
 mv $tmp $1
+#rm $tmp
 ef=`getenforce`
 if [ $ef != 'Disabled' ];then
 chcon -t named_zone_t $1
