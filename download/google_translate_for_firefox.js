@@ -11,7 +11,7 @@
 var toLang = "zh-CN"
 function query(word,pos) {
 	var qurl = 'https://translate.google.cn/translate_a/single?'
-  +'client=gtx&sl=auto&tl='+toLnag+'&hl='+toLang
+  +'client=gtx&sl=auto&tl='+toLang+'&hl='+toLang
   +'&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&otf=2&ssel=0&tsel=0&kc=5&'
 	+'tk='+Math.random()*1000000+'&q='+ encodeURIComponent(word);
 
