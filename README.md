@@ -6,7 +6,7 @@ systemd 修改默认启动级别
  * 修改为5运行级别  
   `ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target`
 
-
+Linux 先切换用户时，需要执行`xhost + ` 命令来允许切换后的用户使用当前用的显示服务（Xorg服务或Xwayland服务）
 
 AOL reader 字体及收卷脚本
 [aol-reader-font-color.js](https://github.com/chopins/chopins.github.com/blob/master/aol-reader-font-color.js)
