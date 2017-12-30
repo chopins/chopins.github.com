@@ -11,13 +11,15 @@ categories: blog
 4、为了防止VPN掉线影响游戏流畅度，需要配置路由让游戏绕开VPN，直接连接，VPN主要是为了连接Facebook
 5、配置方法如下，在windows中执行如下命令
 ```
-route -p add 104.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
-route -p add 54.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
-route -p add 130.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
-route -p add 52.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
-route -p add 13.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
+route add 104.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
+route add 54.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
+route add 130.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
+route add 52.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
+route add 13.0.0.0 mask 255.0.0.0 10.0.0.1 metric 5 if 2 -p
 ```
 上面命名中的`10.0.0.1`需要自行换成真实网关IP地址，就是本地路由器地址，虚拟机需要换成虚拟机的网关地址
+`metric 5` 路由跃点数
+
 `if 2`为接口ID，接口ID通过下面的命令获得：
 ```
 route print -4
