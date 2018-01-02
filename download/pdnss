@@ -2,22 +2,62 @@
 trap 'EX=1;exit' INT 
 trap 'EX=1;exit' TERM
 EX=0
+
+NSIPLIST='http://public-dns.info/nameservers.txt'
+
 CACHE=$(dirname $(realpath $0))/cacheip.txt
 echo '' > $CACHE
-if [ $# -eq 1 ];then
-    ds=$1
-    IFS='.' read -ra NSP <<< "$ds"
-    if [ ${#NSP[@]} -lt 3 ];then
-        A='@'
-    else
-       SUB=$[${#NSP[@]} - 2]
-       A=${NSP[@]:0:$SUB}
+
+has_dns=3
+has_domain=3
+
+for arg in $*
+do
+    if [ $has_dns -eq 1 ];then
+        NSIPLIST=$arg
+        has_dns=2
+        continue
     fi
-else
-    ds='www.gogle.com'
+    if [ $has_domain -eq 1 ];then
+        DOMAIN=$arg
+        has_domain=2
+        continue
+    fi
+    case $arg in
+    -h)
+        echo "Usage: $0 -n www.domain.com -d http://test11.com/ns.list.txt"
+        exit
+        ;;
+    -d)
+        has_dns=1
+        ;;
+    -n)
+        has_domain=1
+        ;;
+    esac
+
+done
+
+
+if [ $# -eq 0 ];then
+    DOMAIN='www.google.com'
     A='*'
+elif [ $has_dns -eq 2 ] && [ $has_domain -eq 3 ]; then
+    DOMAIN='www.google.com'
+    A='*'
+elif [ $has_dns -eq 3 ] && [ $has_domain -eq 3 ];then
+    DOMAIN=$1
 fi
-curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
+
+IFS='.' read -ra NSP <<< "$DOMAIN"
+if [ ${#NSP[@]} -lt 3 ];then
+    A='@'
+else
+    SUB=$[${#NSP[@]} - 2]
+    A=${NSP[@]:0:$SUB}
+fi
+echo "Fetch $DOMAIN in $NSIPLIST"
+curl -s $NSIPLIST | while read -ra LINE;do
     if [ $EX -eq 1 ];then
         exit
     fi
@@ -27,9 +67,10 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
     if [ $NS_CHK_IPV6 -eq 0 ];then
         continue
     fi
-
-    dig $ds @$ns +tcp | while read -ra LINE;do
+    echo -ne "DNS $ns                 \r"
+    dig $DOMAIN @$ns +tcp | while read -ra LINE;do
 {
+        echo $LINE
         if [ $EX -eq 1 ];then
             exit
         fi
@@ -58,22 +99,20 @@ curl -s http://public-dns.info/nameservers.txt | while read -ra LINE;do
                 continue
             fi
             echo $IP >> $CACHE
-
             #timeout 5 bash -c "echo >/dev/tcp/$IP/443" >/dev/null 2>&1 && echo "$A IN A $IP"
-            OPENRE=`echo "\n" | timeout 5 openssl s_client -host $IP -port 443 -verify_hostname $ds -4 -quiet --verify 1 -prexit -crlf  2>&1`
+            #OPENRE=`echo "\n" | timeout 10 openssl s_client -host $IP -port 443 -verify_hostname $ds -4 -quiet --verify 1 -prexit -crlf  2>&1`
+            curl -s --retry 0 --connect-timeout 3 --resolve $DOMAIN:443:$IP https://$DOMAIN > /dev/null
 	        ORN=$?
             if [ $ORN -gt 0 ];then
+                echo -ne "check $IP timeout   \r"
     	    	continue
-	        fi
-	        echo $OPENRE |grep -q mismatch
-	        GRN=$?
-	        if [ $GRN -gt 0 ];then
-		        echo "$A IN A $IP"
+	        elif [ $ORN -eq 0 ];then
+		        echo -e "\r$A IN A $IP"
             fi
             wait
         fi
         
-}&
+}
     done
     wait
 done
