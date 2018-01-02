@@ -8,6 +8,9 @@ systemd 修改默认启动级别
 
 Linux 先切换用户时，需要执行`xhost + ` 命令来允许切换后的用户使用当前用的显示服务（Xorg服务或Xwayland服务），可解决 `can't open display` 错误 
 
+Google Translate Greasemonkey Script for Firefox 
+[Greasemonkey Script](https://github.com/chopins/chopins.github.com/blob/master/download/google_translate_for_firefox.js)
+
 AOL reader 字体及收卷脚本
 [aol-reader-font-color.js](https://github.com/chopins/chopins.github.com/blob/master/aol-reader-font-color.js)
 
