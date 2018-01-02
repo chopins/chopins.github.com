@@ -9,7 +9,7 @@
 
 (function(){
   
-  console.log('start translate');
+console.log('start translate');
 var toLang = "zh-CN";
 
 function setStyle(parentDoc,style) {
@@ -54,13 +54,18 @@ function selectContent(parentDoc,e) {
     if (/[\u4e00-\u9fa5]+/i.test(text)) {
         return;
     }
+  	if (/^[~!@#$%^&*()_+\[\]\{\}\-=\\|`:;"'<>,\.\/?]+$/i.test(text)) {
+      	return;
+    }
+    if (/^[0-9]+$/i.test(text)) {
+        return;
+    }
     var pos = {x: e.clientX, y: e.clientY + window.scrollY};
 
     query(parentDoc,text, pos);
 
 }
 function addEvent(parentDoc) {
-  	console.log(parentDoc);
     parentDoc.ondbclick = function(e) {
       selectContent(parentDoc,e);
     };
@@ -93,8 +98,6 @@ function load(parentNode) {
         }
 
     } else if( bodyTag === 'BODY') {
-      	console.log('add');
-      console.log(parentNode);
       	addEvent(parentNode);
     }
   	var iframes = parentNode.getElementsByTagName('iframe');
