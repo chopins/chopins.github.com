@@ -66,13 +66,13 @@ function selectContent(parentDoc,e) {
 
 }
 function addEvent(parentDoc) {
-    parentDoc.ondbclick = function(e) {
+  	document.addEventListener('dbclick',function(e) {
       selectContent(parentDoc,e);
-    };
-    parentDoc.onclick = function(e) {
+    });
+  	document.addEventListener('click',function(e) {
       selectContent(parentDoc,e);
-    };
-
+    });
+    
     parentDoc._google_translate_pop_info = document.createElement('div');
     var style = {borderRadius: "5px", position: "absolute", display: "none",
         padding: "10px", margin: "10px", background: "#000000", color: "#FFFFFF", opacity: "0.6"};
