@@ -29,7 +29,7 @@ PHP 文档 WEB 版本全自动创建脚本
 
 * PhD 使用问题解决
 
-    `Fatal error: Allowed memory size of -XXX- in -XXXX-/pear/phpdotnet/phd/Package/PHP/Web.php 210` 错误请将该行
+    如果出现 `Fatal error: Allowed memory size of XXXXXX bytes exhausted (tried to allocate XXXX bytes) in XXXX/pear/phpdotnet/phd/Package/PHP/Web.php on line 210` 错误请将该行
     
     ```php 
     $ids[] = array($index["sdesc"], $index["filename"], $index["element"]);
