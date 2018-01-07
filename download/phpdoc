@@ -3,11 +3,23 @@
 #set your default locale language
 LAN='zh'
 
+function usage() {
+    echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer,创建本地文档项目'
+    echo '      phpdoc up [YOUR_PATH]  update local php doc, 更新本地文档'
+    echo '      phpdoc [YOUR_PATH]     update local php doc, 默认更新本地文档'
+    exit 255 
+}
+
+function checkcmd() {
+    $1 --version > /dev/null
+    if [ $? -gt 0 ];then
+        echo "$1 command not found, need install or add environment path"
+        exit 127
+    fi
+}
+
 if [ $# -eq 0 ];then
-   echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer'
-   echo '      phpdoc up [YOUR_PATH]  update local php doc'
-   echo '      phpdoc [YOUR_PATH]     update local php doc'
-   exit 255 
+    usage
 fi
 if [ $# -eq 1 ];then
     PHP_DOC_WEB=$(realpath $1)
@@ -17,25 +29,19 @@ elif [ $# -ge 2 ];then
     PHP_DOC_WEB=$(realpath $2)
 fi
 
-if [ ! -e $PHP_DOC_WEB ];then
-    mkdir $PHP_DOC_WEB
-fi
-
-if [ ! -e $PHP_DOC_WEB ];then
-    echo "$PHP_DOC_WEB not exists"
-    exit 10
-fi
-
 if [ $OP != 'up' ] && [ $OP != 'co' ];then
-   echo 'Usage phpdoc co [YOUR_PATH]     create local php doc viewer'
-   echo '      phpdoc up [YOUR_PATH]     update local php doc'
-   echo '      phpdoc [YOUR_PATH]        update local php doc'
-   exit 255 
-
+    usage
 fi
+
+checkcmd rsync
+checkcmd svn
+checkcmd php
+checkcmd phd
+checkcmd sed
+checkcmd wget
 
 cd $PHP_DOC_WEB
-rsync -avzC --timeout=600 --delete --delete-after --exclude='manual/**' --exclude='distributions/**' --exclude='extra/**'  --exclude='backend/events/**' --exclude='backend/notes/**' rsync.php.net::phpweb ./webroot
+rsync -avzC --timeout=60 --delete --delete-after --exclude='manual/**' --exclude='distributions/**' --exclude='extra/**'  --exclude='backend/events/**' --exclude='backend/notes/**' rsync.php.net::phpweb ./webroot
 
 if [ $OP == 'co' ]; then
     svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base
@@ -46,7 +52,7 @@ elif [ $OP == 'up' ];then
     svn up en
     svn up $LAN
 fi
-php doc-base/configure.php
+php doc-base/configure.php --with-lang=en
 phd -d doc-base/.manual.xml -o output/en -f php -P PHP
 
 php doc-base/configure.php --with-lang=zh
@@ -57,6 +63,14 @@ fi
 if [ ! -e ./webroot/manual/$LAN ];then
 ln -s $PHP_DOC_WEB/output/zh/php-web ./webroot/manual/$LAN
 fi
+
+echo "Create change.php file"
 echo "<?php header(\"Location:{\$_GET['page']}\");" > ./webroot/manual/change.php
 
+sed -i 's/window.location = \(.*\);/window.location = \1 +".php";/g' ./webroot/js/search.js
+
+echo "Replace jquery to local file"
+wget http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js -O ./webroot/js/jquery.min.js
+sed -i '/ajax\.googleapis\.com/d' ./webroot/include/footer.inc
+sed -i 's/\$jsfiles = array(/$jsfiles = array("jquery.min.js",/g' ./webroot/include/footer.inc
 echo "Web Root is: $PHP_DOC_WEB/webroot"
