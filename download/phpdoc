@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# Toknot phpdoc creater ( http://toknot.com )
+# @copyright  Copyright (c) 2011 - 2018 Toknot.com
+# @license    http://toknot.com/LICENSE.txt New BSD License
+# @link       https://github.com/chopins/chopins.github.com
+#
+
 
 #set your default locale language
 LAN='zh'
