@@ -9,23 +9,24 @@ PHP 文档 WEB 版本全自动创建脚本
 
 * 用法
 
-    phpdoc co [路径]  创建文档文件到该路径
-    phpdoc up [路径]  更新指定路径的文档
-    phpdoc [路径]     更新指定路径的文档
+    1. phpdoc co [路径]  创建文档文件到该路径
+    2. phpdoc up [路径]  更新指定路径的文档
+    3. phpdoc [路径]     更新指定路径的文档
 
 * 特性
     
-    默认会创建英文语言版本和中文语言版本，修改`LAN`变量后可替换中文语言版本为其他语言版本
-    支持搜索功能
-    目前没有notes
-    页面体验与`https://php.net`体验一样
+    1. 默认会创建英文语言版本和中文语言版本，修改`LAN`变量后可替换中文语言版本为其他语言版本
+    2. 支持即时搜索功能，且无需配置rewrite即可访问
+    3. 目前没有notes
+    4. 默认不支持函数直接访问，需要自行配置rewrite
+    5. 其余页面体验与`https://php.net`体验一样
 
 * 必须条件
     
-    需要安装 rsync,svn,php,phd,sed,wget
-    phd 安装见[https://wiki.php.net/doc/phd/install](https://wiki.php.net/doc/phd/install)
-    phd 安装时需要将可选包 PhD_PHP 安装上
-    php 需要安装 php-xml 扩展，以支持 dom, xml 操作
+    1. 需要安装 rsync,svn,php,phd,sed,wget
+    2. phd 安装见[https://wiki.php.net/doc/phd/install](https://wiki.php.net/doc/phd/install)
+    3. phd 安装时需要将可选包 PhD_PHP 安装上
+    4. php 需要安装 php-xml 扩展，以支持 dom, xml 操作
 
 * PhD 使用问题解决
 
