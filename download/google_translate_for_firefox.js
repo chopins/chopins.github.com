@@ -8,8 +8,7 @@
 //
 
 (function(){
-  
-console.log('start translate');
+
 var toLang = "zh-CN";
 
 function setStyle(parentDoc,style) {
@@ -18,21 +17,29 @@ function setStyle(parentDoc,style) {
     }
 }
 function query(parentDoc,word, pos) {
+    var len = word.length;
+    var enword = encodeURIComponent(word);
     var qurl = 'https://translate.google.cn/translate_a/single?'
             + 'client=gtx&sl=auto&tl=' + toLang + '&hl=' + toLang
             + '&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&otf=2&ssel=0&tsel=0&kc=5&'
-            + 'tk=' + Math.random() * 1000000 + '&q=' + encodeURIComponent(word);
-		console.log("query " + word);
+            + '&q=' + enword;
+		var audio = 'https://translate.google.cn/translate_tts?ie=UTF-8&q='+enword
+    				+'&tl=en&total=1&idx=0&textlen='+len+'&client=gt&prev=input';
     GM.xmlHttpRequest({method: "GET",
         url: qurl,
         overrideMimeType: "application/json; charset=UTF-8",
         onload: function (response) {
             var res = JSON.parse(response.responseText);
+
             var zh = res[0][0][0];
+            var ph = res[0][1][3] ? '<span onclick="console.log(this.parentNode.previousElementSibling);this.parentNode.previousElementSibling.play();">[ '+ res[0][1][3] +' ]</span>  ' : '';
+            var more = res[1] ? res[1][0][1].join('; ') : '';
+
             var style = {display: "block", left: pos.x + 'px', top : pos.y + 'px'};
             setStyle(parentDoc,style);
-	
-            parentDoc._google_translate_pop_info.innerHTML = zh;
+
+					  parentDoc._google_translate_pop_info.firstElementChild.innerHTML = '<source src="'+audio+'"></source>';
+            parentDoc._google_translate_pop_info.lastElementChild.innerHTML = ph +zh+ '<br />' + more;
 
             setTimeout(function () {
                 setStyle(parentDoc, {display: "none"});
@@ -77,7 +84,13 @@ function addEvent(parentDoc) {
     var style = {borderRadius: "5px", position: "absolute", display: "none",
         padding: "10px", margin: "10px", background: "#000000", color: "#FFFFFF", opacity: "0.6"};
     setStyle(parentDoc,style);
-
+    var video = document.createElement('video');
+    video.autoplay = "false";
+    video.style.display = 'none';
+ 
+		parentDoc._google_translate_pop_info.appendChild(video);
+    var sub = document.createElement('div');
+   	parentDoc._google_translate_pop_info.appendChild(sub);
     parentDoc.body.appendChild(parentDoc._google_translate_pop_info);
 }
 
@@ -112,4 +125,5 @@ function load(parentNode) {
 }
 load(document);
 })();
+
 
