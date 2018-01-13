@@ -23,8 +23,8 @@ function query(parentDoc,word, pos) {
             + 'client=gtx&sl=auto&tl=' + toLang + '&hl=' + toLang
             + '&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&otf=2&ssel=0&tsel=0&kc=5&'
             + '&q=' + enword;
-		var audio = 'https://translate.google.cn/translate_tts?ie=UTF-8&q='+enword
-    				+'&tl=en&total=1&idx=0&textlen='+len+'&client=gt&prev=input';
+		//var audio = 'https://translate.google.cn/translate_tts?ie=UTF-8&q='+enword
+    //				+'&tl=en&total=1&idx=0&textlen='+len+'&client=gt&prev=input';
     GM.xmlHttpRequest({method: "GET",
         url: qurl,
         overrideMimeType: "application/json; charset=UTF-8",
@@ -38,7 +38,7 @@ function query(parentDoc,word, pos) {
             var style = {display: "block", left: pos.x + 'px', top : pos.y + 'px'};
             setStyle(parentDoc,style);
 
-					  parentDoc._google_translate_pop_info.firstElementChild.innerHTML = '<source src="'+audio+'"></source>';
+					  //parentDoc._google_translate_pop_info.firstElementChild.innerHTML = '<source src="'+audio+'"></source>';
             parentDoc._google_translate_pop_info.lastElementChild.innerHTML = ph +zh+ '<br />' + more;
 
             setTimeout(function () {
@@ -96,6 +96,10 @@ function addEvent(parentDoc) {
 
 
 function load(parentNode) {
+  	if(!parentNode.body) {
+      	setTimeout(function() { load(parentNode);},2000);
+      	return;
+    }
 		var bodyTag = parentNode.body.tagName;
 
     if(bodyTag === 'FRAMESET') { 
@@ -123,7 +127,6 @@ function load(parentNode) {
     	}
     }
 }
-load(document);
+setTimeout(function() {load(document);},3000);
 })();
-
 
