@@ -46,6 +46,11 @@ checkcmd php
 checkcmd phd
 checkcmd sed
 checkcmd wget
+checkcmd which
+
+PHD_PATH=`which phd`
+PHD_PATH=`realpath $PHD_PATH`
+PHP_CMD='php -d memory_limit=-1' 
 
 cd $PHP_DOC_WEB
 rsync -avzC --timeout=60 --delete --delete-after --exclude='manual/**' --exclude='distributions/**' --exclude='extra/**'  --exclude='backend/events/**' --exclude='backend/notes/**' rsync.php.net::phpweb ./webroot
@@ -59,11 +64,11 @@ elif [ $OP == 'up' ];then
     svn up en
     svn up $LAN
 fi
-php doc-base/configure.php --with-lang=en
-phd -d doc-base/.manual.xml -o output/en -f php -P PHP
+$PHP_CMD doc-base/configure.php --with-lang=en
+$PHP_CMD $PHD_PATH -d doc-base/.manual.xml -o output/en -f php -P PHP
 
-php doc-base/configure.php --with-lang=zh
-phd -d doc-base/.manual.xml -o output/zh -f php -P PHP
+$PHP_CMD doc-base/configure.php --with-lang=zh
+$PHP_CMD $PHD_PATH -d doc-base/.manual.xml -o output/zh -f php -P PHP
 if [ ! -e ./webroot/manual/en ];then
 ln -s $PHP_DOC_WEB/output/en/php-web ./webroot/manual/en
 fi
