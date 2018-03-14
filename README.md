@@ -9,19 +9,19 @@ systemd 修改默认启动级别
 Linux 先切换用户时，需要执行`xhost + ` 命令来允许切换后的用户使用当前用的显示服务（Xorg服务或Xwayland服务），可解决 `can't open display` 错误 
 
 Google Translate Greasemonkey Script for Firefox (API is https://translate.google.cn) 划词翻译脚本 
-[Greasemonkey Script](https://toknot.com/download/google_translate_for_firefox.js)
+[Greasemonkey Script](http://toknot.com/download/google_translate_for_firefox.js)
 
 AOL reader 字体及收卷脚本
-[aol-reader-font-color.js](https://github.com/chopins/chopins.github.com/blob/master/aol-reader-font-color.js)
+[aol-reader-font-color.js](http://toknot.com/download/aol-reader-font-color.js)
 
 PHP 扩展自动编译脚本
-[phpcim](https://github.com/chopins/chopins.github.com/blob/master/phpicm)
+[phpcim](http://toknot.com/download/phpicm)
 
 PHP Shell 脚本
-[phpsh](https://github.com/chopins/chopins.github.com/blob/master/phpsh)
+[phpsh](http://toknot.com/download/phpsh)
 
 SVN 查询脚本, 根据用户名查询指定日期或版本号以后该用户更新日志
-[svn-ext.sh](https://github.com/chopins/chopins.github.com/blob/master/svn-ext.sh)
+[svn-ext.sh](http://toknot.com/download/svn-ext.sh)
 
 PHP HTML简单爬虫
 [php-fetchContent.php](http://toknot.com/download/fetchContent.php)
