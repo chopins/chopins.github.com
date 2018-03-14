@@ -32,6 +32,7 @@ class FetchPage {
         $dom->loadHTML($this->content, LIBXML_HTML_NOIMPLIED | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD | LIBXML_PARSEHUGE);
         foreach (libxml_get_errors() as $error) {
             if ($error->code === 76) {
+                libxml_clear_errors();
                 return $this->reload();
             }
         }
