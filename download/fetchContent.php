@@ -46,7 +46,7 @@ class FetchPage {
         }
 
         //解决链接中的&符号问题
-        $this->content = preg_replace('/&([^;]{0,9})/', '&amp;${1}', $this->content);
+        $this->content = preg_replace('/(<[^>^<]+)&([^;]{0,9})([^<^>]+>)/', '${1}&amp;${2}${3}', $this->content);
 
         return $this->loadHTML($ch);
     }
