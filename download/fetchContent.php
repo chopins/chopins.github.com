@@ -31,10 +31,11 @@ class FetchPage {
 
         $dom->loadHTML($this->content, LIBXML_HTML_NOIMPLIED | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD | LIBXML_PARSEHUGE);
         foreach (libxml_get_errors() as $error) {
-            if ($error['code'] === 76) {
+            if ($error->code === 76) {
                 return $this->reload();
             }
         }
+        libxml_clear_errors();
         $this->dom = $dom;
         return $dom;
     }
