@@ -20,16 +20,20 @@ class FetchPage {
         $this->getPage($url);
     }
 
-    public function loadHTML($charset) {
+    public function reload() {
+        $this->getPage($this->url);
+        return $this->getDOM();
+    }
 
+    public function loadHTML() {
+        libxml_use_internal_errors(true);
         $dom = new DOMDocument();
-        $dom->encoding = $charset;
-        try {
-            $dom->loadHTML($this->content, LIBXML_HTML_NOIMPLIED | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD | LIBXML_PARSEHUGE);
-        } catch (DOMException $e) {
-            $this->dump($e->getCode());
-            $this->dump($e->getMessage());
-            exit;
+
+        $dom->loadHTML($this->content, LIBXML_HTML_NOIMPLIED | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD | LIBXML_PARSEHUGE);
+        foreach (libxml_get_errors() as $error) {
+            if ($error['code'] === 76) {
+                return $this->reload();
+            }
         }
         $this->dom = $dom;
         return $dom;
@@ -45,10 +49,13 @@ class FetchPage {
             $this->content = preg_replace('/charset=("|\')*([a-z0-9\-]+)("|\')*/im', 'charset=${1}utf-8${3}', $this->content);
         }
 
+        //解决如果<title>等包含了中文字符的标签出现在字符编码申明前时中文乱码问题
+        $this->content = str_replace('<head>', '<head><meta charset="utf-8" />', $this->content);
+
         //解决链接中的&符号问题
         $this->content = preg_replace('/(<[^>^<]+)&([^;]{0,9})([^<^>]+>)/', '${1}&amp;${2}${3}', $this->content);
 
-        return $this->loadHTML($ch);
+        return $this->loadHTML();
     }
 
     public function setReferer($referer) {
@@ -71,10 +78,12 @@ class FetchPage {
     }
 
     private function getPage($url) {
-        $ch = curl_init();
-        $this->setCurlOpt($url);
-        curl_setopt_array($ch, $this->curlOpt);
-        $this->content = curl_exec($ch);
+        do {
+            $ch = curl_init();
+            $this->setCurlOpt($url);
+            curl_setopt_array($ch, $this->curlOpt);
+            $this->content = curl_exec($ch);
+        } while (!$this->content && sleep(1) === 0);
     }
 
     public function xpathDom() {
