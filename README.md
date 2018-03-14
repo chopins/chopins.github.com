@@ -9,7 +9,7 @@ systemd 修改默认启动级别
 Linux 先切换用户时，需要执行`xhost + ` 命令来允许切换后的用户使用当前用的显示服务（Xorg服务或Xwayland服务），可解决 `can't open display` 错误 
 
 Google Translate Greasemonkey Script for Firefox (API is https://translate.google.cn) 划词翻译脚本 
-[Greasemonkey Script](https://github.com/chopins/chopins.github.com/blob/master/download/google_translate_for_firefox.js)
+[Greasemonkey Script](https://toknot.com/download/google_translate_for_firefox.js)
 
 AOL reader 字体及收卷脚本
 [aol-reader-font-color.js](https://github.com/chopins/chopins.github.com/blob/master/aol-reader-font-color.js)
@@ -22,6 +22,9 @@ PHP Shell 脚本
 
 SVN 查询脚本, 根据用户名查询指定日期或版本号以后该用户更新日志
 [svn-ext.sh](https://github.com/chopins/chopins.github.com/blob/master/svn-ext.sh)
+
+PHP HTML简单爬虫
+[php-fetchContent.php](http://toknot.com/download/fetchContent.php)
 
 firefox nightly 版本在浏览器选项中去掉了“禁用或替换上下文菜单”修改功能，
 只能在about:config中修改dom.event.contextmenu.enabled项来实现
