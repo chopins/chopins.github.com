@@ -24,7 +24,7 @@ SVN 查询脚本, 根据用户名查询指定日期或版本号以后该用户�
 [svn-ext.sh](http://toknot.com/download/svn-ext.sh)
 
 PHP HTML简单爬虫
-[php-fetchContent.php](http://toknot.com/download/fetchContent.php)
+[php-fetchContent.php](http://toknot.com/download/fetchPage.php)
 
 firefox nightly 版本在浏览器选项中去掉了“禁用或替换上下文菜单”修改功能，
 只能在about:config中修改dom.event.contextmenu.enabled项来实现
