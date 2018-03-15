@@ -49,13 +49,17 @@ class FetchPage {
     }
 
     private function getPage($url) {
+        $errcnt = 0;
         do {
             Tools::msg("GET: $url");
             $ch = curl_init();
             $this->setCurlOpt($url);
             curl_setopt_array($ch, $this->curlOpt);
             $this->content = curl_exec($ch);
-        } while (!$this->content && sleep(1) === 0);
+            if ($errcnt < 10) {
+                $errcnt++;
+            }
+        } while (!$this->content && sleep($errcnt) === 0);
     }
 
 }
@@ -304,6 +308,7 @@ class PageDOM extends HTMLDOM {
         $p = new FetchPage($url, $referer);
         parent::__construct($p->getContent(), $addBody);
     }
+
 }
 
 class Tools {
