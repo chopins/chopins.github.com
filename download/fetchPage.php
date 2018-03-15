@@ -128,11 +128,18 @@ class HTMLDOM extends DOMDocument {
 
     private $content = '';
 
-    public function __construct($content = '') {
+    public function __construct($content = '', $addBody = false) {
         parent::__construct();
         $this->content = $content;
+        if ($addBody) {
+            $this->addBody();
+        }
         $this->correctionHTML();
         $this->importHTML();
+    }
+
+    protected function addBody() {
+        $this->content = "<html><head></head><body>{$this->content}</body></html>";
     }
 
     public function updateHTML($content) {
@@ -185,6 +192,10 @@ class HTMLDOM extends DOMDocument {
         $this->content = preg_replace_callback('/(<+)(<)/i', array($this, 'replaceCallback'), $this->content);
         $this->content = preg_replace_callback('/(>+)(>)/i', array($this, 'replaceCallback'), $this->content);
         $this->content = preg_replace_callback('/(<+)([^a-z^\/])/i', array($this, 'replaceCallback'), $this->content);
+    }
+
+    public function nodes() {
+        return new Nodes($this);
     }
 
 }
@@ -287,6 +298,14 @@ class Nodes extends HTMLElement {
 
 }
 
+class PageDOM extends HTMLDOM {
+
+    public function __construct($url, $referer, $addBody = false) {
+        $p = new FetchPage($url, $referer);
+        parent::__construct($p->getContent(), $addBody);
+    }
+}
+
 class Tools {
 
     public static function replaceMask($str, $i, $mask = '@@NUM@@') {
@@ -348,9 +367,8 @@ $f = new LoopFetch('http://www.zdic.net/c/cibs/');
 $f->setUrl('http://www.zdic.net/c/cibs/bs/?bs=@@MASK@@', $bsArr);
 
 $f->fetch(function($content, $url, $referer) {
-    $dom = new HTMLDOM('<html><head></head><body>' . $content . '</body></html>');
-
-    $indexes = new Nodes($dom);
+    $dom = new HTMLDOM($content, true);
+    $indexes = $dom->nodes();
     $indexes->detectionIndexesLen('/html/body/div/li');
     $list = $indexes->getNodesContent('/html/body/div/li[@@NUM@@]/a');
     $ret = '';
@@ -362,10 +380,8 @@ $f->fetch(function($content, $url, $referer) {
         $getFlag = true;
         do {
             $url = Tools::path2Url('sc/?z=' . $node . '|' . $num, 'http://www.zdic.net/c/cibs/ci/');
-            $p = new FetchPage($url, $referer);
-            $subDom = new HTMLDOM('<html><head></head><body>' . $p->getContent() . '</body></html>');
-
-            $indexesSub = new Nodes($subDom);
+            $subDom = new PageDOM($url, $referer, true);
+            $indexesSub = $subDom->nodes();
             if ($getFlag) {
                 $recourd = $indexesSub->getContentByXpath('/html/body/div/h2');
                 list(, $count, ) = explode(' ', $recourd);
