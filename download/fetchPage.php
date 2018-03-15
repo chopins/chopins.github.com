@@ -56,6 +56,7 @@ class FetchPage {
             $this->setCurlOpt($url);
             curl_setopt_array($ch, $this->curlOpt);
             $this->content = curl_exec($ch);
+            curl_close($ch);
             if ($errcnt < 10) {
                 $errcnt++;
             }
