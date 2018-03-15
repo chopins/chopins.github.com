@@ -60,7 +60,7 @@ class FetchPage {
             if ($errcnt < 10) {
                 $errcnt++;
             }
-        } while (!$this->content && sleep($errcnt) === 0);
+        } while (!$this->content && (print("sleep $errcnt") && sleep($errcnt) === 0));
     }
 
 }
@@ -294,7 +294,7 @@ class Nodes extends HTMLElement {
     public function getNodesContent($xpath) {
         $ret = [];
 
-        for ($i = $this->start; $i < $this->len; $i++) {
+        for ($i = $this->start; $i <= $this->len; $i++) {
             $rxpath = Tools::replaceMask($xpath, $i);
             $ret[] = $this->getContentByXpath($rxpath);
         }
@@ -318,8 +318,8 @@ class Tools {
         return str_replace($mask, "$i", $str);
     }
 
-    public static function msg($msg) {
-        echo "$msg" . PHP_EOL;
+    public static function msg($msg, $append = '') {
+        echo "$msg" . $append;
     }
 
     /**
@@ -358,6 +358,12 @@ class Tools {
 
 }
 
+function getPage($indexes, &$count = 1) {
+    $recourd = $indexes->getContentByXpath('/html/body/div/h2');
+    list(, $count, ) = explode(' ', $recourd);
+    return ceil($count / 300);
+}
+
 $bs = '丨亅丿乛一乙乚丶八勹匕冫卜厂刀刂儿二匚阝丷几卩冂力冖凵人亻入十厶亠匸讠廴又艹屮彳巛川辶寸大飞干工弓廾广己彐彑巾口马门宀女犭山彡尸饣士扌氵纟巳土囗兀夕小忄幺弋尢夂子贝比灬长车歹斗厄方风父戈卝户火旡见斤耂毛木肀牛牜爿片攴攵气欠犬日氏礻手殳水瓦尣王韦文毋心牙爻曰月爫支止爪白癶歺甘瓜禾钅立龙矛皿母目疒鸟皮生石矢示罒田玄穴疋业业用玉耒艸臣虫而耳缶艮虍臼米齐肉色舌覀页先行血羊聿至舟衣竹自羽糸糹貝采镸車辰赤辵豆谷見角克里卤麦身豕辛言邑酉豸走足青靑雨齿長非阜金釒隶門靣飠鱼隹風革骨鬼韭面首韋香頁音髟鬯鬥高鬲馬黄鹵鹿麻麥鳥魚鼎黑黽黍黹鼓鼠鼻齊齒龍龠';
 
 $bsArr = [];
@@ -366,20 +372,46 @@ for ($i = 0; $i < mb_strlen($bs); $i++) {
 }
 
 file_put_contents(__DIR__ . '/data/词.txt', '');
+$allcnt = count($bsArr);
+Tools::msg("部首共计：$allcnt 个", PHP_EOL);
 
-Tools::msg("部首共计：" . count($bsArr) . "个");
 
 $f = new LoopFetch('http://www.zdic.net/c/cibs/');
 $f->setUrl('http://www.zdic.net/c/cibs/bs/?bs=@@MASK@@', $bsArr);
 
 $f->fetch(function($content, $url, $referer) {
+    static $charn = 1;
     $dom = new HTMLDOM($content, true);
     $indexes = $dom->nodes();
     $indexes->detectionIndexesLen('/html/body/div/li');
-    $list = $indexes->getNodesContent('/html/body/div/li[@@NUM@@]/a');
+    $charCount = 1;
+    $cpage = getPage($indexes, $charCount);
+
+    if ($charCount == 1) {
+        $list = $indexes->getContentByXpath('/html/body/div/li/a');
+        $list = [$list];
+    } else if ($charCount < 1) {
+        return 0;
+    } else {
+        $list = $indexes->getNodesContent('/html/body/div/li[@@NUM@@]/a');
+    }
+    list(, $char) = explode('?bs=', $url);
+
+    for ($pp = 2; $pp <= $cpage; $pp++) {
+        Tools::msg(PHP_EOL);
+        $ridex = new PageDOM("http://www.zdic.net/c/cibs/bs/?bs=$char|$pp", $referer, true);
+        $rindexDom = $ridex->nodes();
+        $rindexDom->detectionIndexesLen('/html/body/div/li');
+     
+        $rlist = $rindexDom->getNodesContent('/html/body/div/li[@@NUM@@]/a');
+   
+        $list = array_merge($list, $rlist);
+    }
     $ret = '';
-    $len = $indexes->getCount();
-    Tools::msg("汉字：$len 个");
+    $len = count($list);
+
+    Tools::msg(" ---- $charn / {$GLOBALS['allcnt']} 汉字：$len 个                       ", PHP_EOL);
+    $charn++;
     foreach ($list as $i => $node) {
         $page = 1;
         $num = 1;
@@ -389,21 +421,20 @@ $f->fetch(function($content, $url, $referer) {
             $subDom = new PageDOM($url, $referer, true);
             $indexesSub = $subDom->nodes();
             if ($getFlag) {
-                $recourd = $indexesSub->getContentByXpath('/html/body/div/h2');
-                list(, $count, ) = explode(' ', $recourd);
-                $page = ceil($count / 300);
+                $page = getPage($indexesSub);
                 $getFlag = false;
             }
             $page--;
             $num++;
             $indexesSub->detectionIndexesLen('/html/body/div/li');
 
-            Tools::msg("$i 、词:" . $indexesSub->getCount() . '个');
+            Tools::msg(" ---- $i/$len 、词:" . $indexesSub->getCount() . '个           ', "\r");
             $ci = $indexesSub->getNodesContent('/html/body/div/li[@@NUM@@]/a');
             $ret = implode(PHP_EOL, $ci) . PHP_EOL;
             file_put_contents(__DIR__ . '/data/词.txt', $ret, FILE_APPEND);
         } while ($page > 0);
     }
+    Tools::msg(PHP_EOL);
     return $list;
 });
 
