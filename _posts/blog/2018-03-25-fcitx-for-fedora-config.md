@@ -25,4 +25,4 @@ export XMODIFIERS=@im=fcitx
     
 但是因为一些原因输入法并不会被正确设置。另外因为`imsettings`的`xinput`脚本会进行环境变量清理，所以用户添加的`GTK_IM_MODULE`将会失效。从而导致输入法无法使用。
 
-另一个为经过测试的方法是：在`/etc/X11/xinit/xinput.d/fcitx.conf`添加`IMSETTINGS_MODULE=fcitx`,以使`imsettings-switch`能自动设置输入法。
+另一个未经过测试、不保证有效的的方法是：在`/etc/X11/xinit/xinput.d/fcitx.conf`添加`IMSETTINGS_MODULE=fcitx`,以使`imsettings-switch`能自动设置输入法。
