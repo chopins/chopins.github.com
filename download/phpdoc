@@ -52,6 +52,13 @@ PHD_PATH=`which phd`
 PHD_PATH=`realpath $PHD_PATH`
 PHP_CMD='php -d memory_limit=-1' 
 
+if [ ! -e $PHP_DOC_WEB ];then
+    mkdir $PHP_DOC_WEB
+elif [ ! -d $PHP_DOC_WEB ];then
+    echo "Error:File $PHP_DOC_WEB is exists"
+    exit
+fi
+
 cd $PHP_DOC_WEB
 rsync -avzC --timeout=60 --delete --delete-after --exclude='manual/**' --exclude='distributions/**' --exclude='extra/**'  --exclude='backend/events/**' --exclude='backend/notes/**' rsync.php.net::phpweb ./webroot
 
