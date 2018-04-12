@@ -18,7 +18,7 @@ function usage() {
 }
 
 function checkcmd() {
-    $1 --version > /dev/null
+    $1 --version &> /dev/null
     if [ $? -gt 0 ];then
         echo "$1 command not found, need install or add environment path"
         exit 127
