@@ -1,16 +1,17 @@
 #!/bin/sh
 
-if [ "$#" -eq 1 ] && [[ "$1" -eq '--help' || "$1" -eq '-h' ]];then
+if [ "$#" -eq 1 ] && [[ "$1" == '--help' || "$1" == '-h' ]];then
     echo "Usage: $0 --help/-h  show this message"
     echo "       $0            auto find php-bin-dir"
     echo "       $0 /php/bin   specified php-bin-dir is /php/bin"
+    exit
 fi
 
 USER=`whoami`
 
 if [ $USER != 'root' ];then
     echo 'must use root exec this script'
-exit
+    exit 1
 
 fi
 
@@ -118,8 +119,8 @@ exit $?
 fi
 
 echo $PHPINI
-exists=`cat ${PHPINI}|grep extension=${N}`
-if [ $? -eq 1 ];then
+MATCH_NUM=`cat ${PHPINI}|grep -c extension=${N}`
+if [ $MATCH_NUM -eq 1 ];then
 	echo 'Write extension='$N' to php.ini'
 	echo 'extension='$N >>${PHPINI} 
 else 
