@@ -53,7 +53,7 @@ PHPCONFIG=`${PHPBIN_DIR}/php-config --configure-options`
 PHPINI=`get_php_ini ${PHPCONFIG}`
 if [ "$PHPINI" == "" ];then
 PHPPRE=`${PHPBIN_DIR}/php-config --prefix`
-PHPINI=`${PHPPRE}/lib/php.ini`
+PHPINI="${PHPPRE}/lib/php.ini"
 fi
 
 if [ ! -e "$PHPINI" ];then
@@ -62,7 +62,7 @@ else
 	echo "Found php.ini in ${PHPINI}"
 fi
 PHPFPM=0
-if [ ! -e "${PHPBIN_DIR}php-fpm" ] ; then
+if [ -e "${PHPBIN_DIR}php-fpm" ] ; then
 	echo "Found PHP-FPM in ${PHPBIN_DIR}php-fpm"
 PHPFPM=1
 else
@@ -108,12 +108,20 @@ else
 	echo "extension config exists"
 fi
 
-make clean && /opt/php/bin/phpize --clean 
-if [ $PHPFPM -eq 1 ];then
+make clean && /opt/php/bin/phpize --clean
+echo 'Checking php-fpm'
+PHP_FPM_PROCESS=`ps aux |grep -c php-fpm`
+if [ $PHP_FPM_PROCESS -eq 1 ];then
+   echo 'php-fpm is not runing, exit'
+   exit 0
+fi
+if [[ $PHP_FPM_PROCESS -gt 1 &&  $PHPFPM -eq 1 ]];then
 	echo 'Restart php-fpm: '
 	killall -s USR2 php-fpm
 	if [ $? -gt 0 ];then
-	echo 'Failure'
+	   echo 'Failure'
+	else
+	   echo 'php-fpm restart success,exit'
+	   exit 0
 	fi
 fi
-
