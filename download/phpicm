@@ -1,9 +1,15 @@
 #!/bin/sh
 
+if [ "$#" -eq 1 ] && [[ "$1" -eq '--help' || "$1" -eq '-h' ]];then
+    echo "Usage: $0 --help/-h  show this message"
+    echo "       $0            auto find php-bin-dir"
+    echo "       $0 /php/bin   specified php-bin-dir is /php/bin"
+fi
+
 USER=`whoami`
 
 if [ $USER != 'root' ];then
-echo 'must use root exec this script'
+    echo 'must use root exec this script'
 exit
 
 fi
@@ -30,25 +36,37 @@ esac
 done
 }
 
-if [ "$#" -eq 2 ] && [ -d "$2" ] ;then
-PHPBIN_DIR=$2
+
+if [ "$#" -eq 1 ] && [ -d "$1" ] ;then
+    if [ ! -e "$1/phpize" ];then
+        echo "not found phpize in $1"
+        exit
+    fi
+    PHPBIN_DIR=$1
 elif [ -e '/opt/php/bin/phpize' ]; then
-PHPBIN_DIR='/opt/php/bin/'
-elif [ -e '/usr/local/php/bin/phpize' ]; then
-PHPBIN_DIR='usr/local/php/bin/'
-elif [ -e '/usr/bin/phpize' ];then
-PHPBIN_DIR='/usr/bin/'
+    PHPBIN_DIR='/opt/php/bin/'
 else
-	echo 'Not Found PHP'
-exit
+    which --version &> /dev/null
+    if [ $? -gt 0 ];then
+        echo "command 'which' not found. please install"
+        exit
+    fi
+    PHPIZE=`which phpize`
+    if [ $? -eq 0 ];then
+        PHPBIN_DIR=`dirname $PHPIZE`
+    else
+	    echo 'Not Found PHP bin dir'
+	    exit
+	fi
 fi
 
 echo "Found phpize in ${PHPBIN_DIR}phpize"
 if [ -e "${PHPBIN_DIR}/php-config" ];then
-echo "Found php-config in ${PHPBIN_DIR}php-config"
+    echo "Found php-config in ${PHPBIN_DIR}php-config"
 else
-echo "Not Found php-config in ${PHPBIN_DIR}php-config"
+    echo "Not Found php-config in ${PHPBIN_DIR}php-config"
 fi
+
 PHPCONFIG=`${PHPBIN_DIR}/php-config --configure-options`
 PHPINI=`get_php_ini ${PHPCONFIG}`
 if [ "$PHPINI" == "" ];then
