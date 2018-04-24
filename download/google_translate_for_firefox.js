@@ -74,14 +74,18 @@ function selectContent(parentDoc,e) {
 }
 function addEvent(parentDoc) {
   	document.addEventListener('dbclick',function(e) {
+      var c = e.target.style.zIndex;
+      if(c && c > 10000) parentDoc._google_translate_pop_info.style.zIndex = c+10;
       selectContent(parentDoc,e);
     });
   	document.addEventListener('click',function(e) {
+      var c = e.target.style.zIndex;
+      if(c && c > 10000) parentDoc._google_translate_pop_info.style.zIndex = c+10;
       selectContent(parentDoc,e);
     });
     
     parentDoc._google_translate_pop_info = document.createElement('div');
-    var style = {borderRadius: "5px", position: "absolute", display: "none",
+    var style = {borderRadius: "5px", position: "absolute", display: "none",'z-index':10000,
         padding: "10px", margin: "10px", background: "#000000", color: "#FFFFFF", opacity: "0.6"};
     setStyle(parentDoc,style);
     var video = document.createElement('video');
@@ -92,6 +96,7 @@ function addEvent(parentDoc) {
     var sub = document.createElement('div');
    	parentDoc._google_translate_pop_info.appendChild(sub);
     parentDoc.body.appendChild(parentDoc._google_translate_pop_info);
+  	console.log('add pop');
 }
 
 
@@ -115,6 +120,7 @@ function load(parentNode) {
         }
 
     } else if( bodyTag === 'BODY') {
+      	console.log('add event');
       	addEvent(parentNode);
     }
   	var iframes = parentNode.getElementsByTagName('iframe');
