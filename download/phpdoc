@@ -9,7 +9,6 @@
 
 #set your default locale language
 LAN='zh'
-LOCAL_PWD=`pwd`
 
 function usage() {
     echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer,创建本地文档项目'
@@ -29,7 +28,6 @@ function checkcmd() {
 function looprun() {
    cnt=1
    RET=1
-   cd $LOCAL_PWD
    echo "looprun $1"
    while [[ $RET -gt 0 && $cnt -lt 5 ]]
    do
