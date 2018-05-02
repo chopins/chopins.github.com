@@ -9,6 +9,7 @@
 
 #set your default locale language
 LAN='zh'
+LOCAL_PWD=`pwd`
 
 function usage() {
     echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer,创建本地文档项目'
@@ -18,7 +19,7 @@ function usage() {
 }
 
 function checkcmd() {
-    $1 --version &> /dev/null
+    $1 --version > /dev/null
     if [ $? -gt 0 ];then
         echo "$1 command not found, need install or add environment path"
         exit 127
@@ -28,6 +29,7 @@ function checkcmd() {
 function looprun() {
    cnt=1
    RET=1
+   cd $LOCAL_PWD
    echo "looprun $1"
    while [[ $RET -gt 0 && $cnt -lt 5 ]]
    do
@@ -42,7 +44,7 @@ if [ $# -eq 0 ];then
     usage
 fi
 if [ $# -eq 1 ];then
-    PHP_DOC_WEB=$(realpath $1)
+    PHP_DOC_WEB=`pwd`
     OP='up'
 elif [ $# -ge 2 ];then
     OP=$1
