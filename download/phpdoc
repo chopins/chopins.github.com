@@ -116,8 +116,8 @@ echo "==================================================="
 echo "Below is nginx rewrite config"
 echo 'location / {'
 echo '     try_files $uri  $uri/ $uri.php;'
-echo '         if ( !-f $request_filename ) {'
-echo '             rewrite ^/([a-z0-9\_\-]+) /manual/$cookie_LAST_LANG/function.$1.php;'
-echo '      }'
+echo '     if ( !-f $request_filename ) {'
+echo '          rewrite ^/([a-z0-9\_\-]+) /manual/$cookie_LAST_LANG/function.$1.php;'
+echo '     }'
 echo '}'
 
