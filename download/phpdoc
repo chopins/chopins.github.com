@@ -9,6 +9,7 @@
 
 #set your default locale language
 LAN='zh'
+set -x
 
 function usage() {
     echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer,创建本地文档项目'
@@ -28,7 +29,6 @@ function checkcmd() {
 function looprun() {
    cnt=1
    RET=1
-   echo "looprun $1"
    while [[ $RET -gt 0 && $cnt -lt 5 ]]
    do
 	$1
@@ -112,3 +112,12 @@ wget http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js -O ./webroot/js/
 sed -i '/ajax\.googleapis\.com/d' ./webroot/include/footer.inc
 sed -i 's/\$jsfiles = array(/$jsfiles = array("jquery.min.js",/g' ./webroot/include/footer.inc
 echo "Web Root is: $PHP_DOC_WEB/webroot"
+echo "==================================================="
+echo "Below is nginx rewrite config"
+echo 'location / {'
+echo '     try_files $uri  $uri/ $uri.php;'
+echo '         if ( !-f $request_filename ) {'
+echo '             rewrite ^/([a-z0-9\_\-]+) /manual/$cookie_LAST_LANG/function.$1.php;'
+echo '      }'
+echo '}'
+
