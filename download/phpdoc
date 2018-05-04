@@ -9,7 +9,6 @@
 
 #set your default locale language
 LAN='zh'
-set -x
 
 function usage() {
     echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer,创建本地文档项目'
@@ -65,11 +64,14 @@ PHD_PATH=`which phd`
 PHD_PATH=`realpath $PHD_PATH`
 PHP_CMD='php -d memory_limit=-1' 
 
-if [ ! -e $PHP_DOC_WEB ];then
-    mkdir $PHP_DOC_WEB
-elif [ ! -d $PHP_DOC_WEB ];then
-    echo "Error:File $PHP_DOC_WEB is exists"
+if [ $OP == 'up' ] && [ !-e $PHP_DOC_WEB/webroot ];then
+    echo "Error: $PHP_DOC_WEB/webroot not exists, can not update"
     exit
+elif [ $OP == 'co' ] && [ -e $PHP_DOC_WEB ];then
+    echo "Error:File $PHP_DOC_WEB is exists, can not create doc"
+    exit
+elif [ $OP == 'co' ] && [ ! -e $PHP_DOC_WEB ];then
+    mkdir $PHP_DOC_WEB
 fi
 
 cd $PHP_DOC_WEB
@@ -111,13 +113,20 @@ echo "Replace jquery to local file"
 wget http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js -O ./webroot/js/jquery.min.js
 sed -i '/ajax\.googleapis\.com/d' ./webroot/include/footer.inc
 sed -i 's/\$jsfiles = array(/$jsfiles = array("jquery.min.js",/g' ./webroot/include/footer.inc
+
+echo '<?php
+$uri = trim($_SERVER["REQUEST_URI"],"/");
+$lang = empty($_COOKIE["LAST_LANG"]) ? 'en' : $_COOKIE["LAST_LANG"];
+$filepath = "/manual/$lang/function.$uri.php";
+if(!file_exists(__DIR__.$filepath)) {
+    $filepath = "/manual/$lang/$uri.php";
+} 
+header("Location: $filepath");' > ./webroot/rediect.php
+
 echo "Web Root is: $PHP_DOC_WEB/webroot"
 echo "==================================================="
 echo "Below is nginx rewrite config"
+echo 
 echo 'location / {'
-echo '     try_files $uri  $uri/ $uri.php;'
-echo '     if ( !-f $request_filename ) {'
-echo '          rewrite ^/([a-z0-9\_\-]+) /manual/$cookie_LAST_LANG/function.$1.php;'
-echo '     }'
+echo '    try_files $uri  $uri/ /rediect.php;'
 echo '}'
-
