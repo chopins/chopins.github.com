@@ -64,7 +64,7 @@ PHD_PATH=`which phd`
 PHD_PATH=`realpath $PHD_PATH`
 PHP_CMD='php -d memory_limit=-1' 
 
-if [ $OP == 'up' ] && [ !-e $PHP_DOC_WEB/webroot ];then
+if [ $OP == 'up' ] && [ ! -e $PHP_DOC_WEB/webroot ];then
     echo "Error: $PHP_DOC_WEB/webroot not exists, can not update"
     exit
 elif [ $OP == 'co' ] && [ -e $PHP_DOC_WEB ];then
