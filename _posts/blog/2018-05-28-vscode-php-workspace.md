@@ -8,7 +8,7 @@ VS Code ( Visual Studio Code ) 是微软开发的一个编辑器，速度比较�
 
 本内容其实就是介绍安装相关扩展和设置，以获得PHP的友好支持。
 
-===安装扩展
+### 安装扩展
 
     * Code Outline ，安装执行`ext install patrys.vscode-code-outline`, 获得代码导航器支持，安装后，在左侧导航图标栏会出现`Outline`图标
     * PHP Symbols，安装执行`ext install linyang95.php-symbols` 使 Code Outline 支持PHP的导航
@@ -16,7 +16,7 @@ VS Code ( Visual Studio Code ) 是微软开发的一个编辑器，速度比较�
     * phpfmt - PHP formatter，安装执行`ext install kokororin.vscode-phpfmt`,获得PHP格式化支持
     * HTML CSS Support，安装执行`ext install ecmel.vscode-html-css`,以便使PHP文件编辑内嵌HTML代码时获得提醒支持
 
-===其他扩展
+### 其他扩展
 
     * Code Runner   代码运行支持
     * ESLine        javascript
