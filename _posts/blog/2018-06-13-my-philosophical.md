@@ -1,3 +1,8 @@
+---
+layout: blog_contents
+title: 我的心理学与哲学
+categories: blog
+---
 
 #心理发生过程，人类心理来源，本源：
 
