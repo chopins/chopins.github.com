@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name     txt2book-view
+// @name     txt2bookpage
 // @version  1
 // @include    file://*.txt#*
 // @include    file://*.txt
@@ -9,7 +9,7 @@
 
 (function() {
   console.log('load');
-  var style = "body{background-color: #EDE8D5;padding: 0px 120px;color: #333;} ul{display: inline-block;position: fixed;top: 20px;left: 0px;} p {text-indent: 40px;font-size: 20px;line-height: 38px;letter-spacing: 2px;}"
+  var style = "body{background-color: #EDE8D5;padding: 0px 120px;color: #333;} .pb{font-weight: bold;} ul{display: inline-block;position: fixed;top: 20px;left: 0px;} p {text-indent: 40px;font-size: 20px;line-height: 38px;letter-spacing: 2px;}"
   var se = document.createElement('style');
   se.textContent = style;
   unsafeWindow.document.head.appendChild(se);
@@ -27,6 +27,7 @@
       res = c.match(/^\s*第[一二三四五六七八九十0-9]+[章节回][\s\n]*/);
       if(res) {
         	plist[i].setAttribute('id','c-'+cn);
+        	plist[i].setAttribute('class','pb');
           clist += '<li><a href="#c-'+cn+'">' +c+'</a></li>';
         	cn++;
       }
