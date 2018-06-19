@@ -8,7 +8,7 @@
 // ==/UserScript==
 
 (function () {
-    console.log('load');
+    console.log('load txt book');
     var style = "body{background-color: #EDE8D5;padding: 0px 150px;color: #333;} a{color:#333;}"
         + ".pb{font-weight: bold;} .active{background-color:#EFD161;}.active a{color: #D35452;}"
         + "ul{padding-left: 0px;height: 90%;overflow-y: auto;display: inline-block;position:fixed;width:150px;"
