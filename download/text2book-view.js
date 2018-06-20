@@ -80,9 +80,12 @@
                 if (p === null) {
                     break;
                 }
-                ptop = p.offsetTop;
-                if (window.__gmk_preTop > top) { if (ptop >= top) { window.__gmk_nowParagraph = pnum; } else if (ptop < top) { break; } pnum--; } else {
-                    if (ptop <= top) { window.__gmk_nowParagraph = pnum; } else if (ptop > top) { break; }
+                ptop = p.offsetTop + p.parentNode.offsetTop;
+                if (window.__gmk_preTop > top) {
+                    if (ptop >= top) { window.__gmk_nowParagraph = pnum; } else if ((ptop  + p.offsetHeight) < top) { break; }
+                    pnum--;
+                } else {
+                    if ((ptop  + p.offsetHeight) <= top) { window.__gmk_nowParagraph = pnum; } else if (ptop > top) { break; }
                     pnum++;
                 }
             }
@@ -93,13 +96,13 @@
             if (window.location.hash) { window.location.hash = '#c-' + window.location.hash.split('#')[1]; }
             __gmk_getActive();
         }
-        document.getElementsByTagName('ul')[0].addEventListener('click',function(e) {
+        document.getElementsByTagName('ul')[0].addEventListener('click', function (e) {
             var ele = e.target;
-            if(ele.tagName == 'LI') {
+            if (ele.tagName == 'LI') {
                 ele = ele.getElementsByTagName('a')[0];
             }
-            if(ele.tagName == 'A') {
-                window.location.hash = '#c-'+ ele.href.split('#')[1];
+            if (ele.tagName == 'A') {
+                window.location.hash = '#c-' + ele.href.split('#')[1];
             }
         });
     };
