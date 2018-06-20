@@ -9,7 +9,7 @@
 
 (function () {
     console.log('load txt book');
-    var style = "html{background-color:#DCCB9C;}body{background-color: #EDE8D5;margin:0px 250px;padding: 0 30px;color: #666;} a{color:#333;}"
+    var style = "html{background-color:#DCCB9C;}body{background-color: #EDE8D5;margin:0px 250px;padding: 0 30px;color: #666;} a{color:#666;}"
         + ".pb{font-weight: bold;} .active{background-color:#EFD161;}.active a{color: #D35452;}"
         + "ul{padding-left: 10px;height: 90%;overflow-y: auto;display: inline-block;position:fixed;width:250px;"
         + "top:5px;left: 0px;list-style: none;} ul li{padding:3px;width: 130px;}"
