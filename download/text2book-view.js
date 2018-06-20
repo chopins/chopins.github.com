@@ -13,7 +13,7 @@
         + ".pb{font-weight: bold;} .active{background-color:#EFD161;}.active a{color: #D35452;}"
         + "ul{padding-left: 10px;height: 90%;overflow-y: auto;display: inline-block;position:fixed;width:250px;"
         + "top:5px;left: 0px;list-style: none;} ul li{padding:3px;width: 130px;}"
-    		+ "ul div span {display: inline-block;width:20px;height:20px;border:1px solid #ccc;margin-right: 5px;}"
+        + "ul div span {display: inline-block;width:20px;height:20px;border:1px solid #ccc;margin-right: 5px;}"
         + "p {text-indent: 40px;font-size: 20px;line-height: 38px;letter-spacing: 2px;}"
     var se = document.createElement('style');
     se.textContent = style;
@@ -26,11 +26,11 @@
     c.innerHTML = '<p>' + html + '</p>';
 
     var result = true, p = null, c = '', i = cn = 1, clist = '', top = 0,
-        clist ='<div id="bgcolor"><span style="background-color:#f6f4ec;" data-pbg="#EBE5D8">'
-                + '</span><span style="background-color:#F6ECCB;" data-pbg="#DCCB9C"></span>'
-                + '<span style="background-color:#E5F1E5;" data-pbg="#CFE1CF"></span>'
-                + '<span style="background-color:#161819;" data-pbg="#0E0F11"></span>'
-    		  + '<span style="background-color:#DEDEDE;" data-pbg="#CFCFCF"></span></div>';
+        clist = '<div id="bgcolor"><span style="background-color:#f6f4ec;" data-pbg="#EBE5D8">'
+            + '</span><span style="background-color:#F6ECCB;" data-pbg="#DCCB9C"></span>'
+            + '<span style="background-color:#E5F1E5;" data-pbg="#CFE1CF"></span>'
+            + '<span style="background-color:#161819;" data-pbg="#0E0F11"></span>'
+            + '<span style="background-color:#DEDEDE;" data-pbg="#CFCFCF"></span></div>';
     while (result) {
         result = document.evaluate('/html/body/pre/p[' + i + ']', document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE);
         if (result === null) {
@@ -57,23 +57,23 @@
     ul.innerHTML = clist;
     unsafeWindow.document.body.appendChild(ul);
     var scriptText = function () {
-        var hashCode = function(str) {
+        function hashCode(str) {
             var hash = 0, i, chr;
             if (str.length === 0) return hash;
             for (i = 0; i < str.length; i++) {
-              chr   = str.charCodeAt(i);
-              hash  = ((hash << 5) - hash) + chr;
-              hash |= 0; // Convert to 32bit integer
+                chr = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + chr;
+                hash |= 0; // Convert to 32bit integer
             }
             return hash;
-          };
-        var fileHash = hashCode(window.location.pathname).
-        document.getElementById('bgcolor').addEventListener('click',function(e) {
-        	var ele = e.target;
-          if (ele.tagName == 'SPAN') {
-            document.body.style.backgroundColor = ele.style.backgroundColor;
-            document.getElementsByTagName('html')[0].style.backgroundColor = ele.getAttribute('data-pbg');
-          }
+        };
+        var fileHash = hashCode(window.location.pathname);
+        document.getElementById('bgcolor').addEventListener('click', function (e) {
+            var ele = e.target;
+            if (ele.tagName == 'SPAN') {
+                document.body.style.backgroundColor = ele.style.backgroundColor;
+                document.getElementsByTagName('html')[0].style.backgroundColor = ele.getAttribute('data-pbg');
+            }
         });;
         window.__gmk_nowActive = null;
         window.__gmk_nowParagraph = 1; window.__gmk_preTop = 1;
@@ -106,24 +106,24 @@
                 }
                 ptop = p.offsetTop + p.parentNode.offsetTop;
                 if (window.__gmk_preTop > top) {
-                    if (ptop >= top) { window.__gmk_nowParagraph = pnum; } else if ((ptop  + p.offsetHeight) < top) { break; }
+                    if (ptop >= top) { window.__gmk_nowParagraph = pnum; } else if ((ptop + p.offsetHeight) < top) { break; }
                     pnum--;
                 } else {
-                    if ((ptop  + p.offsetHeight) <= top) { window.__gmk_nowParagraph = pnum; } else if (ptop > top) { break; }
+                    if ((ptop + p.offsetHeight) <= top) { window.__gmk_nowParagraph = pnum; } else if (ptop > top) { break; }
                     pnum++;
                 }
             }
             if (p) {
-                var pageIndex =p.id.substr(2);
-                window.location.hash = pageIndex; 
+                var pageIndex = p.id.substr(2);
+                window.location.hash = pageIndex;
                 window.localStorage.setItem(fileHash, pageIndex);
             }
             window.__gmk_preTop = top;
         }
         window.document.body.onscroll = __gmk_getActive;
         var pageIndex = window.localStorage.getItem(fileHash);
-        if(pageIndex) {
-            window.location.hash = pageIndex;
+        if (pageIndex) {
+            window.location.hash = '#c-' + pageIndex;
         }
         if (window.scrollY > 0) {
             if (window.location.hash) { window.location.hash = '#c-' + window.location.hash.split('#')[1]; }
