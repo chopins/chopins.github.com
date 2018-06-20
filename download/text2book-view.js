@@ -57,6 +57,17 @@
     ul.innerHTML = clist;
     unsafeWindow.document.body.appendChild(ul);
     var scriptText = function () {
+        var hashCode = function(str) {
+            var hash = 0, i, chr;
+            if (str.length === 0) return hash;
+            for (i = 0; i < str.length; i++) {
+              chr   = str.charCodeAt(i);
+              hash  = ((hash << 5) - hash) + chr;
+              hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+          };
+        var fileHash = hashCode(window.location.pathname).
         document.getElementById('bgcolor').addEventListener('click',function(e) {
         	var ele = e.target;
           if (ele.tagName == 'SPAN') {
@@ -102,9 +113,18 @@
                     pnum++;
                 }
             }
-            if (p) { window.location.hash = p.id.substr(2); } window.__gmk_preTop = top;
+            if (p) {
+                var pageIndex =p.id.substr(2);
+                window.location.hash = pageIndex; 
+                window.localStorage.setItem(fileHash, pageIndex);
+            }
+            window.__gmk_preTop = top;
         }
         window.document.body.onscroll = __gmk_getActive;
+        var pageIndex = window.localStorage.getItem(fileHash);
+        if(pageIndex) {
+            window.location.hash = pageIndex;
+        }
         if (window.scrollY > 0) {
             if (window.location.hash) { window.location.hash = '#c-' + window.location.hash.split('#')[1]; }
             __gmk_getActive();
