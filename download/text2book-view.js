@@ -9,10 +9,11 @@
 
 (function () {
     console.log('load txt book');
-    var style = "body{background-color: #EDE8D5;padding: 0px 150px;color: #333;} a{color:#333;}"
+    var style = "html{background-color:#DCCB9C;}body{background-color: #EDE8D5;margin:0px 250px;padding: 0 30px;color: #666;} a{color:#333;}"
         + ".pb{font-weight: bold;} .active{background-color:#EFD161;}.active a{color: #D35452;}"
-        + "ul{padding-left: 0px;height: 90%;overflow-y: auto;display: inline-block;position:fixed;width:150px;"
-        + "top:20px;left: 0px;list-style: none;} ul li{padding:3px;width: 130px;}"
+        + "ul{padding-left: 10px;height: 90%;overflow-y: auto;display: inline-block;position:fixed;width:250px;"
+        + "top:5px;left: 0px;list-style: none;} ul li{padding:3px;width: 130px;}"
+    		+ "ul div span {display: inline-block;width:20px;height:20px;border:1px solid #ccc;margin-right: 5px;}"
         + "p {text-indent: 40px;font-size: 20px;line-height: 38px;letter-spacing: 2px;}"
     var se = document.createElement('style');
     se.textContent = style;
@@ -24,7 +25,12 @@
 
     c.innerHTML = '<p>' + html + '</p>';
 
-    var result = true, p = null, clist = c = '', i = cn = 1, clist = '', top = 0;
+    var result = true, p = null, c = '', i = cn = 1, clist = '', top = 0,
+        clist ='<div id="bgcolor"><span style="background-color:#f6f4ec;" data-pbg="#EBE5D8">'
+                + '</span><span style="background-color:#F6ECCB;" data-pbg="#DCCB9C"></span>'
+                + '<span style="background-color:#E5F1E5;" data-pbg="#CFE1CF"></span>'
+                + '<span style="background-color:#161819;" data-pbg="#0E0F11"></span>'
+    		  + '<span style="background-color:#DEDEDE;" data-pbg="#CFCFCF"></span></div>';
     while (result) {
         result = document.evaluate('/html/body/pre/p[' + i + ']', document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE);
         if (result === null) {
@@ -51,6 +57,13 @@
     ul.innerHTML = clist;
     unsafeWindow.document.body.appendChild(ul);
     var scriptText = function () {
+        document.getElementById('bgcolor').addEventListener('click',function(e) {
+        	var ele = e.target;
+          if (ele.tagName == 'SPAN') {
+            document.body.style.backgroundColor = ele.style.backgroundColor;
+            document.getElementsByTagName('html')[0].style.backgroundColor = ele.getAttribute('data-pbg');
+          }
+        });;
         window.__gmk_nowActive = null;
         window.__gmk_nowParagraph = 1; window.__gmk_preTop = 1;
         function __gmk_getActive() {
