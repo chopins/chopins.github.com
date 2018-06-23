@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name     txt2bookpage
 // @version  1
-// @include    file://*.txt#*
-// @include    file://*.txt
-// @grant    none
+// @include  file://*.txt#*
+// @include  file://*.txt
+// @grant    unsafeWindow
 // @run-at	 document-end
 // ==/UserScript==
 
@@ -39,6 +39,9 @@
         p = result.singleNodeValue;
         if (p === null) {
             break;
+        }
+      	if(i==1) {
+          	document.title = p.textContent;
         }
         c = p.textContent.replace(/^\s*/, '');
         p.textContent = c;
