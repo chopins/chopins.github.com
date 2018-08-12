@@ -6,7 +6,7 @@ categories: blog
 
 __字体锯齿问题解决方法__  
 
-打开配置文件`YOUR_INSTALL_PATH/netbeans-8.2/etc/netbeans.conf`，找到`netbeans_default_option=`配置项，在其末尾添加`-J-Dsun.java2d.noddraw=true`
+打开配置文件`YOUR_INSTALL_PATH/netbeans-8.2/etc/netbeans.conf`，找到`netbeans_default_option=`配置项，在其末尾添加`-J-Dsun.java2d.noddraw=true -J-Dawt.useSystemAAFontSettings=on`
 
 __界面部分中文出现方块问题解决方法__
 
