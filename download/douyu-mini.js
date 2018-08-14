@@ -16,12 +16,13 @@
             return document.querySelector(selector);
         };
       	var obj = {};
+        obj.node = query(selector);
         obj.hide = function() {
-          	var e = query(selector);
+          	var e = obj.node;
             if(e)e.style.display = 'none';
         };
         obj.css =function(s) {
-            var e = query(selector);
+            var e = obj.node;
             if(e)e.setAttribute('style', s);
         };
         return obj;
@@ -32,7 +33,7 @@
           	unsafeWindow.close();
           	return;
         }
-        var option = "width=420,height=230,resizable,scrollbars=yes";
+        var option = "width=500,height=320,resizable,scrollbars=yes,titlebar=no,location=no,toolbar=no,menubar=no";
         var url = unsafeWindow.location.href +'#ismini';
       	unsafeWindow.open(url,'mini',option);
         unsafeWindow.open('','_self',option);
@@ -46,15 +47,30 @@
         btn.addEventListener('click',opendouyu);
         unsafeWindow.document.body.appendChild(btn);
     }
+  	function hideOther(showNode) {
+        if(!showNode.parentNode) {
+           return;
+        }
+      	var cl = showNode.parentNode.childNodes;
+       
+        for(var e in cl) {
+           var ele = cl[e];
+           if(ele && ele.tagName && ele !== showNode && ele.tagName !== 'HEAD') {
+              	showNode.parentNode.removeChild(cl[e]);
+           }
+        }
+ 
+        hideOther(showNode.parentNode);
+    }
     function pageFull() {
-        $('#header').hide();
       	$('#js-room-video').css('padding:0px;position: fixed;display: block;top:0;left:0;');
-        $('.diy-live-room-top').hide();
-        $('#js-live-room-normal-right').hide();
-        $('.anchor-info-con').hide();
-        $('#js-stats-and-actions').hide();
         $('.live-room').css('padding:0px;');
       	$('#mainbody').css('width:auto');
+
+        setTimeout(function(){
+        	hideOther($('#js-room-video').node);
+          setTimeout(pageFull, 3000);
+        node.parentNode.removeChild(node);},3000);
     }
     function init() {
         if(ismini()) {
@@ -63,7 +79,7 @@
         createBtn();
     }
     function ismini() {
-        return unsafeWindow.location.hash == '#ismini';
+        return unsafeWindow.location.hash === '#ismini';
     }
     setTimeout(init, 3000);
 })();
