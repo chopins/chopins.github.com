@@ -10,6 +10,7 @@
 
 (function (){
     'use strict';
+    var hideCnt = 0;
     function $(selector) {
       console.log(selector);
         function query(selector) {
@@ -68,6 +69,10 @@
       	$('#mainbody').css('width:auto');
 
         setTimeout(function(){
+          if(hideCnt>5) {
+              return;
+          }
+          hideCnt++;
         	hideOther($('#js-room-video').node);
           setTimeout(pageFull, 3000);
         node.parentNode.removeChild(node);},3000);
