@@ -12,6 +12,7 @@
 #include "qtts.h"
 #include "msp_cmn.h"
 #include "msp_errors.h"
+#include <math.h>
 
 /* wav音频头部格式 */
 typedef struct _wave_pcm_hdr
@@ -163,11 +164,17 @@ int main(int argc, char* argv[])
 	char filename[30];            //= "wav/tts_sample%s.wav"; //合成的语音文件名称
 	char text[1000];               // = "亲爱的用户，您好，这是一个语音合成示例，感谢您对科大讯飞语音技术的支持！科大讯飞是亚太地区最大的语音上市公司，股票代码：002230";
 	char args[100];
+	char format_arr[100];
+	char* format;
 
 	for(int i=0;i<argc;i++) {
 		if(strcmp(argv[i],"-d") == 0) {
 			i++;
 			store_dir = argv[i];
+			if(!access(store_dir, 0)) {
+				printf("%s no such dir", store_dir);
+				return 1;
+			}
 		} else if(strcmp(argv[i], "-i") == 0) {
 			i++;
 			set_offset = atoi(argv[i]);
@@ -178,7 +185,7 @@ int main(int argc, char* argv[])
 		} else if(strcmp(argv[i],"-v") == 0) {
 			i++;
 			voice_name = argv[i];
-		} else if(argv[i] == "-h") {
+		} else if(strcmp(argv[i],"-h") == 0) {
 			puts(" -d 存储文件夹\n -i 读取offset\n -s 需转换的文件\n -v 合成发音人\n -h 显示本信息");
 			return 0;
 		}
@@ -214,14 +221,24 @@ int main(int argc, char* argv[])
 		printf("open %s error.\n", source_file);
 		return 1;
 	}
-
+	fseek(afp, 0L, SEEK_END);
+	int filesize = ftell(afp);
+	fseek(afp, 0L, SEEK_SET);
+	printf("File Size %d\n", filesize);
+	
+	int bit_len = ceil(filesize/1000);
+	sprintf(format_arr, "%d", bit_len);
 	if (set_offset) {
 		set_offset = atoi(argv[2]);
 		seek_offset += set_offset;
 		fseek(afp, seek_offset, SEEK_SET);
 	}
 
-
+	if(atol(format_arr) > 4) {
+		sprintf(format_arr,"%ss/convert-%s0%dd.wav", "%", "%", strlen(format_arr));
+	} else {	
+		strcpy(format_arr,  "%s/convert-%'.04d.wav");
+	}
 	do {
 		seek = 0;
 		do {
@@ -237,19 +254,23 @@ int main(int argc, char* argv[])
 
 		seek_offset += lnOffset;
 
-		sprintf(filename, "%s/convert-%d.wav", store_dir, file_count);
+		sprintf(filename, format_arr, store_dir, file_count);
+		printf("准备合成量:%d\n", seek_offset);
 		ret = text_to_speech(read_buff, filename, session_begin_params);
+		
 		memset(read_buff, 0x0, 1000);
 		if (MSP_SUCCESS != ret)
 		{
 			printf("text_to_speech failed, error code: %d.\n", ret);
 		}
+		printf("已合成量:%d\n", seek_offset);
 		file_count++;
 	} while(feof(afp) == 0 && MSP_SUCCESS == ret);
 
 	if(feof(afp) == 0) {
 		read_offset = ftell(afp);
 	}
+	fclose(afp);
 	printf("合成完毕\n");
 
 
