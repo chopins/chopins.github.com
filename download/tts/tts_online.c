@@ -134,6 +134,10 @@ int text_to_speech(const char* src_text, const char* des_path, const char* param
 	return ret;
 }
 
+void help() {
+puts("用法参数如下:\n -d  存储文件夹\n -i  读取offset\n -s  需转换的文件\n -v  合成发音人(可用：xiaoxi,xiaoyan, yanping, xiaofeng, jinger,xiaomeng,xiaolin)\n -sp 速度，1-100\n -vo 音量，1-100\n -fn 保存的音频文件编号起始数\n -h  显示本信息");
+}
+
 int main(int argc, char* argv[])
 {
 	int         ret                  = MSP_SUCCESS;
@@ -160,41 +164,53 @@ int main(int argc, char* argv[])
 	* text_encoding: 合成文本编码格式
 	*
 	*/
-	const char* session_begin_params_c = "voice_name = %s, text_encoding = utf8, sample_rate = 16000, speed = 55, volume = 50, pitch = 45, rdn = 2";
+	const char* session_begin_params_c = "voice_name = %s, text_encoding = utf8, sample_rate = 16000, speed = %s, volume = %s, pitch = 50, rdn = 2";
 	char filename[30];            //= "wav/tts_sample%s.wav"; //合成的语音文件名称
 	char text[1000];               // = "亲爱的用户，您好，这是一个语音合成示例，感谢您对科大讯飞语音技术的支持！科大讯飞是亚太地区最大的语音上市公司，股票代码：002230";
 	char args[100];
 	char format_arr[100];
 	char* format;
+	char* speed = "50";
+	char* volume = "50";
 
 	for(int i=0;i<argc;i++) {
 		if(strcmp(argv[i],"-d") == 0) {
 			i++;
 			store_dir = argv[i];
-			if(!access(store_dir, 0)) {
+			if(access(store_dir, 0) == -1) {
 				printf("%s no such dir", store_dir);
+				help();
 				return 1;
 			}
 		} else if(strcmp(argv[i], "-i") == 0) {
 			i++;
 			set_offset = atoi(argv[i]);
 		} else if(strcmp(argv[i],"-s") == 0) {
-			puts(argv[i]);
 			i++;
 			source_file = argv[i];
 		} else if(strcmp(argv[i],"-v") == 0) {
 			i++;
 			voice_name = argv[i];
 		} else if(strcmp(argv[i],"-h") == 0) {
-			puts(" -d 存储文件夹\n -i 读取offset\n -s 需转换的文件\n -v 合成发音人\n -h 显示本信息");
+			help();
 			return 0;
+		} else if(strcmp(argv[i], "-sp") == 0) {
+			i++;
+			speed = argv[i];
+		} else if(strcmp(argv[i], "-vo") == 0) {
+			i++;
+			volume = argv[i];
+		} else if(strcmp(argv[i], "-fn") == 0) {
+			i++;
+			file_count = atoi(argv[i]);
 		}
 	}
 	if(strlen(source_file) == 0) {
 		puts("require source file path");
+		help();
 		return 1;
 	}
-	sprintf(session_begin_params, session_begin_params_c, voice_name);
+	sprintf(session_begin_params, session_begin_params_c, voice_name, speed, volume);
 
 	FILE * afp;
 
@@ -205,11 +221,6 @@ int main(int argc, char* argv[])
 		printf("MSPLogin failed, error code: %d.\n", ret);
 		goto exit ;//登录失败，退出登录
 	}
-	printf("\n###########################################################################\n");
-	printf("## 语音合成（Text To Speech，TTS）技术能够自动将任意文字实时转换为连续的 ##\n");
-	printf("## 自然语音，是一种能够在任何时间、任何地点，向任何人提供语音信息服务的  ##\n");
-	printf("## 高效便捷手段，非常符合信息时代海量数据、动态更新和个性化查询的需求。  ##\n");
-	printf("###########################################################################\n\n");
 	/* 文本合成 */
 	printf("开始合成 ...\n");
 
@@ -228,8 +239,7 @@ int main(int argc, char* argv[])
 	
 	int bit_len = ceil(filesize/1000);
 	sprintf(format_arr, "%d", bit_len);
-	if (set_offset) {
-		set_offset = atoi(argv[2]);
+	if (set_offset > 0) {
 		seek_offset += set_offset;
 		fseek(afp, seek_offset, SEEK_SET);
 	}
@@ -263,7 +273,7 @@ int main(int argc, char* argv[])
 		{
 			printf("text_to_speech failed, error code: %d.\n", ret);
 		}
-		printf("已合成量:%d\n", seek_offset);
+		printf("保存文件:%s, 已合成量:%d\n", filename, seek_offset);
 		file_count++;
 	} while(feof(afp) == 0 && MSP_SUCCESS == ret);
 
