@@ -135,7 +135,7 @@ int text_to_speech(const char* src_text, const char* des_path, const char* param
 }
 
 void help() {
-puts("用法参数如下:\n -d  存储文件夹\n -i  读取offset\n -s  需转换的文件\n -v  合成发音人(可用：xiaoxi,xiaoyan, yanping, xiaofeng, jinger,xiaomeng,xiaolin)\n -sp 速度，1-100\n -vo 音量，1-100\n -fn 保存的音频文件编号起始数\n -h  显示本信息");
+puts("本软件基于科大讯飞在线TTS提供文字转语音\n用法参数如下:\n -d  存储文件夹\n -i  读取offset\n -s  需转换的文件\n -v  合成发音人(可用：xiaoxi,xiaoyan, yanping, xiaofeng, jinger,xiaomeng,xiaolin)\n -sp 速度，1-100\n -vo 音量，1-100\n -fn 保存的音频文件编号起始数\n -h  显示本信息");
 }
 
 int main(int argc, char* argv[])
@@ -146,9 +146,10 @@ int main(int argc, char* argv[])
 	int 		seek_offset = 0;
 	int 		set_offset = 0;
 	int 	    file_count = 1;
+	int 		maxLen = 8000;
 	int lnOffset = 0;
 	const char* login_params         = "appid = 5c1d90a2, work_dir = .";//登录参数,appid与msc库绑定,请勿随意改动
-	char read_buff[1000];
+	char read_buff[maxLen];
 	int char1;
 	char* source_file = "";
 	char* store_dir = "wav";
@@ -237,7 +238,7 @@ int main(int argc, char* argv[])
 	fseek(afp, 0L, SEEK_SET);
 	printf("File Size %d\n", filesize);
 	
-	int bit_len = ceil(filesize/1000);
+	int bit_len = ceil(filesize/maxLen);
 	sprintf(format_arr, "%d", bit_len);
 	if (set_offset > 0) {
 		seek_offset += set_offset;
@@ -257,7 +258,7 @@ int main(int argc, char* argv[])
 			if(char1 == 10) {
 				lnOffset = seek;
 			}
-		} while(feof(afp) == 0 && seek < 1000);
+		} while(feof(afp) == 0 && seek < maxLen);
 
 		fseek(afp, seek_offset, SEEK_SET);
 		fread(read_buff,1, lnOffset, afp);
@@ -268,7 +269,7 @@ int main(int argc, char* argv[])
 		printf("准备合成量:%d\n", seek_offset);
 		ret = text_to_speech(read_buff, filename, session_begin_params);
 		
-		memset(read_buff, 0x0, 1000);
+		memset(read_buff, 0x0, maxLen);
 		if (MSP_SUCCESS != ret)
 		{
 			printf("text_to_speech failed, error code: %d.\n", ret);
