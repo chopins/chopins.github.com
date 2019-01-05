@@ -29,12 +29,13 @@
     var idx = 1;
     var reg = new RegExp(/^\s*第[一二三四五六七八九十百千十0-9]+[章节回集][\s\n]*/);
     var cnum = 0;
+    clist += '<li><a href="#p-' + idx + '" data-cn="'+cnum+'">书首</a></li>';
     var html = c.textContent.replace(/([^\n]*)\n/g, function (ms,sub) {
         var s ='<p id="c-p-'+idx+'"';
         if (reg.test(sub)) {
             s += ' class="pb"';
             cnum++;
-            clist += '<li><a href="#p-' + idx + '" data-cn="'+cnum+'">' + sub + '</a></li>';   
+            clist += '<li><a href="#p-' + idx + '" data-cn="'+cnum+'">' + sub + '</a></li>';
         }
         s += ' data-cn="'+cnum+'">';
         idx++;
@@ -73,7 +74,7 @@
                 activeId = 'c-' + activeId;
             }
             activeP = document.getElementById(activeId);
-            var idx = activeP.getAttribute('data-cn');   
+            var idx = activeP.getAttribute('data-cn');
             if(activeLink != null) {
                 activeLink.removeAttribute('class');
             }
