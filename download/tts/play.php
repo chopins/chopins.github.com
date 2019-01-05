@@ -19,6 +19,15 @@ $playHistory = [];
 $i =0;
 while(true) {
     $darr = scandir($dir);
+    if(count($darr) <= $playHistory) {
+        echo "已播放完毕。按q键退出，按c键继续";
+        $enter = trim(fgets(STDIN));
+        if($enter == 'c') {
+            continue;
+        } else {
+            exit;
+        }
+    }
     foreach($darr as $f) {
         if($f === '.' || $f=== '..') {
             continue;
@@ -32,8 +41,10 @@ while(true) {
         if(in_array($f, $playHistory)) {
             continue;
         }
-        $playHistory[] = $f;
         $file = "$dir/$f";
-        system("mplayer $file");
+        if(file_exists($file)) {
+            $playHistory[] = $f;
+            system("mplayer $file");
+        }
     }
 }
