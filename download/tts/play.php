@@ -19,7 +19,8 @@ $playHistory = [];
 $i =0;
 while(true) {
     $darr = scandir($dir);
-    if(count($darr) <= $playHistory) {
+    $diff = array_diff($darr, $playHistory);
+    if(count($diff) == 0) {
         echo "已播放完毕。按q键退出，按c键继续";
         $enter = trim(fgets(STDIN));
         if($enter == 'c') {
@@ -32,12 +33,11 @@ while(true) {
         if($f === '.' || $f=== '..') {
             continue;
         }
-        $i++;
-        if($offset !==false && $i != $offset) {
+        if($offset !==false && $f == $offset) {
+            $offset = false;
             continue;
         }
-        $offset = false;
-        
+
         if(in_array($f, $playHistory)) {
             continue;
         }
