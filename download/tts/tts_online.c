@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 	int 	    file_count = 1;
 	int 		maxLen = 8000;
 	int lnOffset = 0;
-	const char* login_params         = "appid = 5c1d90a2, work_dir = .";//登录参数,appid与msc库绑定,请勿随意改动
+	const char* login_params         = "appid = XXXXXXX, work_dir = .";//修改appid,登录参数,appid与msc库绑定,请勿随意改动
 	char read_buff[maxLen];
 	int char1;
 	char* source_file = "";
