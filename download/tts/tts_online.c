@@ -135,7 +135,7 @@ int text_to_speech(const char* src_text, const char* des_path, const char* param
 }
 
 void help() {
-puts("本软件基于科大讯飞在线TTS提供文字转语音\n用法参数如下:\n -d  存储文件夹\n -i  读取offset\n -s  需转换的文件\n -v  合成发音人(可用：xiaoxi,xiaoyan, yanping, xiaofeng, jinger,xiaomeng,xiaolin)\n -sp 速度，1-100\n -vo 音量，1-100\n -fn 保存的音频文件编号起始数\n -h  显示本信息");
+puts("本软件基于科大讯飞在线TTS提供文字转语音\n用法参数如下:\n -d  存储文件夹\n -i  读取offset(上次处理到的 offset 数)\n -s  需转换的文件\n -v  合成发音人(可用：xiaoxi,xiaoyan, yanping, xiaofeng, jinger,xiaomeng,xiaolin)\n -sp 速度，1-100\n -vo 音量，1-100\n -fn 保存的音频文件编号起始数(新的 offset )\n -h  显示本信息");
 }
 
 int main(int argc, char* argv[])
