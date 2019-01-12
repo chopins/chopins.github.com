@@ -1,6 +1,6 @@
 #common makefile header
 
-ROOT=/home/chopin/bin/tts
+ROOT=YOUR_TTS_BIN/tts
 DIR_INC = $(ROOT)/include
 DIR_BIN = $(ROOT)/bin
 DIR_LIB = $(ROOT)/libs
