@@ -27,7 +27,7 @@
         + '<span style="background-color:#161819;" data-pbg="#0E0F11"></span>'
         + '<span style="background-color:#DEDEDE;" data-pbg="#CFCFCF"></span></div>'
     var idx = 1;
-    var reg = new RegExp(/^\s*第[一二三四五六七八九十百千十0-9]+[章节回集][\s\n]*/);
+    var reg = new RegExp(/^\s*第[一二三四五六七八九十百千十〇0-9]+[章节回集][\s\n]*/);
     var cnum = 0;
     clist += '<li><a href="#p-' + idx + '" data-cn="'+cnum+'">书首</a></li>';
     var html = c.textContent.replace(/([^\n]*)\n/g, function (ms,sub) {
