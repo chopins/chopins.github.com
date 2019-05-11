@@ -59,3 +59,25 @@ st.type = 'text/css';
 st.innerHTML = " * {-moz-user-select: text !important;}";
 document.getElementsByTagName('HEAD').item(0).appendChild(st);
 ```
+
+元素属性变更事件注册
+```javascript
+function addAttributesChangeEvent(node, callback) {
+    var config = {attributes: true};
+    if(typeof MutationObserver != 'undefined') {
+        var mobs = MutationObserver;
+    } else if(typeof WebKitMutationObserver != 'undefined') {
+        var mobs = WebKitMutationObserver;
+    } else if(window.ActiveXObject) {
+        return node.attachEvent('onpropertychange', callback);
+    }
+    var observer = new mobs(function(mutationsList, observer) {
+        for(var mutation of mutationsList) {
+                if (mutation.type == 'attributes' && node === mutation.target) {
+                    callback(mutation.target);
+                }
+            }
+        });
+    observer.observe(node, config); 
+}
+```
