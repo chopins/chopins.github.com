@@ -71,7 +71,7 @@ function addAttributesChangeEvent(node, callback) {
     } else if(window.ActiveXObject) {
         return node.attachEvent('onpropertychange', callback);
     } else {
-        return null;
+        return undefined;
     }
     var observer = new mobs(function(mutationsList, observer) {
         for(var mutation of mutationsList) {
@@ -81,6 +81,13 @@ function addAttributesChangeEvent(node, callback) {
             }
         });
     observer.observe(node, config);
-    return true;
+    node.observer = observer;
+}
+
+function removeAttributesChangeEvent(node, callback) {
+    if(window.ActiveXObject) {
+        return node.attachEvent('onpropertychange', callback);
+    }
+    node.observer.disconnect();
 }
 ```
