@@ -70,6 +70,8 @@ function addAttributesChangeEvent(node, callback) {
         var mobs = WebKitMutationObserver;
     } else if(window.ActiveXObject) {
         return node.attachEvent('onpropertychange', callback);
+    } else {
+        return null;
     }
     var observer = new mobs(function(mutationsList, observer) {
         for(var mutation of mutationsList) {
@@ -78,6 +80,7 @@ function addAttributesChangeEvent(node, callback) {
                 }
             }
         });
-    observer.observe(node, config); 
+    observer.observe(node, config);
+    return true;
 }
 ```
