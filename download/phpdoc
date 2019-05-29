@@ -55,7 +55,7 @@ fi
 checkcmd rsync
 checkcmd svn
 checkcmd php
-checkcmd phd
+checkcmd 'php phd'
 checkcmd sed
 checkcmd wget
 checkcmd which
