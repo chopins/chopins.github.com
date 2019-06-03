@@ -9,10 +9,9 @@
 
 (function () {
     console.log('load txt book');
-
     var style = "html{background-color:#DCCB9C;}body{background-color: #EDE8D5;margin:0px 250px;padding: 0 30px;color: #666;} a{color:#666;}"
         + ".pb{font-weight: bold;} .active{background-color:#ECECDF;}.active a{color: #D35452;}"
-        + "ul{padding-left: 10px;height: 90%;overflow-y: auto;display: inline-block;position:fixed;width:250px;"
+        + "ul{padding-left: 10px;height: 100%;overflow-y: auto;display: inline-block;position:fixed;width:250px;"
         + "top:5px;left: 0px;list-style: none;} ul li{padding:3px;width: 100%;}"
         + "ul div span {display: inline-block;width:20px;height:20px;border:1px solid #ccc;margin-right: 5px;}"
         + "p {text-indent: 40px;font-size: 20px;line-height: 38px;letter-spacing: 2px;}"
@@ -35,7 +34,7 @@
         if (reg.test(sub)) {
             s += ' class="pb"';
             cnum++;
-            clist += '<li><a href="#p-' + idx + '" data-cn="'+cnum+'">' + sub + '</a></li>';
+            clist += '<li><a href="#p-' + idx + '" data-cn="'+cnum+'">' + sub.replace(/\s*/,'') + '</a></li>';
         }
         s += ' data-cn="'+cnum+'">';
         idx++;
@@ -58,6 +57,8 @@
             return hash;
         };
         var fileHash = hashCode(window.location.pathname);*/
+        var store = window.localStorage;
+        var filename = window.location.pathname;
         document.getElementById('bgcolor').addEventListener('click', function (e) {
             var ele = e.target;
             if (ele.tagName == 'SPAN') {
@@ -68,8 +69,9 @@
         var activeLink = null;
         var st = 0;
         var activeP = document.getElementById('c-p-1');
+        var ul = document.getElementsByTagName('ul');
         function __gmk_getActive() {
-            var activeId = window.location.hash.split('#')[1];
+            var activeId = store.getItem(filename);
             if(activeId.indexOf('c-') != 0) {
                 activeId = 'c-' + activeId;
             }
@@ -80,16 +82,19 @@
             }
             activeLink = document.getElementsByTagName('li')[idx];
             activeLink.className = 'active';
+            if((activeLink.offsetTop - ul.scrollTop) > ul.offsetHeight) {
+                activeLink.parentNode.scorllTo(0, activeLink.offsetTop);
+            }
         }
-        window.onhashchange = __gmk_getActive;
-        //window.document.body.onscroll = __gmk_getActive;
-        /*var pageIndex = window.localStorage.getItem(fileHash);
+        /*window.onhashchange = __gmk_getActive;
+        window.document.body.onscroll = __gmk_getActive;
+        var pageIndex = window.localStorage.getItem(fileHash);
         if (pageIndex) {
             window.location.hash = '#c-' + pageIndex;
-        }*/
+        }
         if (window.location.hash != '' && window.location.hash != '#') {
             __gmk_getActive();
-        }
+        }*/
         document.getElementsByTagName('ul')[0].addEventListener('click', function (e) {
             var ele = e.target;
             if (ele.tagName == 'LI') {
@@ -113,18 +118,20 @@
                     nodeOffset = find.offsetTop;
                     nodeBottomOffset = nodeOffset + find.offsetHeight;
                     if(offset >= nodeOffset && nodeBottomOffset > offset) {
-                        window.location.hash = '#' + find.id;
+                        //window.location.hash = '#' + find.id;
+                        store.setItem(filename, find.id);
                         return;
                     }
                 }
                 lastNode = find;
             }
+           
         }
         window.onscroll = function() {
             if(st) {
-                clearTimeout(st);
+                //clearTimeout(st);
             }
-            st = setTimeout(function() {
+            //st = setTimeout(function() {
             var scorllTop = window.scrollY;
             cOffset = 0;
             if(activeP != null) {
@@ -134,8 +141,19 @@
                 findOffset(scorllTop, activeP, false);
             } else {
                 findOffset(scorllTop, activeP, true);
-            }}, 1000);
-        }
+                
+            }
+            __gmk_getActive();
+        //}, 100);
+        };
+
+        (function() {
+            var id = store.getItem(filename);
+            if(id) {
+                window.location.hash = id;
+                __gmk_getActive();
+            }
+        })();
         /*window.onresize = function() {
             window.__gmk_resizeStatus = true;
             var lis = document.getElementsByTagName('ul')[0].getElementsByTagName('li');
