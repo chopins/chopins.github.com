@@ -52,34 +52,55 @@ if [ $OP != 'up' ] && [ $OP != 'co' ];then
     usage
 fi
 
-checkcmd rsync
+#checkcmd rsync
 checkcmd svn
+checkcmd git
 checkcmd php
-checkcmd 'php phd'
 checkcmd sed
 checkcmd wget
 checkcmd which
 
-PHD_PATH=` which phd`
-PHD_PATH=`realpath $PHD_PATH`
 PHP_CMD='php -d memory_limit=-1' 
-
-if [ $OP == 'up' ] && [ ! -e $PHP_DOC_WEB/webroot ];then
-    echo "Error: $PHP_DOC_WEB/webroot not exists, can not update"
-    exit
-elif [ $OP == 'co' ] && [ -e $PHP_DOC_WEB ];then
+UPDATE_PATH="webroot web-php phd doc-base en $LAN"
+for p in $UPDATE_PATH;do
+if [ $OP == 'up' ] && [ ! -e $PHP_DOC_WEB/$p ];then
+    echo "Error: $PHP_DOC_WEB/$p not exists, can not update"
+    exit 127
+fi
+done
+if [ $OP == 'co' ] && [ -e $PHP_DOC_WEB ];then
     echo "Error:File $PHP_DOC_WEB is exists, can not create doc"
-    exit
+    exit 127
 elif [ $OP == 'co' ] && [ ! -e $PHP_DOC_WEB ];then
     mkdir $PHP_DOC_WEB
 fi
 
 cd $PHP_DOC_WEB
 
-#looprun 'rsync -uavzC --timeout=60 --delete --delete-after --exclude=manual --exclude=distributions --exclude=extra  --exclude=backend/events --exclude=backend/notes rsync.php.net::phpweb ./webroot'
-echo "Upgrade web-php"
-cd ./web-php
-git pull
+if [ $OP == 'co' ]; then
+    looprun 'git clone https://github.com/php/web-php.git'
+    looprun 'git clone https://github.com/php/phd.git'
+    looprun 'svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
+    looprun 'svn co http://svn.php.net/repository/phpdoc/en/trunk en'
+    looprun "svn co http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
+elif [ $OP == 'up' ];then
+    echo "Upgrade Phd..."
+    cd phd
+    looprun 'git pull'
+    cd ..
+    echo "Upgrade web-php..."
+    cd web-php
+    looprun 'git pull'
+    cd ..
+    looprun 'svn up doc-base'
+    looprun 'svn up en'
+    looprun "svn up $LAN"
+fi
+
+PHD_PATH="$PHP_DOC_WEB/phd/render.php"
+
+
+cd web-php
 TAR_FILE="$PHP_DOC_WEB/web-php.tar.gz"
 if [ -e  $TAR_FILE ];then
    rm $TAR_FILE
@@ -91,15 +112,6 @@ cd ..
 rm -rf $PHP_DOC_WEB/webroot/*
 tar xfz $TAR_FILE -C "$PHP_DOC_WEB/webroot"
 
-if [ $OP == 'co' ]; then
-    looprun 'svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
-    looprun 'svn co http://svn.php.net/repository/phpdoc/en/trunk en'
-    looprun "svn co http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
-elif [ $OP == 'up' ];then
-    looprun 'svn up doc-base'
-    looprun 'svn up en'
-    looprun "svn up $LAN"
-fi
 $PHP_CMD doc-base/configure.php --lang=en
 $PHP_CMD $PHD_PATH -d doc-base/.manual.xml -o output/en -f php -P PHP
 
