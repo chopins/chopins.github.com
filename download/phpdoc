@@ -14,6 +14,16 @@ function usage() {
     echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer,创建本地文档项目'
     echo '      phpdoc up [YOUR_PATH]  update local php doc, 更新本地文档'
     echo '      phpdoc [YOUR_PATH]     update local php doc, 默认更新本地文档'
+    echo '      phpdoc v [YOUR_PATH]   view local php doc 查看本地文档'
+    echo ''
+    echo 'Directory Structure'
+    echo ' - doc-base   Tools for PHP documentation of svn repository'
+    echo ' - en         English PHP documentation of svn repository'
+    echo ' - '$LAN'         '$LAN' PHP documentation of svn repository'
+    echo ' - phd        The PHP based Docbook Renderer of git repository'
+    echo ' - web-php    The main PHP site at www.php.net of git repository'
+    echo ' - res        some scripts for webroot'
+    echo ' - webroot    The doc site this is local webroot directory'
     exit 255 
 }
 
@@ -41,41 +51,48 @@ if [ $# -eq 0 ];then
     usage
 fi
 if [ $# -eq 1 ];then
-    PHP_DOC_WEB=`pwd`
+    PHP_DOC_ROOT=`pwd`
     OP='up'
 elif [ $# -ge 2 ];then
     OP=$1
-    PHP_DOC_WEB=$(realpath $2)
+    PHP_DOC_ROOT=$(realpath $2)
 fi
 
-if [ $OP != 'up' ] && [ $OP != 'co' ];then
+if [ $OP != 'up' ] && [ $OP != 'co' ] && [ $OP != 'v' ];then
     usage
 fi
 
-#checkcmd rsync
+checkcmd php
+
+if [ $OP == 'v' ];then
+    cd $PHP_DOC_ROOT/webroot
+    echo "Please visit via web browser: http://127.0.0.1:8080";
+    php -S 127.0.0.1:8080 .router.php > /dev/null 2>&1
+    exit 0
+fi
+
 checkcmd svn
 checkcmd git
-checkcmd php
 checkcmd sed
 checkcmd wget
-checkcmd which
 
 PHP_CMD='php -d memory_limit=-1' 
-UPDATE_PATH="webroot web-php phd doc-base en $LAN"
+UPDATE_PATH="webroot web-php phd doc-base en $LAN res"
 for p in $UPDATE_PATH;do
-if [ $OP == 'up' ] && [ ! -e $PHP_DOC_WEB/$p ];then
-    echo "Error: $PHP_DOC_WEB/$p not exists, can not update"
+if [ $OP == 'up' ] && [ ! -e $PHP_DOC_ROOT/$p ];then
+    echo "Error: $PHP_DOC_ROOT/$p not exists, can not update"
     exit 127
 fi
 done
-if [ $OP == 'co' ] && [ -e $PHP_DOC_WEB ];then
-    echo "Error:File $PHP_DOC_WEB is exists, can not create doc"
+if [ $OP == 'co' ] && [ -e $PHP_DOC_ROOT ];then
+    echo "Error:File $PHP_DOC_ROOT is exists, can not create doc"
     exit 127
-elif [ $OP == 'co' ] && [ ! -e $PHP_DOC_WEB ];then
-    mkdir $PHP_DOC_WEB
+elif [ $OP == 'co' ] && [ ! -e $PHP_DOC_ROOT ];then
+    mkdir $PHP_DOC_ROOT
+    mkdir $PHP_DOC_ROOT/res
 fi
 
-cd $PHP_DOC_WEB
+cd $PHP_DOC_ROOT
 
 if [ $OP == 'co' ]; then
     looprun 'git clone https://github.com/php/web-php.git'
@@ -97,11 +114,11 @@ elif [ $OP == 'up' ];then
     looprun "svn up $LAN"
 fi
 
-PHD_PATH="$PHP_DOC_WEB/phd/render.php"
+PHD_PATH="$PHP_DOC_ROOT/phd/render.php"
 
 
 cd web-php
-TAR_FILE="$PHP_DOC_WEB/web-php.tar.gz"
+TAR_FILE="$PHP_DOC_ROOT/res/web-php.tar.gz"
 if [ -e  $TAR_FILE ];then
    rm $TAR_FILE
 fi
@@ -109,8 +126,8 @@ echo "Archive web-php"
 git archive --format tar.gz --output "$TAR_FILE" master
 cd ..
 
-rm -rf $PHP_DOC_WEB/webroot/*
-tar xfz $TAR_FILE -C "$PHP_DOC_WEB/webroot"
+rm -rf $PHP_DOC_ROOT/webroot/*
+tar xfz $TAR_FILE -C "$PHP_DOC_ROOT/webroot"
 
 $PHP_CMD doc-base/configure.php --lang=en
 $PHP_CMD $PHD_PATH -d doc-base/.manual.xml -o output/en -f php -P PHP
@@ -123,19 +140,22 @@ if [ ! -e ./webroot/manual ];then
 fi
 
 rm -rf ./webroot/manual/en
-if [ ! -e ./webroot/manual/en ];then
-   ln -s $PHP_DOC_WEB/output/en/php-web ./webroot/manual/en
-fi
-if [ ! -e ./webroot/manual/$LAN ];then
-   ln -s $PHP_DOC_WEB/output/zh/php-web ./webroot/manual/$LAN
-fi
+
+mv $PHP_DOC_ROOT/output/en/php-web $PHP_DOC_ROOT/webroot/manual/en
+mv $PHP_DOC_ROOT/output/zh/php-web $PHP_DOC_ROOT/webroot/manual/$LAN
+
+rm -rf $PHP_DOC_ROOT/output
+
 
 echo "Create change.php for Change Language"
-echo "<?php header(\"Location:{\$_GET['page']}\");" > ./webroot/manual/change.php
+echo "<?php header(\"Location:{\$_GET['page']}\");" > $PHP_DOC_ROOT/webroot/manual/change.php
 
 #echo "Replace jquery to local file"
-wget http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js -O ./webroot/js/jquery.min.js
-sed -i 's/\/ajax\.googleapis\.com\/ajax\/libs\/jquery\/1.10.2/js/g' ./webroot/include/footer.inc
+if [ ! -e $PHP_DOC_ROOT/res/jquery.min.js ];then
+wget http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js -O $PHP_DOC_ROOT/res/jquery.min.js
+fi
+ln -s $PHP_DOC_ROOT/res/jquery.min.js $PHP_DOC_ROOT/webroot/js/jquery.min.js
+sed -i 's/\/ajax\.googleapis\.com\/ajax\/libs\/jquery\/1.10.2/js/g' $PHP_DOC_ROOT/webroot/include/footer.inc
 
 echo '<?php
 $uri = basename(trim($_SERVER["REQUEST_URI"],"/"));
@@ -158,9 +178,20 @@ if(!file_exists(__DIR__.$filepath)) {
     exit;
 }
 
-header("Location: $filepath");' > ./webroot/rediect.php
+header("Location: $filepath");' > $PHP_DOC_ROOT/webroot/rediect.php
+if [ ! -e $PHP_DOC_ROOT/res/pregen_news ];then
+wget -O $PHP_DOC_ROOT/res/pregen_news https://master.php.net/scripts/pregen_news
+fi
+if [ ! -e $PHP_DOC_ROOT/res/conference_teaser ];then
+wget -O $PHP_DOC_ROOT/res/conference_teaser https://master.php.net/scripts/conference_teaser 
+fi
+$PHP_CMD -r '$root="'$PHP_DOC_ROOT'/webroot/";
+include "'$PHP_DOC_ROOT'/res/pregen_news";
+pregen_atom("$root/archive/archive.xml", "$root/feed.atom", "$root/include/pregen-news.inc");
+include "'$PHP_DOC_ROOT'/res/conference_teaser";
+pregenerate_conf_teaser("$root/feed.atom", "$root/include/pregen-confs.inc");'
 
-echo "Web Root is: $PHP_DOC_WEB/webroot"
+echo "Web Root is: $PHP_DOC_ROOT/webroot"
 echo "==================================================="
 echo "Below is nginx rewrite config"
 echo 
