@@ -173,7 +173,7 @@ if(!file_exists(__DIR__.$filepath)) {
 
 if(!file_exists(__DIR__.$filepath)) {
     $url = "https://www.php.net".$_SERVER["REQUEST_URI"];
-    echo "<html><body><b>File not Found</b><br>";
+    echo "<html><body><b>File not Found at local</b><br>";
     echo "<b>Please visit:</b>&nbsp;<a href=\"$url\" target=\"_blank\">$url</a><body></html>";
     exit;
 }
