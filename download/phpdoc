@@ -35,11 +35,28 @@ function checkcmd() {
     fi
 }
 
+function checkrep() {
+    if [ ! -e $2 ];then
+        return 0
+    fi
+    cd $2
+    echo "Exec:$1"
+    $1 > /dev/null
+    RET=$?
+    cd ..
+    if [ $RET -gt 0 ];then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function looprun() {
    cnt=1
    RET=1
    while [[ $RET -gt 0 && $cnt -lt 5 ]]
    do
+    echo "Exec:$1"
 	$1
 	RET=$?
 	cnt=$(($cnt+1))
@@ -86,7 +103,11 @@ fi
 done
 if [ $OP == 'co' ] && [ -e $PHP_DOC_ROOT ];then
     echo "Error:File $PHP_DOC_ROOT is exists, can not create doc"
-    exit 127
+    read -p "Whether foce write[yes/no]:" CONFIRM
+    if [ $CONFIRM == 'no' ];then
+        exit 125
+    fi
+    
 elif [ $OP == 'co' ] && [ ! -e $PHP_DOC_ROOT ];then
     mkdir $PHP_DOC_ROOT
     mkdir $PHP_DOC_ROOT/res
@@ -95,11 +116,26 @@ fi
 cd $PHP_DOC_ROOT
 
 if [ $OP == 'co' ]; then
-    looprun 'git clone https://github.com/php/web-php.git'
-    looprun 'git clone https://github.com/php/phd.git'
-    looprun 'svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
-    looprun 'svn co http://svn.php.net/repository/phpdoc/en/trunk en'
-    looprun "svn co http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
+    checkrep 'git status' web-php
+    if [ $? -eq 0 ];then
+        looprun 'git clone https://github.com/php/web-php.git'
+    fi
+    checkrep 'git status' phd
+    if [ $? -eq 0 ];then 
+        looprun 'git clone https://github.com/php/phd.git'
+    fi
+    checkrep 'svn info' doc-base
+    if [ $? -eq 0 ];then
+        looprun 'svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
+    fi
+    checkrep 'svn info' en
+    if [ $? -eq 0 ];then
+        looprun 'svn co http://svn.php.net/repository/phpdoc/en/trunk en'
+    fi
+    checkrep 'svn info' $LAN
+    if [ $? -eq 0 ];then
+        looprun "svn co http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
+    fi
 elif [ $OP == 'up' ];then
     echo "Upgrade Phd..."
     cd phd
