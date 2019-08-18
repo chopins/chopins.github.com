@@ -32,7 +32,7 @@ function checkcmd() {
     if [ $# -eq 1 ];then
       EXEC="$1 --version"
     fi
-    echo "checking" $EXEC
+    echo "Checking" $EXEC
     $EXEC > /dev/null
     RET=$?
     if [ $RET -gt 0 ];then
@@ -112,7 +112,8 @@ if [ $OP == 'v' ];then
     php -S 127.0.0.1:8080 .router.php > /dev/null 2>&1
     exit 0
 fi
-checkcmd 'php --ri dom' 'PHP dom extension '
+checkcmd "php -r extension_loaded('dom')?exit(0):exit(1);" 'PHP dom extension '
+checkcmd "php -r extension_loaded('sqlite3')?exit(0):exit(1);" 'PHP sqlite3 extension '
 checkcmd svn
 checkcmd git
 checkcmd sed
@@ -185,7 +186,9 @@ elif [ $OP == 'up' ];then
     looprun 'git pull -q'
     cd ..
     looprun 'svn up -q doc-base'
-    looprun 'svn up -q en'
+    cd en
+    looprun 'git pull -q'
+    cd ..
     looprun "svn up -q $LAN"
 fi
 
@@ -229,9 +232,10 @@ echo "<?php header(\"Location:{\$_GET['page']}\");" > $PHP_DOC_ROOT/webroot/manu
 if [ ! -e $PHP_DOC_ROOT/res/jquery.min.js ];then
 wget http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js -O $PHP_DOC_ROOT/res/jquery.min.js
 fi
-ln -s $PHP_DOC_ROOT/res/jquery.min.js $PHP_DOC_ROOT/webroot/js/jquery.min.js
-sed -i 's/\/ajax\.googleapis\.com\/ajax\/libs\/jquery\/1.10.2/js/g' $PHP_DOC_ROOT/webroot/include/footer.inc
+cp -f $PHP_DOC_ROOT/res/jquery.min.js $PHP_DOC_ROOT/webroot/js/jquery.min.js
 
+sed -i '/ajax\.googleapis\.com.*jquery/d' $PHP_DOC_ROOT/webroot/include/footer.inc
+sed -i 's/\$jsfiles = array(/&"jquery.min.js", /' $PHP_DOC_ROOT/webroot/include/footer.inc
 echo '<?php
 $uri = basename(trim($_SERVER["REQUEST_URI"],"/"));
 $lang = empty($_COOKIE["LAST_LANG"]) ? 'en' : $_COOKIE["LAST_LANG"];
