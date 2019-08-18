@@ -28,9 +28,19 @@ function usage() {
 }
 
 function checkcmd() {
-    $1 --version > /dev/null
-    if [ $? -gt 0 ];then
+    EXEC=$1
+    if [ $# -eq 1 ];then
+      EXEC="$1 --version"
+    fi
+    echo "checking" $EXEC
+    $EXEC > /dev/null
+    RET=$?
+    if [ $RET -gt 0 ];then
+	if [ $# -eq 2 ];then
+	echo "$2 not install"
+	else
         echo "$1 command not found, need install or add environment path"
+	fi
         exit 127
     fi
 }
@@ -40,15 +50,27 @@ function checkrep() {
         return 0
     fi
     cd $2
-    echo "Exec:$1"
+    echo "Exec:$1 $2"
     $1 > /dev/null
     RET=$?
     cd ..
+    #repository status error
     if [ $RET -gt 0 ];then
+	rm -rf ./$2
         return 0
     else
+	echo "Exec: $3"
+	cd $2
+	$3
+        #repository update error
+  	if [ $? -gt 0 ];then
+           cd ..
+           rm -rf ./$2
+           return 0
+        fi
         return 1
     fi
+  
 }
 
 function looprun() {
@@ -87,7 +109,7 @@ if [ $OP == 'v' ];then
     php -S 127.0.0.1:8080 .router.php > /dev/null 2>&1
     exit 0
 fi
-
+checkcmd 'php --ri dom' 'PHP dom extension '
 checkcmd svn
 checkcmd git
 checkcmd sed
@@ -103,37 +125,49 @@ fi
 done
 if [ $OP == 'co' ] && [ -e $PHP_DOC_ROOT ];then
     echo "Error:File $PHP_DOC_ROOT is exists, can not create doc"
-    read -p "Whether foce write[yes/no]:" CONFIRM
+    read -p "Whether force write[yes/no]:" CONFIRM
     if [ $CONFIRM == 'no' ];then
         exit 125
     fi
-    
+    if [ ! -e $PHP_DOC_ROOT/webroot ];then
+	mkdir $PHP_DOC_ROOT/webroot
+    fi 
+    if [ ! -e $PHP_DOC_ROOT/res ];then
+	mkdir $PHP_DOC_ROOT/res
+    fi 
+
 elif [ $OP == 'co' ] && [ ! -e $PHP_DOC_ROOT ];then
     mkdir $PHP_DOC_ROOT
     mkdir $PHP_DOC_ROOT/res
+    mkdir $PHP_DOC_ROOT/webroot
 fi
 
 cd $PHP_DOC_ROOT
 
 if [ $OP == 'co' ]; then
-    checkrep 'git status' web-php
-    if [ $? -eq 0 ];then
+    checkrep 'git status' web-php 'git pull'
+    RET=$?
+    if [ $RET -eq 0 ];then
         looprun 'git clone https://github.com/php/web-php.git'
     fi
-    checkrep 'git status' phd
-    if [ $? -eq 0 ];then 
+    checkrep 'git status' phd 'git pull'
+    RET=$?
+    if [ $RET -eq 0 ];then 
         looprun 'git clone https://github.com/php/phd.git'
     fi
-    checkrep 'svn info' doc-base
-    if [ $? -eq 0 ];then
+    checkrep 'svn info' doc-base 'svn up'
+    RET=$?
+    if [ $RET -eq 0 ];then
         looprun 'svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
     fi
-    checkrep 'svn info' en
-    if [ $? -eq 0 ];then
+    checkrep 'svn info' en 'svn up'
+    RET=$?
+    if [ $RET -eq 0 ];then
         looprun 'svn co http://svn.php.net/repository/phpdoc/en/trunk en'
     fi
-    checkrep 'svn info' $LAN
-    if [ $? -eq 0 ];then
+    checkrep 'svn info' $LAN 'svn up'
+    RET=$?
+    if [ $RET -eq 0 ];then
         looprun "svn co http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
     fi
 elif [ $OP == 'up' ];then
@@ -234,5 +268,4 @@ echo
 echo 'location / {'
 echo '    try_files $uri  $uri/ /rediect.php;'
 echo '}'
-
 
