@@ -47,10 +47,12 @@ function checkcmd() {
 
 function checkrep() {
     if [ ! -e $2 ];then
+	echo "$2 not exits"
         return 0
     fi
+    echo "$2 is exits"
     cd $2
-    echo "Exec:$1 $2"
+    echo "Exec: $1 $2"
     $1 > /dev/null
     RET=$?
     cd ..
@@ -62,9 +64,9 @@ function checkrep() {
 	echo "Exec: $3"
 	cd $2
 	$3
+	cd ..
         #repository update error
   	if [ $? -gt 0 ];then
-           cd ..
            rm -rf ./$2
            return 0
         fi
@@ -84,6 +86,7 @@ function looprun() {
 	cnt=$(($cnt+1))
 	wait
    done
+   return $RET
 }
 
 if [ $# -eq 0 ];then
@@ -145,43 +148,45 @@ fi
 cd $PHP_DOC_ROOT
 
 if [ $OP == 'co' ]; then
-    checkrep 'git status' web-php 'git pull'
+    checkrep 'git status' web-php 'git pull -q'
     RET=$?
     if [ $RET -eq 0 ];then
         looprun 'git clone https://github.com/php/web-php.git'
     fi
-    checkrep 'git status' phd 'git pull'
+    checkrep 'git status' phd 'git pull -q'
     RET=$?
     if [ $RET -eq 0 ];then 
         looprun 'git clone https://github.com/php/phd.git'
     fi
-    checkrep 'svn info' doc-base 'svn up'
+    checkrep 'svn info' doc-base 'svn up -q'
     RET=$?
     if [ $RET -eq 0 ];then
-        looprun 'svn co http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
+        looprun 'svn co -q http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
     fi
-    checkrep 'svn info' en 'svn up'
+    #checkrep 'svn  info' en 'svn up -q'
+    checkrep 'git status' en 'git pull -q'
     RET=$?
     if [ $RET -eq 0 ];then
-        looprun 'svn co http://svn.php.net/repository/phpdoc/en/trunk en'
+	looprun 'git clone https://github.com/php/doc-en.git en'
+        #looprun 'svn co -q http://svn.php.net/repository/phpdoc/en/trunk en'
     fi
-    checkrep 'svn info' $LAN 'svn up'
+    checkrep 'svn info' $LAN 'svn up -q'
     RET=$?
     if [ $RET -eq 0 ];then
-        looprun "svn co http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
+        looprun "svn co -q http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
     fi
 elif [ $OP == 'up' ];then
     echo "Upgrade Phd..."
     cd phd
-    looprun 'git pull'
+    looprun 'git pull -q'
     cd ..
     echo "Upgrade web-php..."
     cd web-php
-    looprun 'git pull'
+    looprun 'git pull -q'
     cd ..
-    looprun 'svn up doc-base'
-    looprun 'svn up en'
-    looprun "svn up $LAN"
+    looprun 'svn up -q doc-base'
+    looprun 'svn up -q en'
+    looprun "svn up -q $LAN"
 fi
 
 PHD_PATH="$PHP_DOC_ROOT/phd/render.php"
