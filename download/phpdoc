@@ -159,10 +159,12 @@ if [ $OP == 'co' ]; then
     if [ $RET -eq 0 ];then 
         looprun 'git clone https://github.com/php/phd.git'
     fi
-    checkrep 'svn info' doc-base 'svn up -q'
+    #checkrep 'svn info' doc-base 'svn up -q'
+    checkrep 'git status' doc-base 'git pull -q'
     RET=$?
     if [ $RET -eq 0 ];then
-        looprun 'svn co -q http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
+        #looprun 'svn co -q http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
+	looprun 'git clone https://git.php.net/repository/doc/base.git doc-base'
     fi
     #checkrep 'svn  info' en 'svn up -q'
     checkrep 'git status' en 'git pull -q'
@@ -185,7 +187,11 @@ elif [ $OP == 'up' ];then
     cd web-php
     looprun 'git pull -q'
     cd ..
-    looprun 'svn up -q doc-base'
+    echo "Upgrade doc-base"
+    cd doc-base
+    looprun 'git pull -q'
+    cd ..
+    echo "Upgrade doc-en"
     cd en
     looprun 'git pull -q'
     cd ..
@@ -277,4 +283,5 @@ echo
 echo 'location / {'
 echo '    try_files $uri  $uri/ /rediect.php;'
 echo '}'
+
 
