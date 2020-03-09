@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Toknot phpdoc creater ( http://toknot.com )
-# @copyright  Copyright (c) 2011 - 2019 Toknot.com
+# @copyright  Copyright (c) 2011 - 2020 Toknot.com
 # @license    http://toknot.com/LICENSE.txt New BSD License
 # @link       http://toknot.com/download/phpdoc
 #
@@ -109,7 +109,7 @@ checkcmd php
 if [ $OP == 'v' ];then
     cd $PHP_DOC_ROOT/webroot
     echo "Please visit via web browser: http://127.0.0.1:8080";
-    php -S 127.0.0.1:8080 .router.php > /dev/null 2>&1
+    php -S 127.0.0.1:8080 .router.php > /dev/null 2>&1 &
     exit 0
 fi
 checkcmd "php -r extension_loaded('dom')?exit(0):exit(1);" 'PHP dom extension '
@@ -173,10 +173,11 @@ if [ $OP == 'co' ]; then
 	looprun 'git clone https://github.com/php/doc-en.git en'
         #looprun 'svn co -q http://svn.php.net/repository/phpdoc/en/trunk en'
     fi
-    checkrep 'svn info' $LAN 'svn up -q'
+    checkrep 'git status' $LAN 'git pull -q'
     RET=$?
     if [ $RET -eq 0 ];then
-        looprun "svn co -q http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
+	looprun "git clone https://git.php.net/repository/doc/zh.git $LAN"
+        #looprun "svn co -q http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
     fi
 elif [ $OP == 'up' ];then
     echo "Upgrade Phd..."
@@ -194,8 +195,9 @@ elif [ $OP == 'up' ];then
     echo "Upgrade doc-en"
     cd en
     looprun 'git pull -q'
-    cd ..
-    looprun "svn up -q $LAN"
+    echo "Upgrade doc-$LAN"
+    cd ../$LAN
+    looprun "git pull -q"
 fi
 
 PHD_PATH="$PHP_DOC_ROOT/phd/render.php"
