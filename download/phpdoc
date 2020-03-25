@@ -114,7 +114,7 @@ if [ $OP == 'v' ];then
 fi
 checkcmd "php -r extension_loaded('dom')?exit(0):exit(1);" 'PHP dom extension '
 checkcmd "php -r extension_loaded('sqlite3')?exit(0):exit(1);" 'PHP sqlite3 extension '
-checkcmd svn
+#checkcmd svn
 checkcmd git
 checkcmd sed
 checkcmd wget
