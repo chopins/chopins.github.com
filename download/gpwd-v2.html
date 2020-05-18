@@ -219,7 +219,7 @@ function c() {
 <li>网站Url/或名字：<input type="text" value="" id="url"  style="min-width:90%"></li>
 <li>网站用户名：<input type="text" value="" id="uname"  size="50"><span>非必须，该值能减少相同概率；注意：对应生成的密码都必须填写此用户名</span></li>
 <li>密码 Key：<input type="text" value="" id="key" size="50"><b>请务必牢记</b></li>
-<li>特殊字符：<label></label><input type="checkbox" value="1" id="hasSC">启用</label></li>
+<li>特殊字符：<label></label><input type="checkbox" checked="true" value="1" id="hasSC">启用</label></li>
 <li>密码长度：<input type="number" value="12" id="length" size="50" min="10" max="28"><span>值在10-20之间</span></li>
 <li>生成的密码：<input type="text" value="" id="password" size="50" readonly> <button type="button" onclick="copy()">复制</button></li>
 <li><button type="button" onclick="g(1)">生成</button><button type="reset" onclick="c()">重置</button><span><b id="err" style="color:red;"></b></span></li>
