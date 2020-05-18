@@ -2,6 +2,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>密码生成器</title>
 <style>
 body{font-size:.90rem;}
 input,select {border:1px solid #ccc;}
@@ -28,22 +29,14 @@ function g()
 	var url = document.getElementById('url').value.toLocaleLowerCase();
 	var key = document.getElementById('key').value;
 	var err = document.getElementById('err');
-	var pwdLength = document.getElementById('length').value;
 	var uname = document.getElementById('uname').value;
+	
 	if(url.length <= 0) {
 		err.innerHTML = '网站URL不能为空';
 		return false;
 	}
 	if(key.length < 4) {
 		err.innerHTML = 'key长度必须大于4';
-		return false;
-	}
-	if(!isFinite(pwdLength)) {
-		err.innerHTML = '密码长度必须是数字';
-		return false;
-	}
-	if(pwdLength < 10 || pwdLength > 20) {
-		err.innerHTML = '只能生成10到20的密码长度';
 		return false;
 	}
 	
@@ -56,20 +49,27 @@ function g()
 	} else {
 		var siteName = url;
 	}
-	var offset = gn(siteName);
-	var upperNumber = (offset % 3) + 2;
+	var offset = gn(siteName + uname);
+	var upperNumber = (offset % 3) + 1;
 
-	var keyOffset = gn(key);
+	var keyOffset = gn(key + uname);
+	var ksgn = gn(keyOffset + offset + '');
+	var kgn = gn(keyOffset+'');
+	var pwdLength = ksgn % 20;
+	if(pwdLength < 10) {
+		var pwdLength = 10 + pwdLength;
+	}
 	var check = document.getElementById('hasSC');
 	var sclen = 0, sc1 = '', sc2 = '';
 	if(check.checked) {
 		var sc = '_-=~!@#$%^&*+:"<>?;';
-		sc1 = sc[offset%20];
-		sc2 = sc[keyOffset%20];
+		var cidx =  ksgn % sc.length;
+		sc1 = sc[cidx];
+		sc2 = sc[kgn%sc.length];
 		sclen = 2;
 	}
 	if(window.localStorage) {
-		localStorage.setItem("s_l_k", key);
+		localStorage.setItem("v2s_l_k", key);
 	}
 	var salt = sha256(gsalt(offset) + gsalt(keyOffset));
 	var hashpwd = sha256(siteName + salt + key + pwdLength + upperNumber + sc1 + sc2 + uname);
@@ -147,58 +147,14 @@ function setDefKey()
 {
 	var sc1 = sc2 = sc3 = '';
 	if(window.localStorage) {
-		var key = localStorage.getItem("s_l_k");
+		var key = localStorage.getItem("v2s_l_k");
 		document.getElementById('key').value = key;
-		var pwdl = localStorage.getItem("p_l");
-		//var upperN = localStorage.getItem("u_l");
-		if(pwdl) {
-			document.getElementById('length').value = pwdl;
-		}
-		// if(upperN) {
-		// 	document.getElementById('upper').value = upperN;
-		// }
-		// sc1 = localStorage.getItem("s_c_1", sc1);
-		// sc2 = localStorage.getItem("s_c_2", sc2);
-		// sc3 = localStorage.getItem("s_c_3", sc3);
 	}
-	// var sc = '_`-=\\~!@#$%^&*()+|{}:"<>?[];\',./';
-	// //var select1 = document.getElementById('SC1');
-	// //var select2 = document.getElementById('SC2');
-	// //var select3 = document.getElementById('SC3');
-	// var op = document.createElement('option');
-	// op.value = '';
-	// op.textContent = '-- 无 --';
-	// select1.appendChild(op);
-	// select2.appendChild(op.cloneNode(true));
-	// select3.appendChild(op.cloneNode(true));
-	// for(var i=0;i<sc.length;i++) {
-	// 	var op = document.createElement('option');
-	// 	op.value = sc[i];
-	// 	op.textContent = sc[i];
-		
-	// 	select1.appendChild(op);
-	// 	s2op = op.cloneNode(true);
-	// 	s3op = op.cloneNode(true);
-	// 	select2.appendChild(s2op);
-	// 	select3.appendChild(s3op);
-	// 	if(sc1 == sc[i]) {
-	// 		op.selected = true;
-	// 	}
-	// 	if(sc2 == sc[i]) {
-	// 		s2op.selected = true;
-	// 	}
-	// 	if(sc3 == sc[i]) {
-	// 		s3op.selected = true;
-	// 	}
-	// }
 }
 
 function c() {
 	if(window.localStorage) {
-		localStorage.removeItem("s_l_k");
-		localStorage.removeItem("s_c_1");
-		localStorage.removeItem("s_c_2");
-		localStorage.removeItem("s_c_3");
+		localStorage.removeItem("v2s_l_k");
 	}
 }
 
@@ -209,7 +165,7 @@ function c() {
 
 <form>
 <h2 style="margin-bottom:5px;">在线密码生成器（<a href="./gpwd-v1.html">第一版生成器</a>）</h2>
-<ul style="margin-top:5px;">
+<ul style="margin-top:5px;max-width: 90%;">
 <li><span>密码生成规则: <i>sha256(网站名 + 盐字符串 + 密码key)</i>, 截取其中的部分，并在固定位置插入特殊符号；
 <i>网站名</i>取的值类似<i>http://www.example.com</i>中的<i>example</i>；<b>注意:网站名<i>http://www.example.com</i>与<i>www.example.com</i>将会生成不同的密码</b>；
 以下输入项，不同的值将会生成不同的密码；重置按钮将会清除本地存储的值；盐字符串取决于网站名与key值；
@@ -217,13 +173,14 @@ function c() {
 </span>
 </li>
 <li>网站Url/或名字：<input type="text" value="" id="url"  style="min-width:90%"></li>
-<li>网站用户名：<input type="text" value="" id="uname"  size="50"><span>非必须，该值能减少相同概率；注意：对应生成的密码都必须填写此用户名</span></li>
-<li>密码 Key：<input type="text" value="" id="key" size="50"><b>请务必牢记</b></li>
-<li>特殊字符：<label></label><input type="checkbox" checked="true" value="1" id="hasSC">启用</label></li>
-<li>密码长度：<input type="number" value="12" id="length" size="50" min="10" max="28"><span>值在10-20之间</span></li>
+<li>密码 Key：<input type="text" value="" id="key" size="50" name="key"><b>请务必牢记</b></li>
+<li><label><input type="checkbox" checked="true" value="1" id="hasSC">启用特殊字符</label>
+	<label style="float:right;">网站用户名：<input type="text" name="uname" value="" id="uname"  size="10"><span>非必须，能减少相同概率；注意：对应生成的密码都须填写用户名</span></label></li>
 <li>生成的密码：<input type="text" value="" id="password" size="50" readonly> <button type="button" onclick="copy()">复制</button></li>
+
 <li><button type="button" onclick="g(1)">生成</button><button type="reset" onclick="c()">重置</button><span><b id="err" style="color:red;"></b></span></li>
 <li style="margin-top:30px;"><a style="background-color: #018ee1;padding: 10px;color: white;border-radius: 5px;font-size: 20px;text-decoration: none;" href="http://cdn.toknot.com/gpassword/gpassword.20200517.apk">下载密码生成器APP, Andorid版</a></li>
+<li>注意：生成的密码不会被保存，密码key会临时保存在浏览器内，</li>
 </ul>
 </form>
 </body>
