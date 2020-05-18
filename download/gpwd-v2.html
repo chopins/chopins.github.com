@@ -164,7 +164,7 @@ function c() {
 <noscript><h1 style="color:red;">需求浏览器启用javascript</h1></noscript>
 
 <form>
-<h2 style="margin-bottom:5px;">在线密码生成器（<a href="./gpwd-v1.html">第一版生成器</a>）</h2>
+<h2 style="margin-bottom:5px;">在线密码生成器-简易版（<a href="./gpwd-v1.html">完全版</a>）</h2>
 <ul style="margin-top:5px;max-width: 90%;">
 <li><span>密码生成规则: <i>sha256(网站名 + 盐字符串 + 密码key)</i>, 截取其中的部分，并在固定位置插入特殊符号；
 <i>网站名</i>取的值类似<i>http://www.example.com</i>中的<i>example</i>；<b>注意:网站名<i>http://www.example.com</i>与<i>www.example.com</i>将会生成不同的密码</b>；
@@ -179,7 +179,7 @@ function c() {
 <li>生成的密码：<input type="text" value="" id="password" size="50" readonly> <button type="button" onclick="copy()">复制</button></li>
 
 <li><button type="button" onclick="g(1)">生成</button><button type="reset" onclick="c()">重置</button><span><b id="err" style="color:red;"></b></span></li>
-<li style="margin-top:30px;"><a style="background-color: #018ee1;padding: 10px;color: white;border-radius: 5px;font-size: 20px;text-decoration: none;" href="http://cdn.toknot.com/gpassword/gpassword.20200517.apk">下载密码生成器APP, Andorid版</a></li>
+<li style="margin-top:30px;"><a style="background-color: #018ee1;padding: 10px;color: white;border-radius: 5px;font-size: 20px;text-decoration: none;" href="http://page.toknot.com/get-gpassword.php">下载密码生成器APP, Andorid版</a></li>
 <li>注意：生成的密码不会被保存，密码key会临时保存在浏览器内，</li>
 </ul>
 </form>
