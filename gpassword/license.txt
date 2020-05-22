@@ -1,0 +1,28 @@
+结点密码生成器（ToKnot Password Generator）许可证（中文版）
+以下"本应用程序"是指"结点密码生成器"；
+1、本应用程序英文名字"ToKnot Password Generator"；
+2、本应用程序的版权归肖鑫鑫(chopins.xiao@live.com)完全所有；肖鑫鑫为本应用程序版权所有人；
+3、本应用仅提供给最终用户进行密码生成，未经chopin xiao 许可任何个人或组织不擅自得进行其他任何其他用途；
+4、未经本应用程序版权所有人许可任何个人或组织不得将本应用程序进行二次发行、不得利用本应用程序进行任何形式的开发、或其他任何形式的用途；
+5、本应用程序为匿名使用，不会收集使用者的任何数据；
+6、本应用程序中内置有Google AdMob 广告展示功能，该功能的数据收集与隐私政策见 Google AdMob 隐私政策；本应用程序版权人不会为其承担任何责任；
+7、本应用程序版权所有人位于中国贵州省安龙县德卧镇团山堡村；
+8、本许可证可能会在使用者不知情的情况下进行变更；本许可证变更后可能不会通知使用者；
+9、本许可证的效力高于英文版本
+其他未尽事宜由本应用程序版权人补充、解释、发布。
+本许可证于2020年05月22日发布生效。
+
+ToKnot Password Generator (结点密码生成器) license (English version)
+The following "this application" refers to "node password generator";
+1. The Chinese name of this application is "结点密码生成器";
+2. The copyright of this application belongs to Xiao Xin (chopins.xiao@live.com); chopin xiao is the copyright owner of this application;
+3. This application is only provided to the end user for password generation. Any individual or organization without permission of chopin xiao is not allowed to use it for any other purpose;
+4. Without the permission of chopin xiao, no individual or organization shall publish this application for the second time, use this application for any form of development, or any other form of use;
+5. This application is used anonymously and does not collect any data from users;
+6. The Google AdMob advertisement display function is built into this application. For the data collection and privacy policy of this function, see the Google AdMob privacy policy; the copyright owner of this application will not be held responsible for it;
+7. The copyright owner of this application is located in Tuanshanbao Village, Dewo Town, Anlong County, Guizhou Province, China;
+8. This license may be changed without the user's knowledge; the user may not be notified after the change of this license;
+9. The Chinese version of this license is more effective than the English version
+10. The ambiguity of this license is subject to the Chinese version license
+Other unfinished matters shall be supplemented, explained and released by the copyright owner of this application.
+This license will be effective on May 22, 2020.
