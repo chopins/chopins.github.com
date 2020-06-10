@@ -202,7 +202,7 @@ fi
 
 PHD_PATH="$PHP_DOC_ROOT/phd/render.php"
 
-
+cd $PHP_DOC_ROOT
 cd web-php
 TAR_FILE="$PHP_DOC_ROOT/res/web-php.tar.gz"
 if [ -e  $TAR_FILE ];then
