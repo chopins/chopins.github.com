@@ -3,13 +3,13 @@
 // @version  1
 // @grant    none
 // @include *://mylib.nlc.cn/*
-// @run-at document-start
+// @run-at document-end
 // ==/UserScript==
 
 
-setTimeout(function() {
+(function() {
  var s = document.createElement('script');
  s.innerHTML = 'function isAcrobatPluginInstall() { return true;}'
- document.getElementsByTagName('head')[0].appendChild(s);
+ document.body.appendChild(s);
  console.log('overload')
-},3000);
+})();
