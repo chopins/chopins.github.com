@@ -107,6 +107,19 @@ fi
 checkcmd php
 
 if [ $OP == 'v' ];then
+    if [ ! -e $PHP_DOC_ROOT/webroot ];then
+	echo "$PHP_DOC_ROOT/webroot not exists";
+	exit 220
+    fi
+    if [ ! -e $PHP_DOC_ROOT/webroot/.router.php ];then
+	echo "$PHP_DOC_ROOT/webroot/.router.php not exists"
+	exit 221
+    fi
+    if [ ! -e $PHP_DOC_ROOT/webroot/manual ];then
+	echo "$PHP_DOC_ROOT/webroot/manual not exists"
+	exit 223
+    fi
+
     cd $PHP_DOC_ROOT/webroot
     echo "Please visit via web browser: http://127.0.0.1:8080";
     php -S 127.0.0.1:8080 .router.php > /dev/null 2>&1 &
@@ -164,7 +177,7 @@ if [ $OP == 'co' ]; then
     RET=$?
     if [ $RET -eq 0 ];then
         #looprun 'svn co -q http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
-	looprun 'git clone https://git.php.net/repository/doc/base.git doc-base'
+	looprun 'git clone https://github.com/php/doc-base.git doc-base'
     fi
     #checkrep 'svn  info' en 'svn up -q'
     checkrep 'git status' en 'git pull -q'
@@ -176,7 +189,7 @@ if [ $OP == 'co' ]; then
     checkrep 'git status' $LAN 'git pull -q'
     RET=$?
     if [ $RET -eq 0 ];then
-	looprun "git clone https://git.php.net/repository/doc/zh.git $LAN"
+	looprun "git clone https://github.com/php/doc-$LAN.git $LAN"
         #looprun "svn co -q http://svn.php.net/repository/phpdoc/$LAN/trunk $LAN"
     fi
 elif [ $OP == 'up' ];then
@@ -285,5 +298,4 @@ echo
 echo 'location / {'
 echo '    try_files $uri  $uri/ /rediect.php;'
 echo '}'
-
 
