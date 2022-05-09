@@ -8,7 +8,7 @@ use yii\base\Model
 use yii\data\ActiveDataProvider;
 class supplier extends Model {
      public function tableName(){
-     return 'frsupplier';
+     return 'supplier';
      }
 }
 class FilterModel extends supplier{
