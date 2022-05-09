@@ -1,4 +1,8 @@
 <?php
+//因为电脑故障维修中
+//以下代码是使用手机在Github在线编辑
+//代码质量问题请谅解
+
 use yii\grid\GridView;
 use yii\base\Model
 use yii\data\ActiveDataProvider;
@@ -41,10 +45,27 @@ class FilterModel extends supplier{
     }
 }
 class Test ｛
+    public function csv($data){
+       //直接输出输出Csv
+       //也可写到文件
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment; filename="' . $fileName . '"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    foreach($data as $row){
+      echo "$row['id'], $row['name'], $row['code'], $row['t_status']\n";
+    }
+    }
    public function indexAction()
    {
       $filterModel = new FilterModel;
-      $dataProvider = $filterModel->filter(Yii::$app->request->get());
+      $params = Yii::$app->request->get();
+      $dataProvider = $filterModel->filter($params);
+      if(isset($params['csv'])){
+       return $this->csv($dataProvider);
+      }
       return GridView::widget([
            'filterModel' => $filterModel,
            'dataProvider' => $dataProvider,
