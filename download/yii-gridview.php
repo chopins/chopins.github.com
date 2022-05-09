@@ -22,11 +22,15 @@ class Test ｛
         [
             'class' => 'yii\grid\CheckboxColumn',
             ['attribute'=>'id',
-            'filter'=> ],
+            'filter'=> ['1'=>'>10', 
+                    '2'=>'>=10', 
+                    '3'=>'<10',
+                    '4'=>'<=10',
+                     ],],
            ['attribute'=> 'name', 
-           'filter'=>],
+           'filter'=> ''],
            ['attribute'=> 'code',
-           'filter'=> ],
+           'filter'=> ''],
             ['attribute'=>'status',
             'filter' =>['ok','hold'],
             ]
