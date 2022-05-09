@@ -1,6 +1,6 @@
 <?php
-//因为电脑故障维修中
-//以下代码是使用手机在Github在线编辑
+//因电脑故障维修中
+//以下代码是使用手机编写
 //代码质量问题请谅解
 
 use yii\grid\GridView;
@@ -8,7 +8,7 @@ use yii\base\Model
 use yii\data\ActiveDataProvider;
 class supplier extends Model {
      public function tableName(){
-     return 'supplier';
+     return 'frsupplier';
      }
 }
 class FilterModel extends supplier{
@@ -16,6 +16,9 @@ class FilterModel extends supplier{
          $query = supplier::find();
          $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+        'pageSize' => 20,
+    ],
         ]);
          //数据检查规则略
          $this->load($param);
@@ -66,22 +69,39 @@ class Test ｛
       if(isset($params['csv'])){
        return $this->csv($dataProvider);
       }
+   
       return GridView::widget([
            'filterModel' => $filterModel,
            'dataProvider' => $dataProvider,
+         'showFooter'=>true
+
       'columns' => [
         [
-            'class' => 'yii\grid\CheckboxColumn',
+            ['class' => 'yii\grid\CheckboxColumn',
+'checkboxOptions' => function ($model, $key, $index, $column) {
+   if($model){
+    return ['value' => $model->id,’name’=>’r’.$index];
+}
+$options = ‘[‘.ltrim(join(‘,r’,range(0,$index)),’,’).’]’;
+return [‘onclick’ => “$('#grid').yiiGridView(‘setSelectionColumn’, $options);”]
+]
+}
+‘footer’=> 'yii\grid\CheckboxColumn',
+],
             ['attribute'=>'id',
             'filter'=> ['1'=>'>10', 
                     '2'=>'>=10', 
                     '3'=>'<10',
                     '4'=>'<=10',
                      ],
-              'filterInputOptions'=>['name'=>'idFilter','id'=>'idFilter']
+              'filterInputOptions'=>['name'=>'idFilter','id'=>'idFilter'],
+‘footer’ =>’全选’
             ],
            ['attribute'=> 'name', 
-           'filter'=> ''],
+           'filter'=> '',
+‘footer’ => ‘下载本页数据’,
+‘footerOptions’=>[‘onclick’=>”windows.location.href + ‘&csv=1’”,style=>’color:blue;’]
+],
            ['attribute'=> 'code',
            'filter'=> ''],
             ['attribute'=>'t_status',
@@ -89,6 +109,3 @@ class Test ｛
             ]
         ],
 ]);
-
-   }
-｝
