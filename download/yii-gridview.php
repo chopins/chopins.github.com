@@ -8,7 +8,7 @@ use yii\base\Model
 use yii\data\ActiveDataProvider;
 class supplier extends Model {
      public function tableName(){
-     return 'supplier';
+     return 'frsupplier';
      }
 }
 class FilterModel extends supplier{
@@ -82,7 +82,11 @@ class Test ｛
    if($model){
     return ['value' => $model->id,’name’=>’r’.$index];
 }
-$options = ‘[‘.ltrim(join(‘,r’,range(0,$index)),’,’).’]’;
+$options =[];
+foreach(range(0,$index) as $idx) {
+$options[] = [‘name’=> ‘r’.$idx];
+}
+$options =json_encode($options);
 return [‘onclick’ => “$('#grid').yiiGridView(‘setSelectionColumn’, $options);”]
 ]
 }
