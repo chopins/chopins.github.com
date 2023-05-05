@@ -9,6 +9,8 @@
 
 #set your default locale language
 LAN='zh'
+OPT_NUM=$#
+VERBOSE=0
 
 function usage() {
     echo 'Usage phpdoc co [YOUR_PATH]  create local php doc viewer,创建本地文档项目'
@@ -31,8 +33,10 @@ function checkcmd() {
     EXEC=$1
     if [ $# -eq 1 ];then
       EXEC="$1 --version"
+      echo "Checking" $1
+    else
+      echo "Checking" $2 
     fi
-    echo "Checking" $EXEC
     $EXEC > /dev/null
     RET=$?
     if [ $RET -gt 0 ];then
@@ -78,9 +82,9 @@ function checkrep() {
 function looprun() {
    cnt=1
    RET=1
-   while [[ $RET -gt 0 && $cnt -lt 5 ]]
+   while [[ $RET -gt 0 && $cnt -lt 10 ]]
    do
-    echo "Exec:$1"
+    echo "Exec($cnt):$1"
 	$1
 	RET=$?
 	cnt=$(($cnt+1))
@@ -89,15 +93,17 @@ function looprun() {
    return $RET
 }
 
-if [ $# -eq 0 ];then
+if [ $OPT_NUM -eq 0 ];then
     usage
 fi
-if [ $# -eq 1 ];then
-    PHP_DOC_ROOT=`pwd`
+if [ $OPT_NUM -eq 1 ];then
+    PHP_DOC_ROOT=$(realpath $1)
     OP='up'
-elif [ $# -ge 2 ];then
+    echo "Update $PHP_DOC_ROOT"
+elif [ $OPT_NUM -ge 2 ];then
     OP=$1
     PHP_DOC_ROOT=$(realpath $2)
+    echo "Update $PHP_DOC_ROOT"
 fi
 
 if [ $OP != 'up' ] && [ $OP != 'co' ] && [ $OP != 'v' ];then
@@ -160,33 +166,37 @@ elif [ $OP == 'co' ] && [ ! -e $PHP_DOC_ROOT ];then
 fi
 
 cd $PHP_DOC_ROOT
-
+if [ $VERBOSE -eq 0 ];then
+    GIT_QUIET='-q';
+else
+    GIT_QUIET='';
+fi
 if [ $OP == 'co' ]; then
-    checkrep 'git status' web-php 'git pull -q'
+    checkrep 'git status' web-php 'git pull '$GIT_QUIET
     RET=$?
     if [ $RET -eq 0 ];then
         looprun 'git clone https://github.com/php/web-php.git'
     fi
-    checkrep 'git status' phd 'git pull -q'
+    checkrep 'git status' phd 'git pull '$GIT_QUIET
     RET=$?
     if [ $RET -eq 0 ];then 
         looprun 'git clone https://github.com/php/phd.git'
     fi
     #checkrep 'svn info' doc-base 'svn up -q'
-    checkrep 'git status' doc-base 'git pull -q'
+    checkrep 'git status' doc-base 'git pull '$GIT_QUIET
     RET=$?
     if [ $RET -eq 0 ];then
         #looprun 'svn co -q http://svn.php.net/repository/phpdoc/doc-base/trunk doc-base'
 	looprun 'git clone https://github.com/php/doc-base.git doc-base'
     fi
     #checkrep 'svn  info' en 'svn up -q'
-    checkrep 'git status' en 'git pull -q'
+    checkrep 'git status' en 'git pull '$GIT_QUIET
     RET=$?
     if [ $RET -eq 0 ];then
 	looprun 'git clone https://github.com/php/doc-en.git en'
         #looprun 'svn co -q http://svn.php.net/repository/phpdoc/en/trunk en'
     fi
-    checkrep 'git status' $LAN 'git pull -q'
+    checkrep 'git status' $LAN 'git pull '$GIT_QUIET
     RET=$?
     if [ $RET -eq 0 ];then
 	looprun "git clone https://github.com/php/doc-$LAN.git $LAN"
@@ -195,22 +205,22 @@ if [ $OP == 'co' ]; then
 elif [ $OP == 'up' ];then
     echo "Upgrade Phd..."
     cd phd
-    looprun 'git pull -q'
+    looprun 'git pull '$GIT_QUIET
     cd ..
     echo "Upgrade web-php..."
     cd web-php
-    looprun 'git pull -q'
+    looprun 'git pull '$GIT_QUIET
     cd ..
     echo "Upgrade doc-base"
     cd doc-base
-    looprun 'git pull -q'
+    looprun 'git pull '$GIT_QUIET
     cd ..
     echo "Upgrade doc-en"
     cd en
-    looprun 'git pull -q'
+    looprun 'git pull '$GIT_QUIET
     echo "Upgrade doc-$LAN"
     cd ../$LAN
-    looprun "git pull -q"
+    looprun "git pull "$GIT_QUIET
 fi
 
 PHD_PATH="$PHP_DOC_ROOT/phd/render.php"
@@ -298,4 +308,5 @@ echo
 echo 'location / {'
 echo '    try_files $uri  $uri/ /rediect.php;'
 echo '}'
+
 
