@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Toknot phpdoc creater ( http://toknot.com )
-# @copyright  Copyright (c) 2011 - 2020 Toknot.com
+# @copyright  Copyright (c) 2011 - 2023 Toknot.com
 # @license    http://toknot.com/LICENSE.txt New BSD License
 # @link       http://toknot.com/download/phpdoc
 #
@@ -289,6 +289,17 @@ if(!file_exists(__DIR__.$filepath)) {
 }
 
 header("Location: $filepath");' > $PHP_DOC_ROOT/webroot/rediect.php
+
+echo '<IfModule mod_rewrite.c> 
+    RewriteEngine on 
+    RewriteCond %{REQUEST_FILENAME} !-f 
+    RewriteCond %{REQUEST_FILENAME} !-d 
+    RewriteCond %{REQUEST_URI} !=/favicon.ico
+    RewriteCond $1 !^distributions
+    RewriteRule ^(.*)$ $1.php [L]
+    RewriteRule ^distributions/(.*)$ https://www.php.net/distributions/$1
+</IfModule>' >> $PHP_DOC_ROOT/webroot/.htaccess
+
 if [ ! -e $PHP_DOC_ROOT/res/pregen_news ];then
 wget -O $PHP_DOC_ROOT/res/pregen_news https://master.php.net/scripts/pregen_news
 fi
