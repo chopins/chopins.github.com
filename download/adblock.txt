@@ -3,4 +3,4 @@
 ||veryim.com##script
 ||veryim.com##meta[http-equiv="refresh"]
 ||veryim.com*^$third-party
-||wap.veryim.com##script
+||veryim.com*^$csp=script-src: 'none'
