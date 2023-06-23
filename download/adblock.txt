@@ -1,4 +1,5 @@
 ||31xiaoshuo.com##script
+||veryim.com*$script
 ||veryim.com##script
 ||veryim.com##meta[http-equiv="Refresh"]
 ||veryim.com^$third-party
