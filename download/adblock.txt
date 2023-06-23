@@ -3,3 +3,4 @@
 ||veryim.com##script
 ||veryim.com##meta[http-equiv="Refresh"]
 ||veryim.com^$third-party
+||wap.veryim.com##script
