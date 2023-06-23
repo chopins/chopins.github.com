@@ -5,3 +5,4 @@
 ||veryim.com*^$third-party
 ||veryim.com*^$csp=script-src: 'none'
 ||csdn.net*^$csp=script-src: 'none'
+||csdn.net##script,third-party
