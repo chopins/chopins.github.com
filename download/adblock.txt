@@ -7,3 +7,4 @@
 ||csdn.net*^$csp=script-src: 'none'
 ||csdn.net##script,third-party
 ||csdn.net*^$script
+||csdn.net##script
