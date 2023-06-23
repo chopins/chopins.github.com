@@ -1,6 +1,6 @@
 ||31xiaoshuo.com##script
 ||veryim.com*^$script
 ||veryim.com##script
-||veryim.com##meta[http-equiv="Refresh"]
+||veryim.com##meta[http-equiv="refresh"]
 ||veryim.com*^$third-party
 ||wap.veryim.com##script
