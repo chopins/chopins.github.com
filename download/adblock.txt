@@ -9,3 +9,4 @@
 ||csdn.net^$script
 ||csdn.net##script
 ||m.biquge365.net##script
+||m.biquge365.net##img
