@@ -16,5 +16,5 @@
 ||m.boshishuwu.com##img
 ||m.1qxs.com##script
 ||m.1qxs.com##img
-||*.kekewx.com##img
-||*.kekewx.com##script
+||v8.kekewx.com##img
+||v8.kekewx.com##script
