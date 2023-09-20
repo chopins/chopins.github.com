@@ -18,3 +18,5 @@
 ||m.1qxs.com##img
 ||v8.kekewx.com##img
 ||v8.kekewx.com##script
+||www.iqb5.org##script
+||www.iqb5.org##img
