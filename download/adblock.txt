@@ -1,4 +1,4 @@
-||31xiaoshuo.com##script
+p||31xiaoshuo.com##script
 ||veryim.com^$script
 ||veryim.com##script
 ||veryim.com##meta[http-equiv="refresh"]
@@ -20,3 +20,5 @@
 ||v8.kekewx.com##script
 ||www.iqb5.org##script
 ||www.iqb5.org##img
+||m.soduzw.com##img
+||m.soduzw.com##script
