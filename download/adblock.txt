@@ -22,5 +22,6 @@
 ||www.iqb5.org$script
 ||www.iqb5.org$img
 ||www.iqb5.org##img
+||www.iqb5.org##script
 ||m.soduzw.com##img
 ||m.soduzw.com$script,third-party
