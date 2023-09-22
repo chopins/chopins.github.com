@@ -24,7 +24,7 @@
 ||www.iqb5.org$img,third-party
 ||www.iqb5.org##img
 ||www.iqb5.org##script
-||isu*.com
+||isu*.net
 ||fgc111.xyz
 ||m.soduzw.com##img
 ||m.soduzw.com$script,third-party
