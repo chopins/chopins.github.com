@@ -28,3 +28,5 @@
 ||fgc111.xyz
 ||m.soduzw.com##img
 ||m.soduzw.com$script,third-party
+||m.feisxs.com$script
+||m.feisxs.com$script,third-party
