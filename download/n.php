@@ -248,7 +248,9 @@ new class()
         if ($read > 0) {
             $read = "startSpeak();";
         }
-        $content .= '</div><script>
+        $content .= '</div><div class="chapter"><a cid="' . $pid . '" href="?a=c&b=' . $bid . '&c=' . $pid
+            . '">上一页</a><a href="?a=b&b=' . $bid . '">目录</a><a href="?a=c&b='
+            . $bid . '&c=' . $nid . '" cid="' . $nid . '" bid="' . $bid . '">下一页</a></div><script>
         window.onload = function() {
             window.chapterAudio = $("#playChapter");
             parseTalk();
@@ -265,7 +267,7 @@ new class()
                     }
                 }
             });
-            Array.from($("select")).map(s=> s.addEventListener("click", function(e) {
+            $("select").map(s=> s.addEventListener("click", function(e) {
                 if(e.target.tagName== "OPTION") {
                     e.target.parentNode.style.backgroundColor = e.target.style.backgroundColor;
                 } else {
@@ -373,6 +375,7 @@ new class()
                     let NodeCollection = function(nodes) {
                         this.map = (f) => Array.from(nodes).map(f);
                         this.length = nodes.length;
+                        return this;
                     }
                     if (/[ *,\[>~\+|:]/.test(id)) {
                         return NodeCollection(document.querySelectorAll(id));
@@ -383,6 +386,7 @@ new class()
                         case '.':
                             return NodeCollection(document.getElementsByClassName(rname));
                         default:
+                            console.log(id)
                             return NodeCollection(document.getElementsByTagName(id));
                     }
                 }
@@ -525,7 +529,7 @@ new class()
                         .replaceAll("”", '”</prosody></voice><span>');
 
                     $('#chapter').innerHTML = "<p><span>" + c + '</span></p>';
-                    Array.from($('#chapter p')).map(p => p.textContent.trim().length == 0 && $("#chapter").removeChild(p));
+                    $('#chapter p').map(p => p.textContent.trim().length == 0 && $("#chapter").removeChild(p));
 
                     //$('#popVoiceStyles').innerHTML = Object.entries(onlineVoiceStyles).map(([v,k]) => '<option value="'+v+'">' + k + '</option>').join('');
                     //$('#popVoiceRoles').innerHTML = Object.entries(onlineVoiceRoles).map(([v,k]) => '<option value="'+v+'">' + k + '</option>').join('');
@@ -764,7 +768,7 @@ new class()
                     chapterAudio.addEventListener('PlayAudio', function(e) {
                         audioPlay();
                     });
-                    let pl = Array.from($('#chapter p')).map(p => Array.from(p.children));
+                    let pl = $('#chapter p').map(p => Array.from(p.children));
                     let ps = [];
                     let temp = '';
                     for (let k = 0; k < pl.length; k++) {
