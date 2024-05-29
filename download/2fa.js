@@ -14,7 +14,7 @@
 // @grant GM.getValue
 // @grant GM_listValues
 // @grant GM_deleteValue
-// @grant GM_setClipboard 
+// @grant GM_setClipboard
 // @run-at document-end
 // ==/UserScript==
 
@@ -98,8 +98,42 @@ function updateCode() {
     }
     setTimeout(updateCode, 30000);
 }
-
+function save()
+{
+    let allsecretkeys = {};
+    for(let kn of secretkeys) {
+        allsecretkeys[kn] = GM_getValue(kn);
+    }
+    var ks = JSON.stringify(allsecretkeys);
+    const b = new File([ks], "2fa-key-bak.json", {type:"application/json"});
+    var u = URL.createObjectURL(b);
+    let a = document.createElement('a');
+    a.href = u;
+    a.setAttribute('download', "2fa-key-bak.json");
+    a.click();
+}
+function importFile()
+{
+    let i = document.createElement('input');
+    i.setAttribute('type', "file");
+    document.body.appendChild(i);
+    i.addEventListener("change", function() {
+        let f = this.files[0];
+        const reader = new FileReader();
+        reader.addEventListener("load",() => {
+            let data = JSON.parse(reader.result);
+            for(let ik of Object.entries(data)) {
+                GM_setValue(ik[0], ik[1]);
+            }
+            window.location.reload();
+        },false,);
+        reader.readAsText(f);
+    }, false);
+}
 createBtn('添加', 'add', 'add', add);
+createBtn('备份', 'save', 'save', save);
+importFile();
+
 createBtn('剩余时间:30', 30, 'time');
 br();
 for (let n of secretkeys) {
