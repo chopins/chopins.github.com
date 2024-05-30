@@ -30,6 +30,11 @@ function addCss() {
     //let sheet = style.sheet;
     //sheet.insertRule('.-m2fa-it {height: 3rem;width: 20rem;font-size: 1.5rem;margin: 1rem;}', 0);
     //sheet.insertRule('.-m2fa-btn{height: 3rem;width: 20rem;font-size: 1.5rem;margin: 1rem;}', 0);
+
+    let msg = document.createElement('div');
+    msg.id = 'msg';
+    msg.setAttribute('style', 'color: red; z-index: 1000;position: fixed;background-color: #FFF;width: 90%;text-align: center;top: 1;font-size: 1.5rem;');
+    document.body.appendChild(msg);
 }
 function addGetCode(secret) {
     let code = getCodeJS(secret);
@@ -48,13 +53,13 @@ function msg(msg) {
 function add() {
     let box = document.createElement('div');
     box.id = 'add-box';
-    box.innerHTML = '<div style="background-color: #FFF;width: 25rem;margin: auto;">'
+    box.innerHTML = '<div style="background-color: #FFF;width: 25rem;margin: 5rem auto;">'
         + '<input type="text" placeholder="名字" id="add-name" class="-m2fa-it"><br/>'
         + '<input type="text" placeholder="密钥" class="-m2fa-it" id="add-secret"><br/>'
         + '<input type="text" id="add-code-text" placeholder="自动生成的验证码" class="-m2fa-it" readonly><br/>'
         + '<button class="-m2fa-btn">确定</button>'
         + '<button class="-m2fa-btn">取消</button>'
-        + '<br/><span id="msg" style="color:red;"></span></div>';
+        + '<br/></div>';
     box.setAttribute('style', 'position: absolute;z-index:100;height:100%;width:100%;top: 0;left: 0;background-color: rgba(3,3,3,0.8);');
     document.body.appendChild(box);
     let btns = box.getElementsByTagName('button');
@@ -72,6 +77,7 @@ function add() {
         GM_setValue(name, secret);
         cleanIner(addInter);
         document.body.removeChild(document.getElementById('add-box'));
+        window.location.reload();
     });
     btns[1].addEventListener('click', function () {
         cleanIner(addInter);
