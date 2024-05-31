@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         2FA.OTP.TOTP
 // @namespace    https://toknot.com/
-// @version      2024-05-31
+// @version      2024-06-01
 // @description  For 2FA base TOTP
 // @author       chopin xiao
 // @match        http://127.0.0.1/my2fa.html
@@ -82,16 +82,15 @@ try {
     }
 
     function msg(msg) {
-        if(msg) {
+        if (msg) {
             msgdiv.style.display = 'block';
             msgdiv.textContent = msg;
         } else {
             msgdiv.style.display = 'none';
         }
     }
-    function hint(ele, msg)
-    {
-        if(msg) {
+    function hint(ele, msg) {
+        if (msg) {
             ele.style.border = '1px solid red';
             ele.nextElementSibling.textContent = msg;
         } else {
@@ -104,7 +103,7 @@ try {
         box.id = 'add-box';
         box.innerHTML = '<div style="background-color: #FFF;width: 25rem;margin: 5rem auto;">'
             + '<input type="text" placeholder="名字" class="-m2fa-it"><span style="color:red;"></span><br/>'
-            + '<input type="text" placeholder="密钥" class="-m2fa-it"><span style="color:red;">></span><br/>'
+            + '<textarea type="text" placeholder="密钥" class="-m2fa-it" style="height:7rem;"></textarea><span style="color:red;">></span><br/>'
             + '<input type="text" placeholder="自动生成的验证码" class="-m2fa-it" readonly><br/>'
             + '<button class="-m2fa-btn">确定</button>'
             + '<button class="-m2fa-btn">取消</button>'
@@ -114,11 +113,11 @@ try {
         document.body.appendChild(box);
         let btns = box.getElementsByTagName('button');
         let inpts = box.getElementsByTagName('input');
-
+        let secretInput = box.getElementsByTagName('textarea');
         btns[0].addEventListener('click', function () {
-            let secret = inpts[1].value;
+            let secret = secretInput[0].value;
             if (secret.length <= 5) {
-                hint(inpts[1], '密钥太短');
+                hint(secretInput[0], '密钥太短');
                 return;
             }
             let name = inpts[0].value;
@@ -147,8 +146,16 @@ try {
                 let u = URL.createObjectURL(f);
                 qrcode.decode(u);
                 qrcode.callback = function (imgMsg) {
-                    inpts[1].value = imgMsg;
-                    whenInputGetCode(inpts[2], inpts[1]);
+                    if(imgMsg.indexOf('otpauth://') === 0) {
+                        let u = new URL(imgMsg);
+                        let issuer = u.searchParams.get('issuer');
+                        if(issuer) {
+                            inpts[0].value = issuer;
+                        }
+                        inpts[0].value = decodeURIComponent(u.pathname.slice(2).split('/')[1]);
+                    }
+                    secretInput[0].value = imgMsg;
+                    whenInputGetCode(inpts[1], secretInput[0]);
                 }
             }, false);
         });
@@ -160,9 +167,9 @@ try {
                 hint(inpts[0], 0);
             }
         });
-        inpts[1].addEventListener('input', function () {
-            hint(inpts[1], 0);
-            whenInputGetCode(inpts[2], this);
+        secretInput[0].addEventListener('input', function () {
+            hint(secretInput[0], 0);
+            whenInputGetCode(inpts[1], this);
         });
         return;
     }
@@ -173,7 +180,7 @@ try {
         msg('剩余时间:' + s);
         msgdiv.setAttribute('data-hidden', 'show');
         let addInter = setInterval(function () {
-            if(msgdiv.getAttribute('data-hidden') == 'none') {
+            if (msgdiv.getAttribute('data-hidden') == 'none') {
                 clearInterval(addInter);
                 msg('');
                 return;
@@ -183,15 +190,26 @@ try {
             s = getLastSecond();
             msg('剩余时间:' + s);
         }, 1000);
-        
+
     }
     function getCodeJS(secret) {
         try {
+            let secretKey = secret;
+            let algorithm = 'SHA1';
+            let digits = 6;
+            let period = 30;
+            if (secret.indexOf('otpauth://') === 0) {
+                let url = new URL(secret);
+                secretKey = url.searchParams.get('secret');
+                algorithm = url.searchParams.get('algorithm')||algorithm;
+                digits = url.searchParams.get('digits')||digits;
+                period = url.searchParams.get('period')||period;
+            }
             const totp = new OTPAuth.TOTP({
-                algorithm: 'SHA1',
-                digits: 6,
-                period: 30,
-                secret: OTPAuth.Secret.fromBase32(secret)
+                algorithm: algorithm,
+                digits: digits,
+                period: period,
+                secret: OTPAuth.Secret.fromBase32(secretKey)
             });
             return totp.generate();
         } catch (err) {
