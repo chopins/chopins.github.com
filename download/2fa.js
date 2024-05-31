@@ -6,7 +6,7 @@
 // @author       chopin xiao
 // @match        http://127.0.0.1/my2fa.html
 // @match        file:///*/my2fa.html
-// @match        https://page.toknot.com/*
+// @match        https://toknot.com/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @updateURL    https://toknot.com/download/2fa.meta.js
 // @downloadURL https://toknot.com/download/2fa.js
