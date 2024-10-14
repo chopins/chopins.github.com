@@ -1,3 +1,9 @@
+---
+layout: blog_contents
+title: 使用NetworkManager来创建桥接设备
+categories: blog
+---
+
 ### 使用NetworkManager来创建桥接设备
 
 1. 使用`nm-connection-editor`GUI工具新建网桥，可设定网桥名字为`br0`
