@@ -11,9 +11,13 @@ categories: blog
    4. `float`   64位双精度浮点数,IEC 60559标准
    5. `bool`    布尔数，`false`, `true`
    6. `null`    
-   7. `array`   任意可混合类型数组
+   7. `array`   任意可混合类型数组,Hash表
+        ``` php
+        $a = [1,'ss','k' => 'val'];
+        $b = [1 => '2'];
+        ```
    8. `object`  对象
-   9. `void`    无返回值类型
+   9.  `void`    无返回值类型
    10. `any`    任意类型
    11. `list`    单一类型数组，索引为自然整数,第一个元素确定类型
         ```php
@@ -51,15 +55,23 @@ categories: blog
    3. 块变量
       1. 仅块代码中可访问
       2. 使用`var`来声明
-         ```php
-         for() {
-            var $a = 1;
-            var $b =2;
-         }
-         if() {
-             var $a = 3;
-         }
-         ```
+            ```php
+            for() {
+               var $a = 1;
+               var $b =2;
+            }
+            if() {
+               var $a = 3;
+            }
+            ```
+   4. 共享内存变量
+      1. 共享多线程，多进程变量
+      2. 共享内存赋值（写入）具备原子性
+      3. `memory` 关键字
+          ```php
+          memory[share] = 1;//write,
+          $a = memory[share];//read
+          ```
 3. 类组合
    1. 即将不同类的方法组合到一个新类中
    2. 类对象实例指针`$my`
@@ -119,7 +131,9 @@ categories: blog
          class NSB.MixD.NSA.MixA {
             
          }
-         NSB.MixD.my.NSA.MixA.msD();//待定
+         NSB.MixD.my.NSA.MixA.msD();//待定1
+         MSB.MixD::NSA.MixA.msD();//待定2
+         (MSB.MixD)NSA.MixA.msD();//待定3, 依据强制类型转换
          ```
 4. 函数
    1. `func`关键字定义普通函数
@@ -219,24 +233,25 @@ categories: blog
             @deprecated //已被标记为弃用
             ```
         2. `@final` 仅类和类方法可用，类不可被`use`到其他类中，`use`类不允许出现同名方法
-        3. `@abstract`类不可被实例化，类方法被`use`到其他类中时，`use`类必须定义该方法
-        4. `@readonly`类属性仅在类初始化时可被修改
-        5. `@set {}` 设置属性,参数`$name`、`$value`
-        6. `@get {}` 获取属性，参数`$name`
-        7. `@type {}` 类型转换规则，参数`$name`,必须返回`$name`值类型
-        8. `@string {}` 转换成字符串，无参数, 必须返回字符串
-        9. `@int {}`转换成整数，无参数
-        10. `@array {}` 转换成数组，无参数
-        11. `@bool {}`转换成布尔，无参数
-        12. `@float {}`转换成浮点，无参数
-        13. `@serialize{}`序列化，无参数
-        14. `@free {}`释放对象资源数据，对象被删除时被调用
-        15. `@clone{}`复制对象，无参数
-        16. `@dump{}`debug打印对象时被调用
-        17. `@call{}`类方法不可访问时调用，参数`$name`，`$value`
-        18. `@static{}`静态方法不可访问时调用，参数`$name`，`$value`
-        19. `@isset{}`不可访问类属性是否存在，参数`$name`
-        20. `@unset{}`删除不可访问类属性，参数`$name`
-        21. `@unserialize{}`反序列化为对象时被调用
-        22. `@invoke{}`对象被当成函数调用时触发,参数`$args`
-        23. `@export{}`导出类时调用,参数`$args`
+        3. `@interface` 类公共方法在编译后可生成接口头文件
+        4. `@abstract`类不可被实例化，类方法被`use`到其他类中时，`use`类必须定义该方法
+        5. `@readonly`类属性仅在类初始化时可被修改
+        6. `@set {}` 设置属性,参数`$name`、`$value`
+        7. `@get {}` 获取属性，参数`$name`
+        8. `@type {}` 类型转换规则，参数`$name`,必须返回`$name`值类型
+        9. `@string {}` 转换成字符串，无参数, 必须返回字符串
+        10. `@int {}`转换成整数，无参数
+        11. `@array {}` 转换成数组，无参数
+        12. `@bool {}`转换成布尔，无参数
+        13. `@float {}`转换成浮点，无参数
+        14. `@serialize{}`序列化，无参数
+        15. `@free {}`释放对象资源数据，对象被删除时被调用
+        16. `@clone{}`复制对象，无参数
+        17. `@dump{}`debug打印对象时被调用
+        18. `@call{}`类方法不可访问时调用，参数`$name`，`$value`
+        19. `@static{}`静态方法不可访问时调用，参数`$name`，`$value`
+        20. `@isset{}`不可访问类属性是否存在，参数`$name`
+        21. `@unset{}`删除不可访问类属性，参数`$name`
+        22. `@unserialize{}`反序列化为对象时被调用
+        23. `@invoke{}`对象被当成函数调用时触发,参数`$args`
+        24. `@export{}`导出类时调用,参数`$value`
