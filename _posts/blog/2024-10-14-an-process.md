@@ -71,56 +71,56 @@ categories: blog
    8. 静态方法访问：`my.methid()`
    9. 同名的普通方法访问:`$my.NS.MixName.method()`
    10. 同名静态方法访问： `my.NS.MixName.method()`
-   11. 使用`mix`来声明一个可用组合
-      ```php
-      namespace NSA {
-         class MixA {
-            public mA()
-            {
+   11. 使用`class`来声明一个可用组合
+         ```php
+         namespace NSA {
+            class MixA {
+               public mA()
+               {
 
-            }
-            public mB()
-            {
-               
-            }
-            public static msD()
-            {
+               }
+               public mB()
+               {
+                  
+               }
+               public static msD()
+               {
 
+               }
             }
          }
-      }
-      namespace NSB {
-         class MixB {
-            use NSA.MixA;//MixA类名在MixB类中可见
-            public mA {
+         namespace NSB {
+            class MixB {
+               use NSA.MixA;//MixA类名在MixB类中可见
+            
+               public mA {
 
+               }
+               public mB {
+                  $my.mA(); //调用 MixB::mA() 方法
+                  $my.NSA.MixA.mA(); //调用NSA.MixA::mA() 的方法
+                  $my.MixA.mA(); //调用NSA.MixA::mA() 的方法
+                  my.MSA.MixA.msD();
+               }
             }
-            public mB {
-               $my.mA(); //调用 MixB::mA() 方法
-               $my.NSA.MixA.mA(); //调用NSA.MixA::mA() 的方法
-               $my.MixA.mA(); //调用NSA.MixA::mA() 的方法
-               my.MSA.MixA.msD();
+            class MixC {
+               use MixB : mA as MixAmA;
+               public mA {
+                  $my.MixAmA(); //MixB::MixAmA
+               }
+            }
+            class MixD {
+               use NSA.MixA;
+               use MixB;
             }
          }
-         class MixC {
-            use MixB : mA as MixAmA;
-            public mA {
-               $my.MixAmA(); //MixB::MixAmA
-            }
+         $a = new NSB.MixD;
+         $a.NSA.MixA.mA();
+         class NSB.MixD.NSA.MixA {
+            
          }
-         class MixD {
-            use NSA.MixA;
-            use MixB;
-         }
-      }
-      $a = new NSB.MixD;
-      $a.NSA.MixA.mA();
-      class NSB.MixD.NSA.MixA {
-         
-      }
-      NSB.MixD.my.NSA.MixA.msD();//待定
-
-      ``` 
+         NSB.MixD.my.NSA.MixA.msD();//待定
+         ```
 4. 函数
    1. `func`关键字定义普通函数
    2. `()->`定义简单表达式函数
@@ -145,11 +145,16 @@ categories: blog
       $f(1, 2, 3, 4, 5); // echo 5; echo 4; echo 2;
       ```  
 5. 异常
+   1. `try {} catch() {} finally {}`
+   2. `Throwable`
+   3. `thown new`
 6. 注释
+   1. `//`行注释
+   2. `/* */` 块注释
 7. 表达式
    1. `$my`,`my` 为对象与类引用
    2. `.`为类与对象方法和属性访问操作符，`new`类实例化操作符号
-   3. `+, -, !, ~, ++`
+   3. `+, -, !, ~, ++, ?:`
    4. `+, -, *, /, %, &, &&, |, ||, ??, ^, <<, >>, ==, !=, >, <, >=, <=`
    5. `=`,`&`,`+=, -=, *=, /=, %=, |=, ^=, <<=, >>=`
    6. `===`带类型的值是否相同的比较,`!==`带类型的值是否不相同的比较
@@ -166,3 +171,72 @@ categories: blog
       use NSTOP2.NSB.ClassC;//访问的是 NSTOP2.NSB.ClassC;
       ```
 9.  语句
+    1. `for()` 循环
+       1. `for(expr1;expr2;expr3) {}` 复杂条件循环
+       2. `for($arr as $k : $v) {}` 迭代数组
+       3. `for(expr) {}` 简单循环
+       4. `do {} for(true)`
+       5. `continue`
+    2. `if(expr)  else`
+    3. `case(expr) {}`, 分支执行，`=>`分支为松散比较，`==>`分支为严格比较
+       ```php
+       $a=  1;
+       case ($a) {
+          ==> '1' : 
+            echo '不会执行';
+          ==> 1 : 
+            echo '会执行';
+          default: echo '默认执行';
+       }
+       case ($a) {
+         => '1': 
+            echo '会执行';
+            break;
+         => 1 :
+            echo '不会执行';
+         default: '';
+       }
+       ``` 
+    4. `goto`
+    5. `return`
+    6. `break`
+    7. `use`， 后面为字符串时表示包含的文件名，为标识符时为类名或函数名，标识符号导入仅可在顶级代码域和类成员声明级别中使用
+         ```php
+         use 'index.ap' //包含必须文件
+         use ?'include.ap' //包含非必须文件
+         use NS.ClassA; //导入类
+         ```
+ 10. 修饰声明
+     1. 声明前使用`@`开头修饰声明
+     2. 函数、类、类方法、类属性
+     3. 块修饰声明相当于定义一个修饰函数
+     4. 仅名称，则表示指向一个已定义类或函数
+     5. 预定义修饰注解
+        1. `@deprecated(version)` 类、类方法、类函数被标记为弃用，它们被调用时出现`Notice`信息，参数为被标记版本，参数不是必须的
+            ```php
+            @deprecated('1.1') //1.1版本被标记为弃用
+            @deprecated('libc-1.1') //libc-1.1 版本被标记为弃用
+            @deprecated //已被标记为弃用
+            ```
+        2. `@final` 仅类和类方法可用，类不可被`use`到其他类中，`use`类不允许出现同名方法
+        3. `@abstract`类不可被实例化，类方法被`use`到其他类中时，`use`类必须定义该方法
+        4. `@readonly`类属性仅在类初始化时可被修改
+        5. `@set {}` 设置属性,参数`$name`、`$value`
+        6. `@get {}` 获取属性，参数`$name`
+        7. `@type {}` 类型转换规则，参数`$name`,必须返回`$name`值类型
+        8. `@string {}` 转换成字符串，无参数, 必须返回字符串
+        9. `@int {}`转换成整数，无参数
+        10. `@array {}` 转换成数组，无参数
+        11. `@bool {}`转换成布尔，无参数
+        12. `@float {}`转换成浮点，无参数
+        13. `@serialize{}`序列化，无参数
+        14. `@free {}`释放对象资源数据，对象被删除时被调用
+        15. `@clone{}`复制对象，无参数
+        16. `@dump{}`debug打印对象时被调用
+        17. `@call{}`类方法不可访问时调用，参数`$name`，`$value`
+        18. `@static{}`静态方法不可访问时调用，参数`$name`，`$value`
+        19. `@isset{}`不可访问类属性是否存在，参数`$name`
+        20. `@unset{}`删除不可访问类属性，参数`$name`
+        21. `@unserialize{}`反序列化为对象时被调用
+        22. `@invoke{}`对象被当成函数调用时触发,参数`$args`
+        23. `@export{}`导出类时调用,参数`$args`
