@@ -66,50 +66,103 @@ categories: blog
    3. 类调用的引用关键字`my`
    4. 组合方法时，当前类的方法优先级最高，同名方法必须重命名才可访问
    5. 被导入类的方法的名字为被导入类当前可用名字，即，被导入类导入中存在别名方法时，当前导入类需要使用该别名
-   6. 导入多个类时，同名方法将不会被导入。除非通过声明别名的方法来让方法名不相同。
+   6. 导入多个类时，同名方法需添加别名或通过类名访问。未添加别名时，与当前类同名的方法，无法直接使用方法名访问
    7. 普通方法访问: `$my.method()`
    8. 静态方法访问：`my.methid()`
-   9. 未被导入的普通方法访问:`NS.MixName($my).method()`
-   10. 静态方法访问： `NS.MixName(my).method()`
+   9. 同名的普通方法访问:`$my.NS.MixName.method()`
+   10. 同名静态方法访问： `my.NS.MixName.method()`
    11. 使用`mix`来声明一个可用组合
-   ```php
-   mix MixA {
-     public mA()
-     {
+      ```php
+      namespace NSA {
+         class MixA {
+            public mA()
+            {
 
-     }
-     public mB()
-     {
-        
-     }
-   }
-   mix MixB {
-      use MixA;//没有任何方法被显示导入
-      public mA {
+            }
+            public mB()
+            {
+               
+            }
+            public static msD()
+            {
 
+            }
+         }
       }
-      public mB {
-      }
-   }
-   mix MixC {
-      use MixB;
-      public mA {
-        $this.MixAmA(); //MixB::MixAmA
-      }
-   }
-   mix MixD {
-      use MixA;
-      use MixB;
+      namespace NSB {
+         class MixB {
+            use NSA.MixA;//MixA类名在MixB类中可见
+            public mA {
 
-   }
-   ``` 
+            }
+            public mB {
+               $my.mA(); //调用 MixB::mA() 方法
+               $my.NSA.MixA.mA(); //调用NSA.MixA::mA() 的方法
+               $my.MixA.mA(); //调用NSA.MixA::mA() 的方法
+               my.MSA.MixA.msD();
+            }
+         }
+         class MixC {
+            use MixB : mA as MixAmA;
+            public mA {
+               $my.MixAmA(); //MixB::MixAmA
+            }
+         }
+         class MixD {
+            use NSA.MixA;
+            use MixB;
+         }
+      }
+      $a = new NSB.MixD;
+      $a.NSA.MixA.mA();
+      class NSB.MixD.NSA.MixA {
+         
+      }
+      NSB.MixD.my.NSA.MixA.msD();//待定
+
+      ``` 
 4. 函数
+   1. `func`关键字定义普通函数
+   2. `()->`定义简单表达式函数
+   3. `$args` 为函数内预定义变量，默认保存了当前传入参数
+   4. `...` 为可选参数列表
+   5. `func`定义的无名字函数为匿名函数
+      ```php
+      func A() : void {
+         echo count($args);
+      }
+      $a = 1;
+      $b = 2;
+      $f = func($d, ...$c) use($b) : void {
+         echo count($args);
+         echo count($c);
+         echo $b;
+      }
+     
+      $f2 = ($c)-> $a + $b + $c;
+      echo $f2(3); // echo 6
+      A(1, 2,3,4); // echo 4
+      $f(1, 2, 3, 4, 5); // echo 5; echo 4; echo 2;
+      ```  
 5. 异常
 6. 注释
 7. 表达式
-   1. `+, -, !, ~, ++`
-   2. `+, -, *, /, %, &, &&, |, ||, ??, ^, <<, >>, ==, !=, >, <, >=, <=`
-   3. `=`,`&`,`+=, -=, *=, /=, %=, |=, ^=, <<=, >>=`
-   4. `is`,`not`,`ref`
+   1. `$my`,`my` 为对象与类引用
+   2. `.`为类与对象方法和属性访问操作符，`new`类实例化操作符号
+   3. `+, -, !, ~, ++`
+   4. `+, -, *, /, %, &, &&, |, ||, ??, ^, <<, >>, ==, !=, >, <, >=, <=`
+   5. `=`,`&`,`+=, -=, *=, /=, %=, |=, ^=, <<=, >>=`
+   6. `===`带类型的值是否相同的比较,`!==`带类型的值是否不相同的比较
+   7. `is` 是否是类实例，或子类
 8. 命名空间
+   1. `namespace`关键字开始定义命名空间
+   2. `use` 为导入命名空间的类. `use C_NAME as C_A_N` 语法可以给类添加别名，没有别名时使用类名
+   3. 同一个命名空间内，不能存在相同类名
+   4. 类中使用`use`，在类范围类遵循相同规则。在类定义外无效。
+   5. 命名空间名字以`.`分割，以点开头的命名空间为相对于当前命名空间
+      ```php
+      namespace NSTOP.NSA;
+      use .NSC.ClassA; //访问的是 NSTOP.NSA.NSC.ClassA;
+      use NSTOP2.NSB.ClassC;//访问的是 NSTOP2.NSB.ClassC;
+      ```
 9.  语句
