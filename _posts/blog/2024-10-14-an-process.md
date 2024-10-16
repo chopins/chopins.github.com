@@ -133,7 +133,6 @@ categories: blog
          }
          NSB.MixD.my.NSA.MixA.msD();//待定1
          MSB.MixD::NSA.MixA.msD();//待定2
-         (MSB.MixD)NSA.MixA.msD();//待定3, 依据强制类型转换
          ```
 4. 函数
    1. `func`关键字定义普通函数
