@@ -159,8 +159,73 @@ categories: blog
       ```  
 5. 异常
    1. `try {} catch() {} finally {}`
-   2. `Throwable`
-   3. `thown new`
+   2. `raise`
+   3. `BaseException` 所有异常的基类
+      1. `BaseException` 原型
+         ```php
+         class BaseException {
+               protected string $message = "";
+               private string $string = "";
+               protected int $code;
+               protected string $file = "";
+               protected int $line;
+               private array $trace = [];
+               private ?BaseException $previous = null;
+               protected bool $throw = true;
+               private static ?BaseException $lastException = null;
+               /* 方法 */
+               public __construct(string $message = "", int $code = 0, ?BaseException $previous = null)
+               final public getMessage(): string
+               final public getPrevious(): ?BaseException
+               final public getCode(): int
+               final public getFile(): string
+               final public getLine(): int
+               final public getTrace(): array
+               final public getTraceAsString(): string
+               final public getLastException() : ?BaseException
+         }
+         ``` 
+      2. `BaseException::$throw` 属性表示是否中断执行，为`true`时将中断执行，异常对象可被捕获，为`false`时将继续执行后续代码
+          ```php
+          class MyAException
+          {
+            use BaseException;
+            public __init($msg)
+            {
+               $my->break = false;
+               $my.BaseException.__init($msg);
+               echo $my->getMessage();
+            }
+            @string {
+               return $this->getMessage();
+            }
+          }
+          try {
+            raise MyAException('message'); //等效 echo 'message';
+            echo 'continue';  //将输出 continue
+          } catch(BaseException $e) {
+            echo 'catch exception'; //不会被捕获
+          } finally {
+            echo BaseException::getLastException();//echo 'message'
+          }
+          class MyBException
+          {
+            use BaseException;
+            public __init($msg)
+            {
+               $my->break = true;
+               $my.BaseException.__init($msg);
+            }
+          }
+          try {
+            raise MyAException('message'); //中断
+            echo 'continue';  //不会执行
+          } catch(BaseException $e) {
+            echo 'catch exception'; //输出 catch exception
+          } finally {
+            echo BaseException::getLastException();//echo 'message'
+          }
+          ``` 
 6. 注释
    1. `//`行注释
    2. `/* */` 块注释
