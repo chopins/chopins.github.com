@@ -183,6 +183,7 @@ categories: blog
                final public getTrace(): array
                final public getTraceAsString(): string
                final public getLastException() : ?BaseException
+               final public static setThrow(string $exceptionClass, bool $isthrow): bool
          }
          ``` 
       2. `BaseException::$throw` 属性表示是否中断执行，为`true`时将中断执行，异常对象可被捕获，为`false`时将继续执行后续代码
@@ -190,9 +191,9 @@ categories: blog
           class MyAException
           {
             use BaseException;
+            protected bool $throw = false;
             public __init($msg)
             {
-               $my->break = false;
                $my.BaseException.__init($msg);
                echo $my->getMessage();
             }
