@@ -255,6 +255,10 @@ namespace {
         private bool $isCustomMethod = false;
 
         /**
+         * @var bool 是否调用请求
+         */
+        private bool $run = false;
+        /**
          * @var CurlHandle
          */
         private ?CurlHandle $curl = null;
@@ -265,24 +269,25 @@ namespace {
         /**
          * @var array
          */
-        private array $colors = [];
+        private static array $colors = [];
         /**
          * @var bool
          */
-        private bool $isCLI = true;
+        private static bool $isCLI = true;
         /**
          * @var array
          */
         private static array $runFlagLines = [];
-        private bool $run = false;
-        private int $lastCalledLine = 0;
+        
+        private static array $defaultObjVars = [];
 
         private function __construct($host)
         {
             self::$host = $host;
-            $this->isCLI = PHP_SAPI == 'cli';
+            self::$isCLI = PHP_SAPI == 'cli';
             self::$requestBodyType = HttpRequestBodyType::RAW;
             $this->checkRun(false);
+            self::$defaultObjVars = get_object_vars($this);
             $this->color();
         }
 
@@ -299,11 +304,15 @@ namespace {
             if ($host) {
                 self::$obj::$host = $host;
             }
-            self::$obj->isJson = false;
-            self::$obj->isXml = false;
-            self::$obj->isHtml = false;
-            self::$obj->isText = false;
+            self::$obj->reset();
             return self::$obj;
+        }
+
+        public function reset()
+        {
+            foreach(self::$defaultObjVars as $k => $v) {
+                $this->$k = $v;
+            }
         }
 
         private function buildUrl(string $path = '/', $queryData = null)
@@ -554,7 +563,7 @@ namespace {
             if (!$this->run) {
                 return $this;
             }
-            if ($this->isCLI) {
+            if (self::$isCLI) {
                 $this->showStd();
             } else {
                 $this->showHTML();
@@ -566,16 +575,17 @@ namespace {
         {
             $cols = exec('tput cols');
             echo str_repeat('-', $cols);
-            echo "{$this->colors['BLUE']}{$this->method} {$this->url} {$this->colors['END']}" . PHP_EOL;
+
+            echo self::$colors['BLUE'] . "{$this->method} {$this->url} " . self::$colors['END'] . PHP_EOL;
             if (self::$showHead) {
                 foreach ($this->responseHeader as $i => $header) {
                     if (strpos($header, ':') === false) {
-                        echo $this->colors['GREEN'] . $header . $this->colors['END'];
+                        echo self::$colors['GREEN'] . $header . self::$colors['END'];
                     } else {
-                        echo $this->colors['MAGENTA'] . str_replace(':', ':' . $this->colors['END'], $header);
+                        echo self::$colors['MAGENTA'] . str_replace(':', ':' . self::$colors['END'], $header);
                     }
                 }
-                echo $this->colors['END'];
+                echo self::$colors['END'];
             }
             if (self::$showBody) {
                 if ($this->isJson) {
@@ -600,15 +610,15 @@ namespace {
 
             if (PHP_SAPI != 'cli') {
                 $code = ['BLUE' => 'red', 'GREEN' => 'green', 'MAGENTA' => 'MAGENTA'];
-                $this->colors['END'] = "</p>";
+                self::$colors['END'] = "</p>";
                 foreach ($code as $k => $n) {
-                    $this->colors[$k] = "<p style='color:$n'>";
+                    self::$colors[$k] = "<p style='color:$n'>";
                 }
             } else {
                 $code = ['BLUE' => 34, 'GREEN' => 32, 'MAGENTA' => 35];
-                $this->colors['END'] = "{$ansi}[0m";
+                self::$colors['END'] = "{$ansi}[0m";
                 foreach ($code as $k => $n) {
-                    $this->colors[$k] = "{$ansi}[0;{$n}m";
+                    self::$colors[$k] = "{$ansi}[0;{$n}m";
                 }
             }
         }
@@ -638,13 +648,13 @@ namespace {
 
             <body>
                 <?php
-                echo "{$this->colors['BLUE']}{$this->method} {$this->url} {$this->colors['END']}";
+                echo self::$colors['BLUE']."{$this->method} {$this->url} ". self::$colors['END'];
                 if (self::$showHead) {
                     foreach ($this->responseHeader as $i => $header) {
                         if ($i == 0) {
-                            echo $this->colors['GREEN'] . $header . $this->colors['END'];
+                            echo self::$colors['GREEN'] . $header . self::$colors['END'];
                         } else {
-                            echo $this->colors['MAGENTA'] . str_replace(':', ':' . $this->colors['END'] . '<p>', $header) . $this->colors['END'];
+                            echo self::$colors['MAGENTA'] . str_replace(':', ':' . self::$colors['END'] . '<p>', $header) . self::$colors['END'];
                         }
                     }
                 }
