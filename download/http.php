@@ -132,7 +132,7 @@ class HTTP
     /**
      * @var string 位于调用行时，激活执行的 token 值
      */
-    public static string $enableTag = ';';
+    public static string $enableTag = '@';
     /**
      * @var string 设置 User Agent
      */
@@ -141,6 +141,9 @@ class HTTP
      * @var string 设置 oauth2 token
      */
     public static string $oauth2Token = '';
+
+    public static bool $showHead = true;
+    public static bool $showBody = true;
 
 
     /**
@@ -254,7 +257,7 @@ class HTTP
     /**
      * @var CurlHandle
      */
-    private CurlHandle $curl;
+    private ?CurlHandle $curl = null;
     /**
      * @var HTTP
      */
@@ -271,6 +274,8 @@ class HTTP
      * @var array
      */
     private static array $runFlagLines = [];
+    private bool $run = false;
+    private int $lastCalledLine = 0;
 
     private function __construct($host)
     {
@@ -339,7 +344,7 @@ class HTTP
         }
         self::$requestHeader[] = 'Content-Length: ' . strlen($this->requestBody);
     }
-    public static function xmlEncode(array $data)
+    protected static function xmlEncode(array $data)
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         foreach ($data as $key => $v) {
@@ -430,15 +435,18 @@ class HTTP
         return $this->request();
     }
 
-    public function request()
+    protected function request()
     {
-        self::checkRun();
-        if(self::$userAgent) {
+        $this->run = self::checkRun();
+        if (!$this->run) {
+            return;
+        }
+        if (self::$userAgent) {
             $this->curlOptions[CURLOPT_USERAGENT] = self::$userAgent;
-        } else if(self::$userAgent === null) {
+        } else if (self::$userAgent === null) {
             $this->curlOptions[CURLOPT_USERAGENT] = '';
         }
-        if(self::$oauth2Token) {
+        if (self::$oauth2Token) {
             $this->curlOptions[CURLOPT_XOAUTH2_BEARER] = self::$oauth2Token;
         }
         if (self::$user) {
@@ -470,6 +478,7 @@ class HTTP
             $this->getNetworkError();
         }
         $this->getCurlInfo();
+        return $this;
     }
 
     private function getCurlInfo()
@@ -523,7 +532,7 @@ class HTTP
         $this->curlError = curl_error($this->curl);
     }
 
-    private function getResposeType($header)
+    protected function getResposeType($header)
     {
         if (isHave($header, 'text/json') || isHave($header, 'application/json')) {
             $this->isJson = true;
@@ -542,43 +551,50 @@ class HTTP
 
     public function show()
     {
+        if (!$this->run) {
+            return $this;
+        }
         if ($this->isCLI) {
             $this->showStd();
         } else {
             $this->showHTML();
         }
+        return $this;
     }
 
-    public function showStd()
+    protected function showStd()
     {
         $cols = exec('tput cols');
         echo str_repeat('-', $cols);
         echo "{$this->colors['BLUE']}{$this->method} {$this->url} {$this->colors['END']}" . PHP_EOL;
-
-        foreach ($this->responseHeader as $i => $header) {
-            if (strpos($header, ':') === false) {
-                echo $this->colors['GREEN'] . $header . $this->colors['END'];
-            } else {
-                echo $this->colors['MAGENTA'] . str_replace(':', ':' . $this->colors['END'], $header);
+        if (self::$showHead) {
+            foreach ($this->responseHeader as $i => $header) {
+                if (strpos($header, ':') === false) {
+                    echo $this->colors['GREEN'] . $header . $this->colors['END'];
+                } else {
+                    echo $this->colors['MAGENTA'] . str_replace(':', ':' . $this->colors['END'], $header);
+                }
             }
+            echo $this->colors['END'];
         }
-        echo $this->colors['END'];
-        if ($this->isJson) {
-            $json = json_decode($this->responseBody, true);
-            echo $json ? $json : $this->responseBody;
-        } else if ($this->isXml) {
-            $xml = simplexml_load_string($this->responseBody);
-            echo $xml ? $xml : $this->responseBody;
-        } else if ($this->contentLength <= 500 && $this->httpCode == 200) {
-            echo $this->responseBody;
-        } else {
-            echo 'save to: file://' . realpath('./output.html');
-            file_put_contents('./output.html', $this->responseBody);
+        if (self::$showBody) {
+            if ($this->isJson) {
+                $json = json_decode($this->responseBody, true);
+                $json ? print_r($json) : print($this->responseBody);
+            } else if ($this->isXml) {
+                $xml = simplexml_load_string($this->responseBody);
+                $xml ? print_r($xml) : print($this->responseBody);
+            } else if ($this->contentLength <= 500 && $this->httpCode == 200) {
+                echo $this->responseBody;
+            } else {
+                echo 'save to: file://' . realpath('./output.html');
+                file_put_contents('./output.html', $this->responseBody);
+            }
+            echo PHP_EOL;
         }
-        echo PHP_EOL;
     }
 
-    public function color()
+    protected function color()
     {
         $ansi = isset($_SERVER['ComSpec']) && $_SERVER['ComSpec'] == 'C:\Windows\system32\cmd.exe' ? "\x1b" : "\033";
 
@@ -597,7 +613,7 @@ class HTTP
         }
     }
 
-    public function showHTML()
+    protected function showHTML()
     {
 ?>
         <!DOCTYPE html>
@@ -623,16 +639,18 @@ class HTTP
         <body>
             <?php
             echo "{$this->colors['BLUE']}{$this->method} {$this->url} {$this->colors['END']}";
-            foreach ($this->responseHeader as $i => $header) {
-                if ($i == 0) {
-                    echo $this->colors['GREEN'] . $header . $this->colors['END'];
-                } else {
-                    echo $this->colors['MAGENTA'] . str_replace(':', ':' . $this->colors['END'] . '<p>', $header) . $this->colors['END'];
+            if (self::$showHead) {
+                foreach ($this->responseHeader as $i => $header) {
+                    if ($i == 0) {
+                        echo $this->colors['GREEN'] . $header . $this->colors['END'];
+                    } else {
+                        echo $this->colors['MAGENTA'] . str_replace(':', ':' . $this->colors['END'] . '<p>', $header) . $this->colors['END'];
+                    }
                 }
             }
             ?>
 
-            <pre id="outcode"><?= $this->responseBody ?></pre>
+            <pre id="outcode"><?= self::$showBody ? $this->responseBody : '' ?></pre>
         </body>
 
         </html>
@@ -640,20 +658,18 @@ class HTTP
     }
 
 
-    private static function checkRun($parse = true)
+    protected static function checkRun($parse = true)
     {
         if ($parse) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             $callline = array_column($trace, 'line');
-            array_walk($callline, function (&$v) {
-                $v--;
-            });
             if (array_intersect($callline, self::$runFlagLines)) {
                 return true;
             }
             return false;
         }
-        $all = token_get_all(file_get_contents(__FILE__, false));
+
+        $all = token_get_all(file_get_contents(get_included_files()[0], false));
         $cnt = count($all);
         self::$runFlagLines = [];
         for ($i = 0; $i < $cnt; $i++) {
