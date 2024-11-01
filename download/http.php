@@ -22,77 +22,77 @@ namespace {
     }
 
     /**
-     * @param string $uri
-     * @param string|array $data
-     * @param string|array $query
+     * @param string $path  请求的文件路径，不包括 scheme, host, port部分
+     * @param string|array $data  请求时发送 Body 数据
+     * @param string|array $query URL 查询参数
      * 
      * @return HTTP
      */
-    function GET(string $uri, string|array $data = '', string|array $query = '')
+    function GET(string $path, string|array $query = '', string|array $data = '')
     {
         $obj = HTTP::fetch();
         if ($data) {
-            $obj->custom('GET', $uri, $query, $data);
+            $obj->custom('GET', $path, $query, $data);
         } else {
-            $obj->get($uri, $query);
+            $obj->get($path, $query);
         }
         return $obj;
     }
     /**
-     * @param string $uri
-     * @param string|array $data
-     * @param string|array $query
+     * @param string $path   请求的文件路径，不包括 scheme, host, port部分
+     * @param string|array $data 请求时发送 Body 数据
+     * @param string|array $query URL 查询参数
      * 
      * @return HTTP
      */
-    function PUT(string $uri, string|array $data, string|array $query = '')
+    function PUT(string $path, string|array $query = '', string|array $data)
     {
         $obj = HTTP::fetch();
         $forceFile = ($obj::$requestBodyType == HttpRequestBodyType::FILE || $obj::$requestBodyType == HttpRequestBodyType::FILE->value);
         if (is_array($data)) {
-            $obj->custom('PUT', $uri, $query, $data);
+            $obj->custom('PUT', $path, $query, $data);
         } else if (!$forceFile && is_string($data) && !file_exists($data)) {
-            $obj->custom('PUT', $uri, $query, $data);
+            $obj->custom('PUT', $path, $query, $data);
         } else {
-            $obj->put($uri, $data, $query);
+            $obj->put($path, $data, $query);
         }
         return $obj;
     }
     /**
-     * @param string $uri
-     * @param string|array $data
-     * @param string|array $query
+     * @param string $path 请求的文件路径，不包括 scheme, host, port部分
+     * @param string|array $data 请求时发送 Body 数据
+     * @param string|array $query URL 查询参数
      * 
      * @return HTTP
      */
-    function POST(string $uri, string|array $data, string|array $query = '')
+    function POST(string $path, string|array $data, string|array $query = '')
     {
         $obj = HTTP::fetch();
-        $obj->post($uri, $data, $query);
+        $obj->post($path, $data, $query);
         return $obj;
     }
     /**
-     * @param string $uri
-     * @param string|array $query
+     * @param string $path 请求的文件路径，不包括 scheme, host, port部分 
+     * @param string|array $query URL 查询参数
      * 
      * @return HTTP
      */
-    function DELETE(string $uri, string|array $query = '')
+    function DELETE(string $path, string|array $query = '')
     {
         $obj = HTTP::fetch();
-        $obj->delete($uri, $query);
+        $obj->delete($path, $query);
         return $obj;
     }
     /**
-     * @param string $uri
-     * @param string|array $query
+     * @param string $path 请求的文件路径，不包括 scheme, host, port部分
+     * @param string|array $query URL 查询参数
      * 
      * @return HTTP
      */
-    function HEAD(string $uri, string|array $query = '')
+    function HEAD(string $path, string|array $query = '')
     {
         $obj = HTTP::fetch();
-        $obj->head($uri, $query);
+        $obj->head($path, $query);
         return $obj;
     }
     /**
@@ -278,7 +278,7 @@ namespace {
          * @var array
          */
         private static array $runFlagLines = [];
-        
+
         private static array $defaultObjVars = [];
 
         private function __construct($host)
@@ -310,7 +310,7 @@ namespace {
 
         public function reset()
         {
-            foreach(self::$defaultObjVars as $k => $v) {
+            foreach (self::$defaultObjVars as $k => $v) {
                 $this->$k = $v;
             }
         }
@@ -363,11 +363,11 @@ namespace {
                 $xml .= "<{$key}>{$v}</{$key}>";
             }
         }
-        public function custom($method, $uri, $query = '', $data = '')
+        public function custom($method, $path, $query = '', $data = '')
         {
             $this->method = $method;
             $this->isCustomMethod = true;
-            $this->buildUrl($uri, $query);
+            $this->buildUrl($path, $query);
             $this->buildBody($data);
             if ($data) {
                 $this->curlOptions[CURLOPT_POSTFIELDS] = $this->requestBody;
@@ -648,7 +648,7 @@ namespace {
 
             <body>
                 <?php
-                echo self::$colors['BLUE']."{$this->method} {$this->url} ". self::$colors['END'];
+                echo self::$colors['BLUE'] . "{$this->method} {$this->url} " . self::$colors['END'];
                 if (self::$showHead) {
                     foreach ($this->responseHeader as $i => $header) {
                         if ($i == 0) {
