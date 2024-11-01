@@ -133,6 +133,14 @@ class HTTP
      * @var string 位于调用行时，激活执行的 token 值
      */
     public static string $enableTag = ';';
+    /**
+     * @var string 设置 User Agent
+     */
+    public static ?string $userAgent = '';
+    /**
+     * @var string 设置 oauth2 token
+     */
+    public static string $oauth2Token = '';
 
 
     /**
@@ -295,10 +303,7 @@ class HTTP
 
     private function buildUrl(string $path = '/', $queryData = null)
     {
-        $auth = $query = '';
-        if (self::$user) {
-            $auth = self::$user . ':' . self::$password . '@';
-        }
+        $query = '';
         if ($queryData) {
             $query =  is_array($queryData) ? http_build_query($queryData) : $queryData;
             $query = (strpos($path, '?') === false ? '?' : '&') . $query;
@@ -307,7 +312,7 @@ class HTTP
             $path = "/$path";
         }
         $port = self::$port == 0 ? '' :  ':' . self::$port;
-        $this->url = self::$scheme . "://{$auth}" . self::$host . "{$port}{$path}{$query}";
+        $this->url = self::$scheme . "://" . self::$host . "{$port}{$path}{$query}";
     }
 
     private function buildBody($data)
@@ -428,6 +433,19 @@ class HTTP
     public function request()
     {
         self::checkRun();
+        if(self::$userAgent) {
+            $this->curlOptions[CURLOPT_USERAGENT] = self::$userAgent;
+        } else if(self::$userAgent === null) {
+            $this->curlOptions[CURLOPT_USERAGENT] = '';
+        }
+        if(self::$oauth2Token) {
+            $this->curlOptions[CURLOPT_XOAUTH2_BEARER] = self::$oauth2Token;
+        }
+        if (self::$user) {
+            $this->curlOptions[CURLOPT_USERNAME] = self::$user;
+            $this->curlOptions[CURLOPT_PASSWORD] = self::$password;
+            $this->curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_ANY;
+        }
         if ($this->isCustomMethod) {
             $this->curlOptions[CURLOPT_CUSTOMREQUEST] = $this->method;
             $this->isCustomMethod = false;
