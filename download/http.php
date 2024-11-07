@@ -577,6 +577,10 @@ namespace {
             echo str_repeat('-', $cols);
 
             echo self::$colors['BLUE'] . "{$this->method} {$this->url} " . self::$colors['END'] . PHP_EOL;
+            if(!$this->httpCode) {
+                echo curl_error($this->curl). PHP_EOL;
+                return;
+            }
             if (self::$showHead) {
                 foreach ($this->responseHeader as $i => $header) {
                     if (strpos($header, ':') === false) {
@@ -649,6 +653,9 @@ namespace {
             <body>
                 <?php
                 echo self::$colors['BLUE'] . "{$this->method} {$this->url} " . self::$colors['END'];
+                if(!$this->httpCode) {
+                    echo curl_error($this->curl). PHP_EOL;
+                }
                 if (self::$showHead) {
                     foreach ($this->responseHeader as $i => $header) {
                         if ($i == 0) {
