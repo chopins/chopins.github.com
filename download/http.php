@@ -142,8 +142,9 @@ namespace {
          */
         public static string $oauth2Token = '';
 
-        public static bool $showHead = true;
-        public static bool $showBody = true;
+        public static bool $showResponseHeader = true;
+        public static bool $showResponseBody = true;
+        public static bool $showRequestHeader = false;
 
 
         /**
@@ -187,6 +188,11 @@ namespace {
          * @var string http 响应的HTTP 版本
          */
         public string $httpVersion = 'HTTP/1.1';
+
+        /**
+         * @var array 实际发送的请求头
+         */
+        public array $realRequestHeader = [];
         /**
          * @var string 发送 http 请求的 body 内容
          */
@@ -450,6 +456,7 @@ namespace {
             if (!$this->run) {
                 return;
             }
+
             if (self::$userAgent) {
                 $this->curlOptions[CURLOPT_USERAGENT] = self::$userAgent;
             } else if (self::$userAgent === null) {
@@ -472,6 +479,9 @@ namespace {
                 $this->curlOptions[CURLOPT_POST] = true;
             } else if ($this->method == 'PUT') {
                 $this->curlOptions[CURLOPT_PUT] = true;
+            }
+            if(self::$showRequestHeader) {
+                $this->curlOptions[CURLINFO_HEADER_OUT] = 1;
             }
             $this->curlOptions[CURLOPT_FOLLOWLOCATION] = true;
             $this->curlOptions[CURLOPT_HEADERFUNCTION] = function ($ch, $h) {
@@ -509,6 +519,9 @@ namespace {
                 return;
             }
 
+            if(self::$showRequestHeader) {
+                $this->realRequestHeader = explode("\r\n", $info['request_header']);
+            }
 
             $this->redirectCount = $info['redirect_count'];
             if (isset($info['redirect_url'])) {
@@ -564,34 +577,63 @@ namespace {
                 return $this;
             }
             if (self::$isCLI) {
-                $this->showStd();
+                $this->showConsole();
             } else {
                 $this->showHTML();
             }
             return $this;
         }
 
-        protected function showStd()
+        public static function __callStatic($name, $arguments = [])
+        {
+            if (isset(self::$colors[$name])) {
+                self::out($name, ...$arguments);
+            }
+        }
+
+        protected static function out($color = 'PRESET', $str = '',  $nl = false)
+        {
+            if (isset(self::$colors[$color])) {
+                echo self::$colors[$color] . $str . self::$colors['END'];
+            } else {
+                echo $str;
+            }
+            if ($nl) {
+                echo PHP_EOL;
+            }
+        }
+
+        protected function showConsole()
         {
             $cols = exec('tput cols');
-            echo str_repeat('-', $cols);
-
-            echo self::$colors['BLUE'] . "{$this->method} {$this->url} " . self::$colors['END'] . PHP_EOL;
-            if(!$this->httpCode) {
-                echo curl_error($this->curl). PHP_EOL;
+            self::YELLOW(str_repeat('-', $cols), 1);
+            
+            if (!$this->httpCode) {
+                self::BLUE("{$this->method} {$this->url} ", true);
+                self::RED(curl_error($this->curl), 1);
                 return;
             }
-            if (self::$showHead) {
-                foreach ($this->responseHeader as $i => $header) {
+            if(self::$showRequestHeader) {
+                foreach ($this->realRequestHeader as $i => $header) {
                     if (strpos($header, ':') === false) {
-                        echo self::$colors['GREEN'] . $header . self::$colors['END'];
+                        self::GREEN($header, 1);
                     } else {
-                        echo self::$colors['MAGENTA'] . str_replace(':', ':' . self::$colors['END'], $header);
+                        self::MAGENTA(str_replace(':', ':' . self::$colors['END'], $header), 1);
                     }
                 }
-                echo self::$colors['END'];
+            } else {
+                self::BLUE("{$this->method} {$this->url} ", true);
             }
-            if (self::$showBody) {
+            if (self::$showResponseHeader) {
+                foreach ($this->responseHeader as $i => $header) {
+                    if (strpos($header, ':') === false) {
+                        self::GREEN($header);
+                    } else {
+                        self::MAGENTA(str_replace(':', ':' . self::$colors['END'], $header));
+                    }
+                }
+            }
+            if (self::$showResponseBody) {
                 if ($this->isJson) {
                     $json = json_decode($this->responseBody, true);
                     $json ? print_r($json) : print($this->responseBody);
@@ -613,13 +655,13 @@ namespace {
             $ansi = isset($_SERVER['ComSpec']) && $_SERVER['ComSpec'] == 'C:\Windows\system32\cmd.exe' ? "\x1b" : "\033";
 
             if (PHP_SAPI != 'cli') {
-                $code = ['BLUE' => 'red', 'GREEN' => 'green', 'MAGENTA' => 'MAGENTA'];
+                $code = ['BLUE' => 'blue', 'GREEN' => 'green', 'MAGENTA' => 'MAGENTA', 'RED' => 'red', 'YELLOW' => 'yellow'];
                 self::$colors['END'] = "</p>";
                 foreach ($code as $k => $n) {
                     self::$colors[$k] = "<p style='color:$n'>";
                 }
             } else {
-                $code = ['BLUE' => 34, 'GREEN' => 32, 'MAGENTA' => 35];
+                $code = ['RED' => 31, 'GREEN' => 32, 'YELLOW' => 33, 'BLUE' => 34, 'MAGENTA' => 35];
                 self::$colors['END'] = "{$ansi}[0m";
                 foreach ($code as $k => $n) {
                     self::$colors[$k] = "{$ansi}[0;{$n}m";
@@ -652,22 +694,23 @@ namespace {
 
             <body>
                 <?php
-                echo self::$colors['BLUE'] . "{$this->method} {$this->url} " . self::$colors['END'];
-                if(!$this->httpCode) {
-                    echo curl_error($this->curl). PHP_EOL;
+                self::BLUE("{$this->method} {$this->url} ");
+
+                if (!$this->httpCode) {
+                    self::RED(curl_error($this->curl), 1);
                 }
-                if (self::$showHead) {
+                if (self::$showResponseHeader) {
                     foreach ($this->responseHeader as $i => $header) {
                         if ($i == 0) {
-                            echo self::$colors['GREEN'] . $header . self::$colors['END'];
+                            self::GREEN($header);
                         } else {
-                            echo self::$colors['MAGENTA'] . str_replace(':', ':' . self::$colors['END'] . '<p>', $header) . self::$colors['END'];
+                            self::MAGENTA($header);
                         }
                     }
                 }
                 ?>
 
-                <pre id="outcode"><?= self::$showBody ? $this->responseBody : '' ?></pre>
+                <pre id="outcode"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
             </body>
 
             </html>
