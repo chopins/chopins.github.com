@@ -17,8 +17,9 @@ enum HttpRequestBodyType: string
     case JSON = 'json';
     case XML = 'xml';
     case RAW = 'raw';
-    case FORM = 'form';
+    case FORM_MULTIPART = 'form-multipart';
     case FILE = 'file';
+    case FORM_URL = 'form-url';
 }
 
 /**
@@ -198,7 +199,7 @@ class HTTP
     /**
      * @var string 发送 http 请求的 body 内容
      */
-    public string $requestBody = '';
+    public string|array $requestBody = '';
     /**
      * @var array http 响应的头列表
      */
@@ -342,24 +343,15 @@ class HTTP
         if (is_string(self::$requestBodyType)) {
             HttpRequestBodyType::from(self::$requestBodyType);
         }
-        if (self::$requestBodyType->value == 'json') {
+        if (self::$requestBodyType == HttpRequestBodyType::JSON) {
             $this->requestBody = is_array($data) ? json_encode($data) : $data;
             self::$requestHeader[] = 'Content-Type: application/json';
-        } else if (self::$requestBodyType->value == 'xml') {
+        } else if (self::$requestBodyType->value == HttpRequestBodyType::XML) {
             $this->requestBody = is_array($data) ? self::xmlEncode($data) : $data;
             self::$requestHeader[] = 'Content-Type: application/xml';
-        } else if (is_array($data)) {
-            $hasFile = false;
-            foreach ($data as $v) {
-                if ($v instanceof CURLFile || $v instanceof CURLStringFile) {
-                    $hasFile = true;
-                    break;
-                }
-            }
-            $this->requestBody = $hasFile ? $data : http_build_query($data);
-            return;
+        } else {
+            $this->requestBody = $data;
         }
-        self::$requestHeader[] = 'Content-Length: ' . strlen($this->requestBody);
     }
     protected static function xmlEncode(array $data)
     {
@@ -477,7 +469,7 @@ class HTTP
             $this->isCustomMethod = false;
         } else if ($this->method == 'GET') {
             $this->curlOptions[CURLOPT_HTTPGET] = true;
-        } else if ($this->method == 'POST') {
+        } else if ($this->method == 'POST' && self::$requestBodyType == HttpRequestBodyType::FORM_URL) {
             $this->curlOptions[CURLOPT_POST] = true;
         } else if ($this->method == 'PUT') {
             $this->curlOptions[CURLOPT_PUT] = true;
