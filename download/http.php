@@ -715,6 +715,9 @@ class HTTP
                 }
             }
             if($this->isHtml && self::$showResponseBody) {
+                if(strpos($this->responseBody, '<html>') === false && strpos($this->responseBody, '<body>') === false && strpos($this->responseBody, '<div>') === false) {
+                    $this->responseBody = '<pre>' . $this->responseBody . '</pre>';
+                }
             ?>
             <iframe width="99%" height="900" id="showBodyIframe" srcdoc='<?=addcslashes(trim($this->responseBody), '\'')?>'></iframe>
             <?php } else { ?>
