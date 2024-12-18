@@ -26,7 +26,7 @@ enum HttpRequestBodyType: string
  * @param string $path  请求的文件路径，不包括 scheme, host, port部分
  * @param string|array $data  请求时发送 Body 数据
  * @param string|array $query URL 查询参数
- * 
+ *
  * @return HTTP
  */
 function GET(string $path, string|array $query = '', string|array $data = '')
@@ -43,7 +43,7 @@ function GET(string $path, string|array $query = '', string|array $data = '')
  * @param string $path   请求的文件路径，不包括 scheme, host, port部分
  * @param string|array $data 请求时发送 Body 数据
  * @param string|array $query URL 查询参数
- * 
+ *
  * @return HTTP
  */
 function PUT(string $path, string|array $query = '', string|array $data)
@@ -63,7 +63,7 @@ function PUT(string $path, string|array $query = '', string|array $data)
  * @param string $path 请求的文件路径，不包括 scheme, host, port部分
  * @param string|array $data 请求时发送 Body 数据
  * @param string|array $query URL 查询参数
- * 
+ *
  * @return HTTP
  */
 function POST(string $path, string|array $data, string|array $query = '')
@@ -73,9 +73,9 @@ function POST(string $path, string|array $data, string|array $query = '')
     return $obj;
 }
 /**
- * @param string $path 请求的文件路径，不包括 scheme, host, port部分 
+ * @param string $path 请求的文件路径，不包括 scheme, host, port部分
  * @param string|array $query URL 查询参数
- * 
+ *
  * @return HTTP
  */
 function DELETE(string $path, string|array $query = '')
@@ -87,7 +87,7 @@ function DELETE(string $path, string|array $query = '')
 /**
  * @param string $path 请求的文件路径，不包括 scheme, host, port部分
  * @param string|array $query URL 查询参数
- * 
+ *
  * @return HTTP
  */
 function HEAD(string $path, string|array $query = '')
@@ -302,7 +302,7 @@ class HTTP
 
     /**
      * @param string $host
-     * 
+     *
      * @return HTTP
      */
     public static function fetch($host = '')
@@ -714,9 +714,12 @@ class HTTP
                     echo '</p>';
                 }
             }
+            if($this->isHtml && self::$showResponseBody) {
             ?>
-
+            <iframe width="99%" height="900" id="showBodyIframe" srcdoc='<?=addcslashes(trim($this->responseBody), '\'')?>'></iframe>
+            <?php } else { ?>
             <pre id="outcode"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
+            <?php } ?>
         </body>
 
         </html>
