@@ -671,8 +671,8 @@ class HTTP
 
         <head>
             <title>API Request</title>
+            <script src="./jquery/jquery.min.js"></script>
             <?php if ($this->isJson) { ?>
-                <script src="./jquery/jquery.min.js"></script>
                 <script src="./jquery/jquery.jsonview.min.js"></script>
                 <link href="jquery/jquery.jsonview.min.css" type="text/css" rel="stylesheet">
                 <script>
@@ -714,12 +714,14 @@ class HTTP
                     echo '</p>';
                 }
             }
-            if($this->isHtml && self::$showResponseBody) {
-                if(strpos($this->responseBody, '<html>') === false && strpos($this->responseBody, '<body>') === false && strpos($this->responseBody, '<div>') === false) {
-                    $this->responseBody = '<pre>' . $this->responseBody . '</pre>';
-                }
+            if($this->isHtml && self::$showResponseBody && preg_match('/^\<[A-Z!]+/i', trim($this->responseBody))) {
             ?>
-            <iframe width="99%" height="900" id="showBodyIframe" srcdoc='<?=addcslashes(trim($this->responseBody), '\'')?>'></iframe>
+            <iframe width="99%" height="900" id="showBodyIframe" srcdoc=''></iframe>
+            <script>
+                $(function() {
+                    $('#showBodyIframe').attr('srcdoc', atob('<?=base64_encode($this->responseBody)?>'));
+                });
+            </script>
             <?php } else { ?>
             <pre id="outcode"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
             <?php } ?>
