@@ -94,3 +94,6 @@ function removeAttributesChangeEvent(node, callback) {
 
 SourceForge CDN
 https://liquidtelecom.dl.sourceforge.net/project/
+
+Github No SNI
+nohup /usr/bin/chromium-browser --host-rules="MAP *github.com github.io, MAP *githubusercontent.com ghu.com" --host-resolver-rules="MAP github.io 20.205.243.166, MAP ghu.com 185.199.108.133" --ignore-certificate-errors > /dev/null 2>&1 &
