@@ -31,7 +31,7 @@ enum HttpRequestBodyType: string
  */
 function GET(string $path, string|array $query = '', string|array $data = '')
 {
-    $obj = HTTP::fetch();
+    $obj = HTTP::init();
     if ($data) {
         $obj->custom('GET', $path, $query, $data);
     } else {
@@ -48,7 +48,7 @@ function GET(string $path, string|array $query = '', string|array $data = '')
  */
 function PUT(string $path, string|array $query = '', string|array $data)
 {
-    $obj = HTTP::fetch();
+    $obj = HTTP::init();
     $forceFile = ($obj::$requestBodyType == HttpRequestBodyType::FILE || $obj::$requestBodyType == HttpRequestBodyType::FILE->value);
     if (is_array($data)) {
         $obj->custom('PUT', $path, $query, $data);
@@ -68,7 +68,7 @@ function PUT(string $path, string|array $query = '', string|array $data)
  */
 function POST(string $path, string|array $data, string|array $query = '')
 {
-    $obj = HTTP::fetch();
+    $obj = HTTP::init();
     $obj->post($path, $data, $query);
     return $obj;
 }
@@ -80,7 +80,7 @@ function POST(string $path, string|array $data, string|array $query = '')
  */
 function DELETE(string $path, string|array $query = '')
 {
-    $obj = HTTP::fetch();
+    $obj = HTTP::init();
     $obj->delete($path, $query);
     return $obj;
 }
@@ -92,7 +92,7 @@ function DELETE(string $path, string|array $query = '')
  */
 function HEAD(string $path, string|array $query = '')
 {
-    $obj = HTTP::fetch();
+    $obj = HTTP::init();
     $obj->head($path, $query);
     return $obj;
 }
@@ -125,6 +125,7 @@ class HTTP
      * @var array 请求头列表
      */
     public static array $requestHeader = [];
+    public static bool $isShow = false;
 
     /**
      * @var string|HttpRequestBodyType 请求时发送的body数据类型
@@ -133,7 +134,7 @@ class HTTP
     /**
      * @var string 位于调用行时，激活执行的 token 值
      */
-    public static string $enableTag = '@';
+    private static string $runTag = '@';
     /**
      * @var string 设置 User Agent
      */
@@ -290,9 +291,8 @@ class HTTP
 
     private static array $defaultObjVars = [];
 
-    private function __construct($host)
+    private function __construct()
     {
-        self::$host = $host;
         self::$isCLI = PHP_SAPI == 'cli';
         self::$requestBodyType = HttpRequestBodyType::RAW;
         $this->checkRun(false);
@@ -305,13 +305,13 @@ class HTTP
      *
      * @return HTTP
      */
-    public static function fetch($host = '')
+    public static function init(string $runTag = '')
     {
-        if (!isset(self::$obj)) {
-            self::$obj = new static($host);
+        if ($runTag) {
+            self::$runTag = $runTag;
         }
-        if ($host) {
-            self::$obj::$host = $host;
+        if (!isset(self::$obj)) {
+            self::$obj = new static();
         }
         self::$obj->reset();
         return self::$obj;
@@ -570,6 +570,7 @@ class HTTP
         if (!$this->run) {
             return $this;
         }
+        self::$isShow = true;
         if (self::$isCLI) {
             $this->showConsole();
         } else {
@@ -714,16 +715,16 @@ class HTTP
                     echo '</p>';
                 }
             }
-            if($this->isHtml && self::$showResponseBody && preg_match('/^\<[A-Z!]+/i', trim($this->responseBody))) {
+            if ($this->isHtml && self::$showResponseBody && preg_match('/^\<[A-Z!]+/i', trim($this->responseBody))) {
             ?>
-            <iframe width="99%" height="900" id="showBodyIframe" srcdoc=''></iframe>
-            <script>
-                $(function() {
-                    $('#showBodyIframe').attr('srcdoc', atob('<?=base64_encode($this->responseBody)?>'));
-                });
-            </script>
+                <iframe width="99%" height="900" id="showBodyIframe" srcdoc=''></iframe>
+                <script>
+                    $(function() {
+                        $('#showBodyIframe').attr('srcdoc', atob('<?= base64_encode($this->responseBody) ?>'));
+                    });
+                </script>
             <?php } else { ?>
-            <pre id="outcode"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
+                <pre id="outcode"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
             <?php } ?>
         </body>
 
@@ -746,15 +747,29 @@ class HTTP
         $all = token_get_all(file_get_contents(get_included_files()[0], false));
         $cnt = count($all);
         self::$runFlagLines = [];
+
         for ($i = 0; $i < $cnt; $i++) {
             $token = $all[$i];
-            if ($token == self::$enableTag) {
-                $i = $i + 1;
-                $token = $all[$i];
-                if (is_array($token) && $token[0] == T_STRING) {
-                    self::$runFlagLines[] = $token[2];
-                } else if (is_array($token) && $token[0] == T_WHITESPACE && strpos($token[1], PHP_EOL) === false) {
-                    self::$runFlagLines[] = $token[2];
+            $findTag = false;
+            if ($token == self::$runTag) {
+                $findTag = true;
+            } elseif (is_array($token)  && $token[1] == self::$runTag) {
+                $findTag = true;
+            }
+            $next = $i;
+            while ($findTag) {
+                $next++;
+                if ($next >= $cnt) {
+                    break;
+                }
+                if(!is_array($all[$next])) {
+                    break;
+                }
+                if ($all[$next][0] == T_STRING) {
+                    self::$runFlagLines[] = $all[$next][2];
+                    break;
+                } else if($all[$next][0] != T_WHITESPACE) {
+                    break;
                 }
             }
         }
@@ -819,4 +834,3 @@ function isHave($hay, $needle)
 {
     return stripos($hay, $needle) !== false;
 }
-\HTTP::fetch('localhost');
