@@ -135,6 +135,8 @@ class HTTP
      * @var string 位于调用行时，激活执行的 token 值
      */
     private static string $runTag = '@';
+
+    private static string $runTagShow = '@';
     /**
      * @var string 设置 User Agent
      */
@@ -268,6 +270,8 @@ class HTTP
      * @var bool 是否调用请求
      */
     private bool $run = false;
+
+    private bool $enableShow = false;
     /**
      * @var CurlHandle
      */
@@ -289,6 +293,8 @@ class HTTP
      */
     private static array $runFlagLines = [];
 
+    private static array $runFlagShowLines = [];
+
     private static array $defaultObjVars = [];
 
     private function __construct()
@@ -305,10 +311,13 @@ class HTTP
      *
      * @return HTTP
      */
-    public static function init(string $runTag = '')
+    public static function init(string $runTag = '', string $runTagShow = '')
     {
         if ($runTag) {
             self::$runTag = $runTag;
+        }
+        if($runTagShow) {
+            self::$runTagShow = $runTagShow;
         }
         if (!isset(self::$obj)) {
             self::$obj = new static();
@@ -491,6 +500,9 @@ class HTTP
             $this->getNetworkError();
         }
         $this->getCurlInfo();
+        if($this->enableShow) {
+            return $this->show();
+        }
         return $this;
     }
 
@@ -741,6 +753,11 @@ class HTTP
             if (array_intersect($callline, self::$runFlagLines)) {
                 return true;
             }
+            $this->enableShow = false;
+            if (array_intersect($callline, self::$runFlagShowLines)) {
+                $this->enableShow = true;
+                return true;
+            }
             return false;
         }
 
@@ -750,14 +767,14 @@ class HTTP
 
         for ($i = 0; $i < $cnt; $i++) {
             $token = $all[$i];
-            $findTag = false;
-            if ($token == self::$runTag) {
+            $findTag = $findTagShow = false;
+            if ($token == self::$runTag || (is_array($token) && $token[1] == self::$runTag)) {
                 $findTag = true;
-            } elseif (is_array($token)  && $token[1] == self::$runTag) {
-                $findTag = true;
+            } elseif($token == self::$runTagShow || (is_array($token) && $token[1] == self::$runTagShow)) {
+                $findTagShow = true;
             }
             $next = $i;
-            while ($findTag) {
+            while ($findTag || $findTagShow) {
                 $next++;
                 if ($next >= $cnt) {
                     break;
@@ -766,7 +783,8 @@ class HTTP
                     break;
                 }
                 if ($all[$next][0] == T_STRING) {
-                    self::$runFlagLines[] = $all[$next][2];
+                    $findTag && self::$runFlagLines[] = $all[$next][2];
+                    $findTagShow && self::$runFlagShowLines[] = $all[$next][2];
                     break;
                 } else if($all[$next][0] != T_WHITESPACE) {
                     break;
