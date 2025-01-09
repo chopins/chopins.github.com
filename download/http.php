@@ -66,7 +66,7 @@ function PUT(string $path, string|array $query = '', string|array $data)
  *
  * @return HTTP
  */
-function POST(string $path, string|array $data, string|array $query = '')
+function POST(string $path, string|array $data = '', string|array $query = '')
 {
     $obj = HTTP::init();
     $obj->post($path, $data, $query);
@@ -94,6 +94,32 @@ function HEAD(string $path, string|array $query = '')
 {
     $obj = HTTP::init();
     $obj->head($path, $query);
+    return $obj;
+}
+
+/**
+ * @param string $path 请求的文件路径，不包括 scheme, host, port部分
+ * @param string|array $query URL 查询参数
+ *
+ * @return HTTP
+ */
+function OPTIONS(string $path, string|array $query = '')
+{
+    $obj = HTTP::init();
+    $obj->options($path, $query);
+    return $obj;
+}
+
+/**
+ * @param string $path 请求的文件路径，不包括 scheme, host, port部分
+ * @param string|array $query URL 查询参数
+ *
+ * @return HTTP
+ */
+function TRACE(string $path, string|array $query = '')
+{
+    $obj = HTTP::init();
+    $obj->trace($path, $query);
     return $obj;
 }
 /**
@@ -316,7 +342,7 @@ class HTTP
         if ($runTag) {
             self::$runTag = $runTag;
         }
-        if($runTagShow) {
+        if ($runTagShow) {
             self::$runTagShow = $runTagShow;
         }
         if (!isset(self::$obj)) {
@@ -401,7 +427,7 @@ class HTTP
 
     public function put($path, $file, $query = '')
     {
-        $this->url = $this->buildUrl($path, $query);
+        $this->buildUrl($path, $query);
         $this->method = 'PUT';
         if (is_string($file) && is_file($file)) {
             $this->curlOptions[CURLOPT_INFILE] = fopen($file, 'rb');
@@ -415,7 +441,7 @@ class HTTP
 
     public function delete($path, $query = '')
     {
-        $this->url = $this->buildUrl($path, $query);
+        $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
         $this->method = 'DELETE';
         return $this->request();
@@ -423,7 +449,7 @@ class HTTP
 
     public function head($path, $query = '')
     {
-        $this->url = $this->buildUrl($path, $query);
+        $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
         $this->method = 'HEAD';
         return $this->request();
@@ -431,7 +457,7 @@ class HTTP
 
     public function patch($path, $query = '')
     {
-        $this->url = $this->buildUrl($path, $query);
+        $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
         $this->method = 'PATCH';
         return $this->request();
@@ -439,7 +465,7 @@ class HTTP
 
     public function options($path, $query = '')
     {
-        $this->url = $this->buildUrl($path, $query);
+        $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
         $this->method = 'OPTIONS';
         return $this->request();
@@ -447,7 +473,7 @@ class HTTP
 
     public function trace($path, $query = '')
     {
-        $this->url = $this->buildUrl($path, $query);
+        $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
         $this->method = 'TRACE';
         return $this->request();
@@ -500,7 +526,7 @@ class HTTP
             $this->getNetworkError();
         }
         $this->getCurlInfo();
-        if($this->enableShow) {
+        if ($this->enableShow) {
             return $this->show();
         }
         return $this;
@@ -770,7 +796,7 @@ class HTTP
             $findTag = $findTagShow = false;
             if ($token == self::$runTag || (is_array($token) && $token[1] == self::$runTag)) {
                 $findTag = true;
-            } elseif($token == self::$runTagShow || (is_array($token) && $token[1] == self::$runTagShow)) {
+            } elseif ($token == self::$runTagShow || (is_array($token) && $token[1] == self::$runTagShow)) {
                 $findTagShow = true;
             }
             $next = $i;
@@ -779,14 +805,14 @@ class HTTP
                 if ($next >= $cnt) {
                     break;
                 }
-                if(!is_array($all[$next])) {
+                if (!is_array($all[$next])) {
                     break;
                 }
                 if ($all[$next][0] == T_STRING) {
                     $findTag && self::$runFlagLines[] = $all[$next][2];
                     $findTagShow && self::$runFlagShowLines[] = $all[$next][2];
                     break;
-                } else if($all[$next][0] != T_WHITESPACE) {
+                } else if ($all[$next][0] != T_WHITESPACE) {
                     break;
                 }
             }
