@@ -522,10 +522,12 @@ class HTTP
         $this->curl = curl_init($this->url);
         curl_setopt_array($this->curl, $this->curlOptions);
         $this->responseBody = curl_exec($this->curl);
-        if ($this->responseBody === false) {
+
+        $this->getCurlInfo();
+        if ($this->httpCode === 0) {
             $this->getNetworkError();
         }
-        $this->getCurlInfo();
+
         if ($this->enableShow) {
             return $this->show();
         }
@@ -582,7 +584,7 @@ class HTTP
 
     private function getNetworkError()
     {
-        $this->curlErrno = curl_errno($this > curl);
+        $this->curlErrno = curl_errno($this->curl);
         $this->curlError = curl_error($this->curl);
     }
 
@@ -614,6 +616,12 @@ class HTTP
         } else {
             $this->showHTML();
         }
+        return $this;
+    }
+
+    public function then(callable $callable)
+    {
+        $callable($this);
         return $this;
     }
 
