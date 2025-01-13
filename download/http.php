@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Toknot;
+use CurlHandle;
 /**
  * Http Request by Curl (http://toknot.com)
  *
