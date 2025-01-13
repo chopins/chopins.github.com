@@ -928,7 +928,7 @@ class HTTP
         $mime = mime_content_type($filename);
         if(!$mime && !$filemime) {
             $mime = 'application/octet-stream';
-        } else {
+        } elseif(!$mime) {
             $mime = $filemime;
         }
         return new \CURLFile($filename, $mime);
