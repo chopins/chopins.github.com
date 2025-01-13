@@ -1,5 +1,6 @@
 <?php
-
+declare(strict_types=1);
+namespace Toknot;
 /**
  * Http Request by Curl (http://toknot.com)
  *
@@ -7,8 +8,6 @@
  * @license    http://toknot.com/LICENSE.txt New BSD License
  * @link       https://github.com/chopins/toknot
  */
-
-declare(strict_types=1);
 
 /**
  * Http 请求 Body 数据类型
@@ -922,6 +921,17 @@ class HTTP
                 echo $v . PHP_EOL;
             }
         }
+    }
+
+    public static function file($filename, $filemime = null)
+    {
+        $mime = mime_content_type($filename);
+        if(!$mime && !$filemime) {
+            $mime = 'application/octet-stream';
+        } else {
+            $mime = $filemime;
+        }
+        return new \CURLFile($filename, $mime);
     }
 
     public function __destruct()
