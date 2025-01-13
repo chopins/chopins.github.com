@@ -8,6 +8,7 @@
  * @link       https://github.com/chopins/toknot
  */
 
+declare(strict_types=1);
 
 /**
  * Http 请求 Body 数据类型
@@ -22,6 +23,10 @@ enum HttpRequestBodyType: string
     case FORM_URL = 'form-url';
 }
 
+function RUN()
+{
+    return HTTP::init()->run();
+}
 /**
  * @param string $path  请求的文件路径，不包括 scheme, host, port部分
  * @param string|array $data  请求时发送 Body 数据
@@ -151,6 +156,9 @@ class HTTP
      * @var array 请求头列表
      */
     public static array $requestHeader = [];
+    /**
+     * @var bool 当前实例是否已经显示
+     */
     public static bool $isShow = false;
 
     /**
@@ -162,6 +170,9 @@ class HTTP
      */
     private static string $runTag = '@';
 
+    /**
+     * @var string 位于调用行时，激活执行的并显示的 token 值
+     */
     private static string $runTagShow = '@';
     /**
      * @var string 设置 User Agent
@@ -172,13 +183,26 @@ class HTTP
      */
     public static string $oauth2Token = '';
 
+    /**
+     * @var bool 是否显示响应头
+     */
     public static bool $showResponseHeader = true;
+    /**
+     * @var bool 是否显示响应的内容
+     */
     public static bool $showResponseBody = true;
+    /**
+     * @var bool 是否显示请求头
+     */
     public static bool $showRequestHeader = false;
+    /**
+     * @var bool 是否使用表格显示数组结果
+     */
     public static bool $showArrayTable = false;
+    /**
+     * @var array 表格显示规则
+     */
     public static array $arrayTableLayout = [];
-
-
     /**
      * @var string http 请求方法
      */
@@ -197,9 +221,9 @@ class HTTP
      */
     public string $httpMsg = '';
     /**
-     * @var int http 响应 body 长度
+     * @var float http 响应 body 长度
      */
-    public int $contentLength = 0;
+    public float $contentLength = 0;
     /**
      * @var bool http 响应 body 是否 JSON
      */
@@ -250,17 +274,17 @@ class HTTP
      */
     public string $curlError = '';
     /**
-     * @var int 请求执行时间
+     * @var float 请求执行时间
      */
-    public int $execTime = 0;
+    public float $execTime = 0;
     /**
-     * @var int 请求发起连接时间
+     * @var float 请求发起连接时间
      */
-    public int $connectTime = 0;
+    public float $connectTime = 0;
     /**
-     * @var int DNS解析时间
+     * @var float DNS解析时间
      */
-    public int $nsLookupTime = 0;
+    public float $nsLookupTime = 0;
     /**
      * @var int 重定向次数
      */
@@ -297,6 +321,9 @@ class HTTP
      */
     private bool $run = false;
 
+    /**
+     * @var bool
+     */
     private bool $enableShow = false;
     /**
      * @var CurlHandle
@@ -314,13 +341,24 @@ class HTTP
      * @var bool
      */
     private static bool $isCLI = true;
+
+    /**
+     * @var bool
+     */
+    private static bool $forceRun = false;
     /**
      * @var array
      */
     private static array $runFlagLines = [];
 
+    /**
+     * @var array
+     */
     private static array $runFlagShowLines = [];
 
+    /**
+     * @var array
+     */
     private static array $defaultObjVars = [];
 
     private function __construct()
@@ -337,7 +375,7 @@ class HTTP
      *
      * @return HTTP
      */
-    public static function init(string $runTag = '', string $runTagShow = '')
+    public static function init(string $runTag = '', string $runTagShow = ''): HTTP
     {
         if ($runTag) {
             self::$runTag = $runTag;
@@ -359,7 +397,7 @@ class HTTP
         }
     }
 
-    private function buildUrl(string $path = '/', $queryData = null)
+    private function buildUrl(string $path = '/', string|array $queryData = ''): void
     {
         $query = '';
         if ($queryData) {
@@ -373,7 +411,7 @@ class HTTP
         $this->url = self::$scheme . "://" . self::$host . "{$port}{$path}{$query}";
     }
 
-    private function buildBody($data)
+    private function buildBody(string|array $data): void
     {
         if (is_string(self::$requestBodyType)) {
             HttpRequestBodyType::from(self::$requestBodyType);
@@ -388,7 +426,7 @@ class HTTP
             $this->requestBody = $data;
         }
     }
-    protected static function xmlEncode(array $data)
+    protected static function xmlEncode(array $data): void
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         foreach ($data as $key => $v) {
@@ -398,7 +436,15 @@ class HTTP
             $xml .= "<{$key}>{$v}</{$key}>";
         }
     }
-    public function custom($method, $path, $query = '', $data = '')
+    /**
+     * @param string $method
+     * @param string $path
+     * @param string $query
+     * @param string $data
+     *
+     * @return HTTP
+     */
+    public function custom(string $method, string $path, string|array $query = '', string|array $data = ''): HTTP
     {
         $this->method = $method;
         $this->isCustomMethod = true;
@@ -409,14 +455,14 @@ class HTTP
         }
         return $this->request();
     }
-    public function get(string $path, $query = '')
+    public function get(string $path, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->method = 'GET';
         return $this->request();
     }
 
-    public function post($path, $data, $query = '')
+    public function post(string $path, string|array $data, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->method = 'POST';
@@ -425,7 +471,7 @@ class HTTP
         return $this->request();
     }
 
-    public function put($path, $file, $query = '')
+    public function put(string $path, $file, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->method = 'PUT';
@@ -439,7 +485,7 @@ class HTTP
         return $this->request();
     }
 
-    public function delete($path, $query = '')
+    public function delete(string $path, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
@@ -447,7 +493,7 @@ class HTTP
         return $this->request();
     }
 
-    public function head($path, $query = '')
+    public function head(string $path, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
@@ -455,7 +501,7 @@ class HTTP
         return $this->request();
     }
 
-    public function patch($path, $query = '')
+    public function patch(string $path, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
@@ -463,7 +509,7 @@ class HTTP
         return $this->request();
     }
 
-    public function options($path, $query = '')
+    public function options(string $path, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
@@ -471,7 +517,7 @@ class HTTP
         return $this->request();
     }
 
-    public function trace($path, $query = '')
+    public function trace(string $path, string|array $query = ''): HTTP
     {
         $this->buildUrl($path, $query);
         $this->isCustomMethod = true;
@@ -479,11 +525,11 @@ class HTTP
         return $this->request();
     }
 
-    protected function request()
+    protected function request(): HTTP
     {
         $this->run = $this->checkRun();
         if (!$this->run) {
-            return;
+            return $this;
         }
 
         if (self::$userAgent) {
@@ -534,7 +580,7 @@ class HTTP
         return $this;
     }
 
-    private function getCurlInfo()
+    private function getCurlInfo(): void
     {
         $info = curl_getinfo($this->curl);
         $this->execTime = $info['total_time'];
@@ -582,57 +628,64 @@ class HTTP
         }
     }
 
-    private function getNetworkError()
+    private function getNetworkError(): void
     {
         $this->curlErrno = curl_errno($this->curl);
         $this->curlError = curl_error($this->curl);
     }
 
-    protected function getResposeType($header)
+    protected function getResposeType(string $header): void
     {
-        if (isHave($header, 'text/json') || isHave($header, 'application/json')) {
+        if (self::isHave($header, 'text/json') || self::isHave($header, 'application/json')) {
             $this->isJson = true;
         } else if (
-            isHave($header, 'application/xml')
-            || isHave($header, 'text/xml')
-            || isHave($header, 'application/atom+xml')
+            self::isHave($header, 'application/xml')
+            || self::isHave($header, 'text/xml')
+            || self::isHave($header, 'application/atom+xml')
         ) {
             $this->isXml = true;
-        } else if (isHave($header, 'text/plain')) {
+        } else if (self::isHave($header, 'text/plain')) {
             $this->isText = true;
-        } else if (isHave($header, 'text/html')) {
+        } else if (self::isHave($header, 'text/html')) {
             $this->isHtml = true;
         }
     }
+    public static function isHave(string $hay, string $needle): bool
+    {
+        return stripos($hay, $needle) !== false;
+    }
 
-    public function show()
+    public function show(): HTTP
     {
         if (!$this->run) {
             return $this;
         }
-        self::$isShow = true;
         if (self::$isCLI) {
             $this->showConsole();
         } else {
             $this->showHTML();
         }
+        self::$isShow = true;
         return $this;
     }
 
-    public function then(callable $callable)
+    public function then(callable $callable): HTTP
     {
+        if (!$this->run) {
+            return $this;
+        }
         $callable($this);
         return $this;
     }
 
-    public static function __callStatic($name, $arguments = [])
+    public static function __callStatic(string $name, array $arguments = []): void
     {
         if (isset(self::$colors[$name])) {
             self::out($name, ...$arguments);
         }
     }
 
-    protected static function out($color = 'PRESET', $str = '',  $nl = false)
+    protected static function out(string $color = 'PRESET', string $str = '', bool $nl = false): void
     {
         if (isset(self::$colors[$color])) {
             echo self::$colors[$color] . $str . self::$colors['END'];
@@ -644,7 +697,7 @@ class HTTP
         }
     }
 
-    protected function showConsole()
+    protected function showConsole(): void
     {
         $cols = exec('tput cols');
         self::YELLOW(str_repeat('-', $cols), 1);
@@ -691,7 +744,7 @@ class HTTP
         }
     }
 
-    protected function color()
+    protected function color(): void
     {
         $ansi = isset($_SERVER['ComSpec']) && $_SERVER['ComSpec'] == 'C:\Windows\system32\cmd.exe' ? "\x1b" : "\033";
 
@@ -710,58 +763,54 @@ class HTTP
         }
     }
 
-    protected function showHTML()
+    protected function showHTML(): void
     {
+        if (!self::$isShow) {
 ?>
-        <!DOCTYPE html>
-        <html>
+            <!DOCTYPE html>
+            <html>
 
-        <head>
-            <title>API Request</title>
-            <script src="./jquery/jquery.min.js"></script>
-            <?php if ($this->isJson) { ?>
+            <head>
+                <title>API Request</title>
+                <script src="./jquery/jquery.min.js"></script>
+                <style>* {font-size: 14px;} html {width: 99%;word-break: break-all;} hr {padding:1px;color:yellow} p { margin: 5px; } </style>
                 <script src="./jquery/jquery.jsonview.min.js"></script>
-                <link href="jquery/jquery.jsonview.min.css" type="text/css" rel="stylesheet">
+                <link href="./jquery/jquery.jsonview.min.css" type="text/css" rel="stylesheet">
+            </head>
+            <body>
+            <?php
+        }
+        $outcodeId = md5(microtime() . uniqid());
+        echo '<hr />';
+        if ($this->isJson) { ?>
                 <script>
                     $(function() {
-                        $("#outcode").JSONView(JSON.parse($("#outcode").text()), {
+                        $("#<?=$outcodeId?>").JSONView(JSON.parse($("#<?=$outcodeId?>").text()), {
                             collapsed: true,
                             bigNumbers: true
                         });
                     });
                 </script>
-                <style>
-                    * {
-                        font-size: 14px;
-                    }
 
-                    p {
-                        margin: 5px;
-                    }
-                </style>
-            <?php } ?>
-        </head>
+            <?php }
+        self::BLUE("{$this->method} {$this->url} ");
 
-        <body>
-            <?php
-            self::BLUE("{$this->method} {$this->url} ");
-
-            if (!$this->httpCode) {
-                self::RED(curl_error($this->curl), 1);
-            }
-            if (self::$showResponseHeader) {
-                foreach ($this->responseHeader as $i => $header) {
-                    echo '<p>';
-                    $header = trim($header);
-                    if ($i == 0) {
-                        self::GREEN($header);
-                    } else {
-                        self::MAGENTA(str_replace(':', ':' . self::$colors['END'] . '<span>', $header));
-                    }
-                    echo '</p>';
+        if (!$this->httpCode) {
+            self::RED(curl_error($this->curl), 1);
+        }
+        if (self::$showResponseHeader) {
+            foreach ($this->responseHeader as $i => $header) {
+                echo '<p>';
+                $header = trim($header);
+                if ($i == 0) {
+                    self::GREEN($header);
+                } else {
+                    self::MAGENTA(str_replace(':', ':' . self::$colors['END'] . '<span>', $header));
                 }
+                echo '</p>';
             }
-            if ($this->isHtml && self::$showResponseBody && preg_match('/^\<[A-Z!]+/i', trim($this->responseBody))) {
+        }
+        if ($this->isHtml && self::$showResponseBody && preg_match('/^\<[A-Z!]+/i', trim($this->responseBody))) {
             ?>
                 <iframe width="99%" height="900" id="showBodyIframe" srcdoc=''></iframe>
                 <script>
@@ -770,18 +819,22 @@ class HTTP
                     });
                 </script>
             <?php } else { ?>
-                <pre id="outcode"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
-            <?php } ?>
-        </body>
-
-        </html>
-<?php
+                <pre id="<?=$outcodeId?>"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
+    <?php }
     }
 
+    public function run(): HTTP
+    {
+        self::$forceRun = true;
+        return $this;
+    }
 
-    protected function checkRun($parse = true)
+    protected function checkRun(bool $parse = true): bool
     {
         if ($parse) {
+            if (self::$forceRun) {
+                return true;
+            }
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             $callline = array_column($trace, 'line');
             if (array_intersect($callline, self::$runFlagLines)) {
@@ -825,12 +878,14 @@ class HTTP
                 }
             }
         }
+        return true;
     }
 
-    public function showArrayTable($array)
+    public function showArrayTable(array $array): void
     {
         if (!self::$showArrayTable) {
-            return print_r($array);
+            print_r($array);
+            return;
         }
 
         $cols = exec('tput cols');
@@ -852,7 +907,7 @@ class HTTP
         }
     }
 
-    protected function showList($array, $indent)
+    protected function showList(array $array, string $indent): void
     {
         $indentStr = str_repeat(' ', $indent);
         $i = 0;
@@ -874,15 +929,8 @@ class HTTP
         if ($this->curl instanceof CurlHandle) {
             curl_close($this->curl);
         }
+        if (!self::$isCLI) {
+            echo '</body></html>';
+        }
     }
-}
-
-
-function isBegin($hay, $needle)
-{
-    return stripos($hay, $needle) === 0;
-}
-function isHave($hay, $needle)
-{
-    return stripos($hay, $needle) !== false;
 }
