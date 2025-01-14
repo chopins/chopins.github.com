@@ -260,7 +260,7 @@ class HTTP
     /**
      * @var string http 响应的 body 内容
      */
-    public string $responseBody = '';
+    public string|bool $responseBody = '';
     /**
      * @var array 需要设置的 curl 选项
      */
@@ -693,8 +693,10 @@ class HTTP
         } else {
             echo $str;
         }
-        if ($nl) {
+        if ($nl && self::$isCLI) {
             echo PHP_EOL;
+        } else {
+            echo '<br />';
         }
     }
 
@@ -777,6 +779,9 @@ class HTTP
                     * {
                         font-size: 14px;
                     }
+                    :root {
+                        --pseudo-display: block;
+                    }
 
                     html {
                         width: 99%;
@@ -792,7 +797,7 @@ class HTTP
                         margin: 5px;
                     }
 
-                    m {
+                    m,x {
                         color: blue;
                         font-weight: bold;
                     }
@@ -817,63 +822,104 @@ class HTTP
                         color: navy;
                         margin-right: 10px;
                     }
-
+                    code > div > div {display: none;}
+                    code > div > div + m::before {
+                        content: '......';
+                        display: var(--pseudo-display);
+                        margin-left: 20px;
+                    }
                     code div {
-                        display: none;
+                        margin-left: 20px;
+                    }
+                    x {
+                        font-weight: bold;
+                        margin: 0 2px;
                     }
                 </style>
                 <script>
+                    const d = document;
                     function $(e) {
                         if (typeof e == 'function') {
-                            document.addEventListener('DOMContentLoaded', e);
+                            d.addEventListener('DOMContentLoaded', e);
                         } else if (typeof e == 'string') {
-                            return document.querySelectorAll(e);
+                            return d.querySelectorAll(e);
                         } else {
                             return e;
                         }
                     }
 
-                    function jsonview(obj) {
-                        if (obj instanceof Array) {
-                            if (obj.length == 0) {
-                                return '<m>[]</m>';
+                    function jsonview(o) {
+                        let t = '';
+                        if (o instanceof Array) {
+                            if (o.length == 0) {
+                                return '<m>[]</m>,';
                             }
-                            t = '';
-                            for (let i in obj) t += '<p><b>' + i + ':</b>' + jsonview(obj[i]) + '</p>';
-
-                            return '<m>[</m><div style="margin-left:20px;">' + t + '</div><m>],</m>';
-                        } else if (obj instanceof Object) {
-                            t = '';
-                            for (let i in obj) t += '<p><b>"' + i + '":</b>' + jsonview(obj[i]) + '</p>';
-
-                            return '<m>{</m><div style="margin-left:20px;">' + t + '</div><m>},</m>';
-                        } else if (typeof obj == 'string') {
-                            return '<t>"' + obj + '"</t>,';
+                            for (let i in o) t += '<p><b>' + i + ':</b>' + jsonview(o[i]) + '</p>';
+                            t = t.slice(0, -5) + '</p>';
+                            return '<m>[</m><div>' + t + '</div><m>]</m>,';
+                        } else if (o instanceof Object) {
+                            for (let i in o) t += '<p><b>"' + i + '":</b>' + jsonview(o[i]) + '</p>';
+                            t = t.slice(0, -5) + '</p>';
+                            return '<m>{</m><div>' + t + '</div><m>}</m>,';
+                        } else if (typeof o == 'string') {
+                            return '<t>"' + o + '"</t>,';
                         } else {
-                            return '<n>' + obj + '</n>,';
+                            return '<n>' + o + '</n>,';
                         }
                     }
-                    $(function() {
 
+                    function xmlview(o) {
+                        let t = '';
+                        for (let e of o.children) {
+                            t += '<p><x>&lt;</x><m>' + e.tagName + '</m><x>&gt;</x>';
+                            if (e.children.length > 0) {
+                                t += '<div>' + xmlview(e) + '</div>';
+                            } else {
+                                t += '<t>' + e.innerHTML + '</t>';
+                            }
+                            t += '<x>&lt;/</x><m>' + e.tagName + '</m><x>&gt;</x></p>';
+                        }
+                        return t;
+                    }
+
+
+                    $(function() {
                         $('.responseContent').forEach(function(e) {
                             if (!e.getAttribute('show-content')) {
                                 return;
                             }
                             let type = e.getAttribute('content-type');
                             let v = e.innerHTML;
-                            let show = null;
+                            let s = null;
                             if (type == 'json') {
-                                show = document.createElement('code');
-                                show.innerHTML = '<button>显示/隐藏</button>' + jsonview(JSON.parse(v));
+                                s = d.createElement('code');
+                                try {
+                                    s.innerHTML = '<button>显示/隐藏</button>' + jsonview(JSON.parse(v)).slice(0, -1);
+                                } catch(e) {
+                                    s.innerHTML = v;
+                                }
+                            } else if (type == 'xml') {
+                                s = d.createElement('code');
+                                let xml = v.replaceAll('&lt;/script', '</script').replaceAll('&amp;','&');
+                                try {
+                                    let dom = new DOMParser().parseFromString(xml, 'application/xml');
+                                    s.innerHTML = '<button>显示/隐藏</button>' + xmlview(dom);
+                                } catch(e) {
+                                    s.innerHTML = v;
+                                }
                             } else {
-                                show = document.createElement('iframe');
-                                show.width = "99%";
-                                show.height = "900";
-                                show.srcdoc = v.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&');
+                                s = d.createElement('iframe');
+                                s.width = "99%";
+                                s.height = "900";
+                                s.srcdoc = v.replaceAll('&lt;/script', '</script').replaceAll('&amp;','&');
                             }
-                            e.after(show);
+                            e.after(s);
                         });
-                        $('code button').forEach((e) => e.addEventListener('click', (ev) => ev.target.parentNode.querySelectorAll('div').forEach((k) => k.style.display = k.style.display == 'block' ? 'none' : 'block')));
+                        $('code>button').forEach((c) => c.addEventListener('click', (e) => {
+                            let k = e.target.parentNode.querySelector('div>div');
+                            d.documentElement.style.setProperty('--pseudo-display', getComputedStyle(k).display);
+                            k.style.display = k.style.display == 'block' ? 'none' : 'block';
+                        }));
                     });
                 </script>
             </head>
@@ -883,10 +929,10 @@ class HTTP
         }
 
         echo '<hr />';
-        self::BLUE("{$this->method} {$this->url} ");
+        self::BLUE("{$this->method} {$this->url} ", true);
 
         if (!$this->httpCode) {
-            self::RED(curl_error($this->curl), 1);
+            self::RED(curl_error($this->curl), true);
         }
         if (self::$showResponseHeader) {
             foreach ($this->responseHeader as $i => $header) {
@@ -900,11 +946,13 @@ class HTTP
                 echo '</p>';
             }
         }
-        $contentType = $this->isJson ? 'json' : 'html';
+        if(!$this->responseBody) {
+            return;
+        }
+        $contentType = $this->isJson ? 'json' : ($this->isXml ? 'xml' : 'html');
+        $content = $this->isJson ? $this->responseBody : str_ireplace(['&', '</script'], ['&amp;', '&lt;/script'], $this->responseBody);
             ?>
-            <script class="responseContent" type="text/plain" content-type="<?= $contentType ?>" show-content="<?= self::$showResponseBody ?>">
-                <?= $this->isJson ? $this->responseBody : str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $this->responseBody) ?>
-            </script>
+            <script class="responseContent" type="text/plain" content-type="<?= $contentType ?>" show-content="<?= self::$showResponseBody ?>"><?= $content ?></script>
     <?php
     }
 
