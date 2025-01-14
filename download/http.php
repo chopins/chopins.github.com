@@ -1,6 +1,6 @@
 <?php
+
 declare(strict_types=1);
-use CurlHandle;
 /**
  * Http Request by Curl (http://toknot.com)
  *
@@ -222,7 +222,8 @@ class HTTP
     /**
      * @var float http 响应 body 长度
      */
-    public float $contentLength = 0;
+    public float $responseContentLength = 0;
+    public string $responseType = '';
     /**
      * @var bool http 响应 body 是否 JSON
      */
@@ -589,7 +590,7 @@ class HTTP
         $this->redirectUrls = [];
         $this->connectIp = $info['primary_ip'];
         $this->connectPort = $info['primary_port'];
-        $this->contentLength = $info['size_download'];
+        $this->responseContentLength = $info['size_download'];
         $this->lastUrl = $info['url'];
 
         $this->httpCode = $info['http_code'];
@@ -608,6 +609,7 @@ class HTTP
         }
 
         if (isset($info['content_type'])) {
+            $this->responseType = $info['content_type'];
             $this->getResposeType($info['content_type']);
         }
         if (isset($info['http_version'])) {
@@ -733,7 +735,7 @@ class HTTP
             } else if ($this->isXml) {
                 $xml = simplexml_load_string($this->responseBody);
                 $xml ? $this->showArrayTable($xml) : print($this->responseBody);
-            } else if ($this->contentLength <= 500 && $this->httpCode == 200) {
+            } else if ($this->responseContentLength <= 500 && $this->httpCode == 200) {
                 echo $this->responseBody;
             } else {
                 echo 'save to: file://' . realpath('./output.html');
@@ -771,27 +773,116 @@ class HTTP
 
             <head>
                 <title>API Request</title>
-                <script src="./jquery/jquery.min.js"></script>
-                <style>* {font-size: 14px;} html {width: 99%;word-break: break-all;} hr {padding:1px;color:yellow} p { margin: 5px; } </style>
-                <script src="./jquery/jquery.jsonview.min.js"></script>
-                <link href="./jquery/jquery.jsonview.min.css" type="text/css" rel="stylesheet">
+                <style>
+                    * {
+                        font-size: 14px;
+                    }
+
+                    html {
+                        width: 99%;
+                        word-break: break-all;
+                    }
+
+                    hr {
+                        padding: 1px;
+                        color: yellow;
+                    }
+
+                    p {
+                        margin: 5px;
+                    }
+
+                    m {
+                        color: blue;
+                        font-weight: bold;
+                    }
+
+                    t {
+                        color: green;
+                    }
+
+                    n {
+                        color: darkorchid;
+                    }
+
+                    .responseContent {
+                        display: none;
+                    }
+
+                    code button {
+                        display: block;
+                    }
+
+                    code b {
+                        color: navy;
+                        margin-right: 10px;
+                    }
+
+                    code div {
+                        display: none;
+                    }
+                </style>
+                <script>
+                    function $(e) {
+                        if (typeof e == 'function') {
+                            document.addEventListener('DOMContentLoaded', e);
+                        } else if (typeof e == 'string') {
+                            return document.querySelectorAll(e);
+                        } else {
+                            return e;
+                        }
+                    }
+
+                    function jsonview(obj) {
+                        if (obj instanceof Array) {
+                            if (obj.length == 0) {
+                                return '<m>[]</m>';
+                            }
+                            t = '';
+                            for (let i in obj) t += '<p><b>' + i + ':</b>' + jsonview(obj[i]) + '</p>';
+
+                            return '<m>[</m><div style="margin-left:20px;">' + t + '</div><m>],</m>';
+                        } else if (obj instanceof Object) {
+                            t = '';
+                            for (let i in obj) t += '<p><b>"' + i + '":</b>' + jsonview(obj[i]) + '</p>';
+
+                            return '<m>{</m><div style="margin-left:20px;">' + t + '</div><m>},</m>';
+                        } else if (typeof obj == 'string') {
+                            return '<t>"' + obj + '"</t>,';
+                        } else {
+                            return '<n>' + obj + '</n>,';
+                        }
+                    }
+                    $(function() {
+
+                        $('.responseContent').forEach(function(e) {
+                            if (!e.getAttribute('show-content')) {
+                                return;
+                            }
+                            let type = e.getAttribute('content-type');
+                            let v = e.innerHTML;
+                            let show = null;
+                            if (type == 'json') {
+                                show = document.createElement('code');
+                                show.innerHTML = '<button>显示/隐藏</button>' + jsonview(JSON.parse(v));
+                            } else {
+                                show = document.createElement('iframe');
+                                show.width = "99%";
+                                show.height = "900";
+                                show.srcdoc = v.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&');
+                            }
+                            e.after(show);
+                        });
+                        $('code button').forEach((e) => e.addEventListener('click', (ev) => ev.target.parentNode.querySelectorAll('div').forEach((k) => k.style.display = k.style.display == 'block' ? 'none' : 'block')));
+                    });
+                </script>
             </head>
+
             <body>
             <?php
         }
-        $outcodeId = md5(microtime() . uniqid());
-        echo '<hr />';
-        if ($this->isJson) { ?>
-                <script>
-                    $(function() {
-                        $("#<?=$outcodeId?>").JSONView(JSON.parse($("#<?=$outcodeId?>").text()), {
-                            collapsed: true,
-                            bigNumbers: true
-                        });
-                    });
-                </script>
 
-            <?php }
+        echo '<hr />';
         self::BLUE("{$this->method} {$this->url} ");
 
         if (!$this->httpCode) {
@@ -809,17 +900,12 @@ class HTTP
                 echo '</p>';
             }
         }
-        if ($this->isHtml && self::$showResponseBody && preg_match('/^\<[A-Z!]+/i', trim($this->responseBody))) {
+        $contentType = $this->isJson ? 'json' : 'html';
             ?>
-                <iframe width="99%" height="900" id="showBodyIframe" srcdoc=''></iframe>
-                <script>
-                    $(function() {
-                        $('#showBodyIframe').attr('srcdoc', atob('<?= base64_encode($this->responseBody) ?>'));
-                    });
-                </script>
-            <?php } else { ?>
-                <pre id="<?=$outcodeId?>"><?= self::$showResponseBody ? $this->responseBody : '' ?></pre>
-    <?php }
+            <script class="responseContent" type="text/plain" content-type="<?= $contentType ?>" show-content="<?= self::$showResponseBody ?>">
+                <?= $this->isJson ? $this->responseBody : str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $this->responseBody) ?>
+            </script>
+    <?php
     }
 
     public function run(): HTTP
@@ -926,9 +1012,9 @@ class HTTP
     public static function file($filename, $filemime = null)
     {
         $mime = mime_content_type($filename);
-        if(!$mime && !$filemime) {
+        if (!$mime && !$filemime) {
             $mime = 'application/octet-stream';
-        } elseif(!$mime) {
+        } elseif (!$mime) {
             $mime = $filemime;
         }
         return new \CURLFile($filename, $mime);
