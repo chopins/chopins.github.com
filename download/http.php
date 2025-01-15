@@ -45,24 +45,27 @@ function GET(string $path, string|array $query = '', string|array $data = '')
 }
 /**
  * @param string $path   请求的文件路径，不包括 scheme, host, port部分
- * @param string|array $data 请求时发送 Body 数据
+ * @param string|array|CURLStringFile $file 请求时发送 Body 数据
  * @param string|array $query URL 查询参数
  *
  * @return HTTP
  */
-function PUT(string $path, string|array $query = '', string|array $data)
+function PUT(string $path, string|array|CURLStringFile $file, string|array $query = '')
 {
     $obj = HTTP::init();
-    $forceFile = ($obj::$requestBodyType == HttpRequestBodyType::FILE || $obj::$requestBodyType == HttpRequestBodyType::FILE->value);
     if (is_array($data)) {
-        $obj->custom('PUT', $path, $query, $data);
-    } else if (!$forceFile && is_string($data) && !file_exists($data)) {
-        $obj->custom('PUT', $path, $query, $data);
-    } else {
-        $obj->put($path, $data, $query);
+        return $obj->custom('PUT', $path, $query, $data);
     }
-    return $obj;
+    if ($file instanceof CURLStringFile) {
+        $data = $file->data;
+    } else if(file_exists($file)){
+        $data = file_get_contents($file);
+    } else {
+        throw new \InvalidArgumentException("文件不存在");
+    }
+    return $obj->put($path, $data, $query);
 }
+
 /**
  * @param string $path 请求的文件路径，不包括 scheme, host, port部分
  * @param string|array $data 请求时发送 Body 数据
@@ -897,7 +900,7 @@ class HTTP
         }
     }
 
-    public static function file($filename, $filemime = null)
+    public static function file($filename, $filemime = null): CURLFile
     {
         $mime = mime_content_type($filename);
         if (!$mime && !$filemime) {
@@ -964,6 +967,7 @@ class HTTP
         .responseContent {
             display: none;
         }
+
         code {
             display: block;
             background-color: #FAFAFA;
