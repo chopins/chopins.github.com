@@ -791,9 +791,9 @@ class HTTP
         }
         $contentType = $this->isJson ? 'json' : ($this->isXml ? 'xml' : 'html');
         $content = $this->isJson ? $this->responseBody : str_ireplace(['&', '</script'], ['&amp;', '&lt;/script'], $this->responseBody);
-?>
-        <script class="responseContent" type="text/plain" content-type="<?= $contentType ?>" show-content="<?= self::$showResponseBody ?>"><?= $content ?></script>
-<?php
+        echo <<<HTML
+        <script class="responseContent" type="text/plain" content-type="{$contentType}">{$content}</script>
+        HTML;
     }
 
     public function run(): HTTP
@@ -1052,9 +1052,6 @@ class HTTP
 
         $(function() {
             $('.responseContent').forEach(function(e) {
-                if (!e.getAttribute('show-content')) {
-                    return;
-                }
                 let type = e.getAttribute('content-type');
                 let v = e.innerHTML;
                 let s = null;
