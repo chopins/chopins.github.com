@@ -105,3 +105,6 @@ wfuaa,ujltbq { display:none !important;}
 body>div[style*=fixed][style*=opacity]:empty{display:none !important;}
 ```
 
+### waydroid
+通过 `waydroid_script` 安装 `libndk` `libhoudini` 以支持 ARM APK，
+对于ARM APK 使用`adb install --abi arm64-v8a [APP-PATH.APK]` 进行安装，以便运行时能兼任arm架构的app
