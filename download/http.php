@@ -53,15 +53,12 @@ function GET(string $path, string|array $query = '', string|array $data = '')
 function PUT(string $path, string|array|CURLStringFile $file, string|array $query = '')
 {
     $obj = HTTP::init();
-    if (is_array($data)) {
-        return $obj->custom('PUT', $path, $query, $data);
-    }
     if ($file instanceof CURLStringFile) {
         $data = $file->data;
-    } else if(file_exists($file)){
+    } else if(is_string($file) && file_exists($file)){
         $data = file_get_contents($file);
     } else {
-        throw new \InvalidArgumentException("文件不存在");
+        return $obj->custom('PUT', $path, $query, $file);
     }
     return $obj->put($path, $data, $query);
 }
