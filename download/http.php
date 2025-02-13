@@ -947,8 +947,7 @@ class HTTP
             margin: 5px;
         }
 
-        m,
-        x {
+        m,x {
             color: blue;
             font-weight: bold;
         }
