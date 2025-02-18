@@ -10,7 +10,7 @@ categories: blog
    3. `string`  字符串，最长2GB
    4. `float`   64位双精度浮点数,IEC 60559标准
    5. `bool`    布尔数，`false`, `true`
-   6. `null`    
+   6. `null`
    7. `array`   任意可混合类型数组,Hash表
         ``` php
         $a = [1,'ss','k' => 'val'];
@@ -25,7 +25,7 @@ categories: blog
         $b = ('ss', 'b', 'cass');
         $c = (1.23, 23.93,  45.6);
         $d = (false, true, false);
-        ``` 
+        ```
    12. `type`    标量类型定义关键字, 定义的类型长度必须为2的指数倍数
         ```php
         type LIKE_TYPE(TYPE_SIZE) NEW_TYPE_NAME
@@ -50,7 +50,7 @@ categories: blog
              global $b = 1;
              echo $c;
          }
-         ``` 
+         ```
       3. 全局优先级最高，不可声明成块变量
    3. 块变量
       1. 仅块代码中可访问
@@ -93,7 +93,7 @@ categories: blog
                }
                public mB()
                {
-                  
+
                }
                public static msD()
                {
@@ -104,7 +104,7 @@ categories: blog
          namespace NSB {
             class MixB {
                use NSA.MixA;//MixA类名在MixB类中可见
-            
+
                public mA {
 
                }
@@ -129,7 +129,7 @@ categories: blog
          $a = new NSB.MixD;
          $a.NSA.MixA.mA();
          class NSB.MixD.NSA.MixA {
-            
+
          }
          NSB.MixD.my.NSA.MixA.msD();//待定1
          MSB.MixD::NSA.MixA.msD();//待定2
@@ -151,50 +151,50 @@ categories: blog
          echo count($c);
          echo $b;
       }
-     
+
       $f2 = ($c)-> $a + $b + $c;
       echo $f2(3); // echo 6
       A(1, 2,3,4); // echo 4
       $f(1, 2, 3, 4, 5); // echo 5; echo 4; echo 2;
-      ```  
+      ```
 5. 异常
    1. `try {} catch() {} finally {}`
    2. `raise`
-   3. `BaseException` 所有异常的基类
-      1. `BaseException` 原型
+   3. `Report` 所有异常的基类
+      1. `Report` 原型
          ```php
-         class BaseException {
+         class Report {
                protected string $message = "";
                private string $string = "";
                protected int $code;
                protected string $file = "";
                protected int $line;
                private array $trace = [];
-               private ?BaseException $previous = null;
+               private ?Report $previous = null;
                protected bool $throw = true;
-               private static ?BaseException $lastException = null;
+               private static ?Report $lastException = null;
                /* 方法 */
-               public __construct(string $message = "", int $code = 0, ?BaseException $previous = null)
+               public __construct(string $message = "", int $code = 0, ?Report $previous = null)
                final public getMessage(): string
-               final public getPrevious(): ?BaseException
+               final public getPrevious(): ?Report
                final public getCode(): int
                final public getFile(): string
                final public getLine(): int
                final public getTrace(): array
                final public getTraceAsString(): string
-               final public getLastException() : ?BaseException
+               final public getLastException() : ?Report
                final public static setThrow(string $exceptionClass, bool $isthrow): bool
          }
-         ``` 
-      2. `BaseException::$throw` 属性表示是否中断执行，为`true`时将中断执行，异常对象可被捕获，为`false`时将继续执行后续代码
+         ```
+      2. `Report::$throw` 属性表示是否中断执行，为`true`时将中断执行，异常对象可被捕获，为`false`时将继续执行后续代码
           ```php
           class MyAException
           {
-            use BaseException;
+            use Report;
             protected bool $throw = false;
             public __init($msg)
             {
-               $my.BaseException.__init($msg);
+               $my.Report.__init($msg);
                echo $my->getMessage();
             }
             @string {
@@ -204,29 +204,29 @@ categories: blog
           try {
             raise MyAException('message'); //等效 echo 'message';
             echo 'continue';  //将输出 continue
-          } catch(BaseException $e) {
+          } catch(Report $e) {
             echo 'catch exception'; //不会被捕获
           } finally {
-            echo BaseException::getLastException();//echo 'message'
+            echo Report::getLastException();//echo 'message'
           }
           class MyBException
           {
-            use BaseException;
+            use Report;
             public __init($msg)
             {
                $my->break = true;
-               $my.BaseException.__init($msg);
+               $my.Report.__init($msg);
             }
           }
           try {
             raise MyAException('message'); //中断
             echo 'continue';  //不会执行
-          } catch(BaseException $e) {
+          } catch(Report $e) {
             echo 'catch exception'; //输出 catch exception
           } finally {
-            echo BaseException::getLastException();//echo 'message'
+            echo Report::getLastException();//echo 'message'
           }
-          ``` 
+          ```
 6. 注释
    1. `//`行注释
    2. `/* */` 块注释
@@ -261,21 +261,21 @@ categories: blog
        ```php
        $a=  1;
        case ($a) {
-          ==> '1' : 
+          ==> '1' :
             echo '不会执行';
-          ==> 1 : 
+          ==> 1 :
             echo '会执行';
           default: echo '默认执行';
        }
        case ($a) {
-         => '1': 
+         => '1':
             echo '会执行';
             break;
          => 1 :
             echo '不会执行';
          default: '';
        }
-       ``` 
+       ```
     4. `goto`
     5. `return`
     6. `break`
