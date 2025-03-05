@@ -108,3 +108,13 @@ body>div[style*=fixed][style*=opacity]:empty{display:none !important;}
 ### waydroid
 通过 `waydroid_script` 安装 `libndk` `libhoudini` 以支持 ARM APK，
 对于ARM APK 使用`adb install --abi arm64-v8a [APP-PATH.APK]` 进行安装，以便运行时能兼任arm架构的app
+在文件`/usr/lib/waydroid/tools/services/user_manager.py`的第25行添加 `showApp = False`可以禁止`waydroid`在`~/.local/share/applications`下创建应用的桌面快捷方式，修改后代码如下：
+```python
+showApp = False
+    for cat in appInfo["categories"]:
+        if cat.strip() == "android.intent.category.LAUNCHER":
+            showApp = True
+    showApp = False #添加的行
+    if not showApp:
+        return -1
+```
