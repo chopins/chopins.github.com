@@ -181,7 +181,14 @@ class HTTP
      * @var string 设置 oauth2 token
      */
     public static string $oauth2Token = '';
-
+    /**
+     * @var int 连接等待最上时间
+     */
+    public static int $connectTimeout = 10;
+    /**
+     * @var int curl 执行最长时间
+     */
+    public static int $execTimeout = 30;
     /**
      * @var bool 是否显示响应头
      */
@@ -565,6 +572,8 @@ class HTTP
         };
         $this->curlOptions[CURLOPT_HTTPHEADER] = self::$requestHeader;
         $this->curlOptions[CURLOPT_RETURNTRANSFER] = 1;
+        $this->curlOptions[CURLOPT_CONNECTTIMEOUT] = self::$connectTimeout;
+        $this->curlOptions[CURLOPT_TIMEOUT] = self::$execTimeout;
         $this->curl = curl_init($this->url);
         curl_setopt_array($this->curl, $this->curlOptions);
         $this->responseBody = curl_exec($this->curl);
@@ -702,12 +711,12 @@ class HTTP
 
     protected function showConsole(): void
     {
-        $cols = exec('tput cols');
-        self::YELLOW(str_repeat('-', $cols), 1);
+        $cols = (int)exec('tput cols');
+        self::YELLOW(str_repeat('-', $cols), true);
 
         if (!$this->httpCode) {
             self::BLUE("{$this->method} {$this->url} ", true);
-            self::RED(curl_error($this->curl), 1);
+            self::RED(curl_error($this->curl), true);
             return;
         }
         if (self::$showRequestHeader) {
@@ -715,7 +724,7 @@ class HTTP
                 if (strpos($header, ':') === false) {
                     self::GREEN($header, 1);
                 } else {
-                    self::MAGENTA(str_replace(':', ':' . self::$colors['END'], $header), 1);
+                    self::MAGENTA(str_replace(':', ':' . self::$colors['END'], $header), true);
                 }
             }
         } else {
@@ -917,6 +926,9 @@ class HTTP
             echo '</body></html>';
         }
     }
+}
+if(PHP_SAPI == 'cli') {
+    return;
 }
 ?>
 <!DOCTYPE html>
