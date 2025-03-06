@@ -704,7 +704,7 @@ class HTTP
         }
         if ($nl && self::$isCLI) {
             echo PHP_EOL;
-        } else {
+        } else if(!self::$isCLI) {
             echo '<br />';
         }
     }
@@ -722,7 +722,7 @@ class HTTP
         if (self::$showRequestHeader) {
             foreach ($this->realRequestHeader as $i => $header) {
                 if (strpos($header, ':') === false) {
-                    self::GREEN($header, 1);
+                    self::GREEN($header, true);
                 } else {
                     self::MAGENTA(str_replace(':', ':' . self::$colors['END'], $header), true);
                 }
