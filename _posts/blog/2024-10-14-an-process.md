@@ -81,23 +81,21 @@ categories: blog
    6. 导入多个类时，同名方法需添加别名或通过类名访问。未添加别名时，与当前类同名的方法，无法直接使用方法名访问
    7. 普通方法访问: `$my.method()`
    8. 静态方法访问：`my.methid()`
-   9. 同名的普通方法访问:`$my.NS.MixName.method()`
-   10. 同名静态方法访问： `my.NS.MixName.method()`
-   11. 使用`class`来声明一个可用组合
+   9. `CLASS@name` 类名字, `CLASS@METHOD()` 类方法名, `FUNCTION@name` 函数名
+   10. 同名的普通方法访问:`$my.NS.MixName.method()`
+   11. 同名静态方法访问： `my.NS.MixName.method()`
+   12. 使用`class`来声明一个可用组合
          ```php
          namespace NSA {
             class MixA {
                public mA()
                {
-
                }
                public mB()
                {
-
                }
                public static msD()
                {
-
                }
             }
          }
