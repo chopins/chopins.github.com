@@ -212,11 +212,11 @@ class HTTP
     /**
      * @var array 添加的CURL选项,会覆盖默认选项
      */
-    public static array $setCurlOptions = [];
+    public static array $curlOptions = [];
     /**
      * @var array 需要发送的COOKIE
      */
-    public static array $cookie = [];
+    public static array $requestCookie = [];
     /**
      * @var string http 请求方法
      */
@@ -277,9 +277,9 @@ class HTTP
      */
     public string|bool $responseBody = '';
     /**
-     * @var array 需要设置的 curl 选项
+     * @var array 当前请求使用的 curl 选项
      */
-    public array $curlOptions = [];
+    public array $currentCurlOptions = [];
     /**
      * @var int 请求时 curl 错误码
      */
@@ -466,7 +466,7 @@ class HTTP
         $this->buildUrl($path, $query);
         $this->buildBody($data);
         if ($data) {
-            $this->curlOptions[CURLOPT_POSTFIELDS] = $this->requestBody;
+            $this->currentCurlOptions[CURLOPT_POSTFIELDS] = $this->requestBody;
         }
         return $this->request();
     }
@@ -482,7 +482,7 @@ class HTTP
         $this->buildUrl($path, $query);
         $this->method = 'POST';
         $this->buildBody($data);
-        $this->curlOptions[CURLOPT_POSTFIELDS] = $this->requestBody;
+        $this->currentCurlOptions[CURLOPT_POSTFIELDS] = $this->requestBody;
         return $this->request();
     }
 
@@ -491,11 +491,11 @@ class HTTP
         $this->buildUrl($path, $query);
         $this->method = 'PUT';
         if (is_string($file) && is_file($file)) {
-            $this->curlOptions[CURLOPT_INFILE] = fopen($file, 'rb');
-            $this->curlOptions[CURLOPT_INFILESIZE] = filesize($file);
+            $this->currentCurlOptions[CURLOPT_INFILE] = fopen($file, 'rb');
+            $this->currentCurlOptions[CURLOPT_INFILESIZE] = filesize($file);
         } else if (is_resource($file)) {
-            $this->curlOptions[CURLOPT_INFILE] = $file;
-            $this->curlOptions[CURLOPT_INFILESIZE] = fstat($file)['size'];
+            $this->currentCurlOptions[CURLOPT_INFILE] = $file;
+            $this->currentCurlOptions[CURLOPT_INFILESIZE] = fstat($file)['size'];
         }
         return $this->request();
     }
@@ -548,46 +548,58 @@ class HTTP
         }
 
         if (self::$userAgent) {
-            $this->curlOptions[CURLOPT_USERAGENT] = self::$userAgent;
+            $this->currentCurlOptions[CURLOPT_USERAGENT] = self::$userAgent;
         } else if (self::$userAgent === null) {
-            $this->curlOptions[CURLOPT_USERAGENT] = '';
+            $this->currentCurlOptions[CURLOPT_USERAGENT] = '';
         }
         if (self::$oauth2Token) {
-            $this->curlOptions[CURLOPT_XOAUTH2_BEARER] = self::$oauth2Token;
+            $this->currentCurlOptions[CURLOPT_XOAUTH2_BEARER] = self::$oauth2Token;
         }
         if (self::$user) {
-            $this->curlOptions[CURLOPT_USERNAME] = self::$user;
-            $this->curlOptions[CURLOPT_PASSWORD] = self::$password;
-            $this->curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_ANY;
+            $this->currentCurlOptions[CURLOPT_USERNAME] = self::$user;
+            $this->currentCurlOptions[CURLOPT_PASSWORD] = self::$password;
+            $this->currentCurlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_ANY;
         }
         if ($this->isCustomMethod) {
-            $this->curlOptions[CURLOPT_CUSTOMREQUEST] = $this->method;
+            $this->currentCurlOptions[CURLOPT_CUSTOMREQUEST] = $this->method;
             $this->isCustomMethod = false;
         } else if ($this->method == 'GET') {
-            $this->curlOptions[CURLOPT_HTTPGET] = true;
+            $this->currentCurlOptions[CURLOPT_HTTPGET] = true;
         } else if ($this->method == 'POST' && self::$requestBodyType == HttpRequestBodyType::FORM_URL) {
-            $this->curlOptions[CURLOPT_POST] = true;
+            $this->currentCurlOptions[CURLOPT_POST] = true;
         } else if ($this->method == 'PUT') {
-            $this->curlOptions[CURLOPT_PUT] = true;
+            $this->currentCurlOptions[CURLOPT_PUT] = true;
         }
         if (self::$showRequestHeader) {
-            $this->curlOptions[CURLINFO_HEADER_OUT] = 1;
+            $this->currentCurlOptions[CURLINFO_HEADER_OUT] = 1;
         }
-        $this->curlOptions[CURLOPT_FOLLOWLOCATION] = true;
-        $this->curlOptions[CURLOPT_HEADERFUNCTION] = function ($ch, $h) {
+        $this->currentCurlOptions[CURLOPT_FOLLOWLOCATION] = true;
+        $this->currentCurlOptions[CURLOPT_HEADERFUNCTION] = function ($ch, $h) {
             $this->responseHeader[] = $h;
             return strlen($h);
         };
-        $this->curlOptions[CURLOPT_HTTPHEADER] = self::$requestHeader;
-        $this->curlOptions[CURLOPT_RETURNTRANSFER] = 1;
-        $this->curlOptions[CURLOPT_CONNECTTIMEOUT] = self::$connectTimeout;
-        $this->curlOptions[CURLOPT_TIMEOUT] = self::$execTimeout;
-        if(self::$cookie) {
-            $this->curlOptions[CURLOPT_COOKIE] = http_build_query(self::$cookie, '', ';');
+        if(self::$requestHeader) {
+            foreach(self::$requestHeader as $hk => $hv) {
+                if(!is_numeric($hk)) {
+                    self::$requestHeader[] = "$hk: $hv";
+                    unset(self::$requestHeader[$hk]);
+                }
+            }
+            $this->currentCurlOptions[CURLOPT_HTTPHEADER] = self::$requestHeader;
         }
-        $this->curlOptions = array_merge($this->curlOptions, self::$setCurlOptions);
+        $this->currentCurlOptions[CURLOPT_RETURNTRANSFER] = 1;
+        $this->currentCurlOptions[CURLOPT_CONNECTTIMEOUT] = self::$connectTimeout;
+        $this->currentCurlOptions[CURLOPT_TIMEOUT] = self::$execTimeout;
+
+        if(self::$requestCookie) {
+            $this->currentCurlOptions[CURLOPT_COOKIE] = http_build_query(self::$requestCookie, '', ';');
+        }
+
         $this->curl = curl_init($this->url);
-        curl_setopt_array($this->curl, $this->curlOptions);
+        curl_setopt_array($this->curl, $this->currentCurlOptions);
+        if(self::$curlOptions ) {
+            curl_setopt_array($this->curl, self::$curlOptions);
+        }
         $this->responseBody = curl_exec($this->curl);
 
         $this->getCurlInfo();
