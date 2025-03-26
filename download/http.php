@@ -210,6 +210,14 @@ class HTTP
      */
     public static array $arrayTableLayout = [];
     /**
+     * @var array 添加的CURL选项,会覆盖默认选项
+     */
+    public static array $setCurlOptions = [];
+    /**
+     * @var array 需要发送的COOKIE
+     */
+    public static array $cookie = [];
+    /**
      * @var string http 请求方法
      */
     public string $method = 'GET';
@@ -574,6 +582,10 @@ class HTTP
         $this->curlOptions[CURLOPT_RETURNTRANSFER] = 1;
         $this->curlOptions[CURLOPT_CONNECTTIMEOUT] = self::$connectTimeout;
         $this->curlOptions[CURLOPT_TIMEOUT] = self::$execTimeout;
+        if(self::$cookie) {
+            $this->curlOptions[CURLOPT_COOKIE] = http_build_query(self::$cookie, '', ';');
+        }
+        $this->curlOptions = array_merge($this->curlOptions, self::$setCurlOptions);
         $this->curl = curl_init($this->url);
         curl_setopt_array($this->curl, $this->curlOptions);
         $this->responseBody = curl_exec($this->curl);
