@@ -131,6 +131,7 @@ function TRACE(string $path, string|array $query = '')
  */
 class HTTP
 {
+    public static int $execCount = 0;
     public static string $scriptFile = '';
     /**
      * @var string 用户名
@@ -547,7 +548,7 @@ class HTTP
         if (!$this->run) {
             return $this;
         }
-
+        self::$execCount++;
         if (self::$userAgent) {
             $this->currentCurlOptions[CURLOPT_USERAGENT] = self::$userAgent;
         } else if (self::$userAgent === null) {
@@ -845,13 +846,14 @@ class HTTP
             if (self::$forceRun) {
                 return true;
             }
-            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-            $callline = array_column($trace, 'line');
-            if (array_intersect($callline, self::$runFlagLines)) {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
+            $callline = $trace[3]['line'];
+
+            if (in_array($callline, self::$runFlagLines)) {
                 return true;
             }
             $this->enableShow = false;
-            if (array_intersect($callline, self::$runFlagShowLines)) {
+            if (in_array($callline, self::$runFlagShowLines)) {
                 $this->enableShow = true;
                 return true;
             }
