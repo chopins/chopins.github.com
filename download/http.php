@@ -131,6 +131,7 @@ function TRACE(string $path, string|array $query = '')
  */
 class HTTP
 {
+    public static string $scriptFile = '';
     /**
      * @var string 用户名
      */
@@ -691,6 +692,9 @@ class HTTP
 
     public function show(): HTTP
     {
+        if(self::$isShow) {
+            return $this;
+        }
         if (!$this->run) {
             return $this;
         }
@@ -853,8 +857,8 @@ class HTTP
             }
             return false;
         }
-
-        $all = token_get_all(file_get_contents(get_included_files()[0], false));
+        $file = self::$scriptFile ? self::$scriptFile : $_SERVER['SCRIPT_FILENAME'];
+        $all = token_get_all(file_get_contents($file, false));
         $cnt = count($all);
         self::$runFlagLines = [];
 
@@ -872,7 +876,7 @@ class HTTP
                 if ($next >= $cnt) {
                     break;
                 }
-                if (!is_array($all[$next])) {
+                if (!is_array($all[$next]) && $all[$next] != '=') {
                     break;
                 }
                 if ($all[$next][0] == T_STRING) {
