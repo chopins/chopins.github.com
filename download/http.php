@@ -132,6 +132,7 @@ function TRACE(string $path, string|array $query = '')
 class HTTP
 {
     public static int $execCount = 0;
+    public static int $showCount = 0;
     public static string $scriptFile = '';
     /**
      * @var string 用户名
@@ -157,10 +158,6 @@ class HTTP
      * @var array 请求头列表
      */
     public static array $requestHeader = [];
-    /**
-     * @var bool 当前实例是否已经显示
-     */
-    public static bool $isShow = false;
 
     /**
      * @var string|HttpRequestBodyType 请求时发送的body数据类型
@@ -219,6 +216,10 @@ class HTTP
      * @var array 需要发送的COOKIE
      */
     public static array $requestCookie = [];
+    /**
+     * @var bool 当前实例是否已经显示
+     */
+    public bool $isShow = false;
     /**
      * @var string http 请求方法
      */
@@ -693,7 +694,7 @@ class HTTP
 
     public function show(): HTTP
     {
-        if(self::$isShow) {
+        if($this->isShow) {
             return $this;
         }
         if (!$this->run) {
@@ -704,7 +705,8 @@ class HTTP
         } else {
             $this->showHTML();
         }
-        self::$isShow = true;
+        self::$showCount++;
+        $this->isShow = true;
         return $this;
     }
 
@@ -848,17 +850,17 @@ class HTTP
             }
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
             $callline = $trace[3]['line'];
-
-            if (in_array($callline, self::$runFlagLines)) {
-                return true;
-            }
             $this->enableShow = false;
             if (in_array($callline, self::$runFlagShowLines)) {
                 $this->enableShow = true;
                 return true;
             }
+            if (in_array($callline, self::$runFlagLines)) {
+                return true;
+            }
             return false;
         }
+
         $file = self::$scriptFile ? self::$scriptFile : $_SERVER['SCRIPT_FILENAME'];
         $all = token_get_all(file_get_contents($file, false));
         $cnt = count($all);
@@ -890,6 +892,7 @@ class HTTP
                 }
             }
         }
+
         return true;
     }
 
@@ -952,8 +955,17 @@ class HTTP
         if ($this->curl instanceof CurlHandle) {
             curl_close($this->curl);
         }
+        $msg = 'All requested and show';
+        if (!HTTP::$showCount) {
+            $msg =  'Exec ' . HTTP::$execCount . ' request  and no  output data' . PHP_EOL;
+        } else if(HTTP::$showCount != HTTP::$execCount) {
+            $msg = 'Exec ' . HTTP::$execCount . ' request  and ' . HTTP::$showCount .' show output' . PHP_EOL;
+        }
         if (!self::$isCLI) {
+            echo "<h3>$msg</h3>";
             echo '</body></html>';
+        } else {
+            self::GREEN($msg);
         }
     }
 }
@@ -1038,7 +1050,17 @@ if(PHP_SAPI == 'cli') {
         code div {
             margin-left: 20px;
         }
-
+        body {
+            margin-top: 50px;
+        }
+        body>h3 {
+            position: fixed;
+            top: 1px;
+            background-color: #EEE;
+            border: #000 solid 1px;
+            padding: 4px;
+            color:green;
+        }
         x {
             font-weight: bold;
             margin: 0 2px;
