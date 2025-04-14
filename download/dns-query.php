@@ -1,5 +1,5 @@
 <?php
-ini_set('error_reporting', E_ALL);
+ini_set('error_reporting', 0);
 ini_set('log_errors', 1);
 define('RDIR', __DIR__);
 ini_set('error_log', RDIR . '/logs/php-error.logs');
@@ -13,7 +13,7 @@ class DnsQuery
     public $unsupport = false;
     public $queryName = [];
     public $queryData = '';
-    public $dohHost = 'https://doh.pub/dns-query';
+    public $dohHost = 'https://dns.alidns.com/dns-query';
     private $logfp;
     public static $domainDns = [
         'CF' => [
@@ -85,10 +85,11 @@ class DnsQuery
             } else {
                 $this->queryData = file_get_contents("php://input");
             }
-            header('Content-type: application/dns-message', true);
-            $res = $this->getRecord();
-            header("Content-Length: " . strlen($res));
-            echo $res;
+
+            header('Content-Type: application/dns-message', true);
+            $body = $this->getRecord($curlInfo);
+            header("Content-Length: " . $curlInfo['size_download']);
+            echo $body;
         }
     }
     public function log(...$datas)
@@ -252,14 +253,11 @@ class DnsQuery
 
             $start = $i;
         }
-
-
-        if ($packet['flags']['qr']) {
+        if($packet['flags']['qr']) {
             $this->saveData('A', $queryData);
         } else {
             $this->saveData('Q', $queryData);
         }
-        $this->log('Packet:', $packet);
         return $packet;
     }
 
@@ -268,7 +266,7 @@ class DnsQuery
         $this->log('Query:', $this->queryName);
         foreach (self::$domainDns as $dns => $domain) {
             foreach ($domain as $name) {
-                if (str_ends_with($this->queryName[0][0], $name)) {
+                if (str_ends_with($this->queryName[0]['name'], $name)) {
                     $this->dohHost = self::$dohDnsList[$dns];
                     $this->log('Switch Dns:', $this->dohHost);
                     return true;
@@ -278,7 +276,7 @@ class DnsQuery
         return true;
     }
 
-    public function getRecord()
+    public function getRecord(&$curlInfo)
     {
         $packet = $this->parseData($this->queryData);
         $this->queryName = $packet['questions'];
@@ -287,22 +285,23 @@ class DnsQuery
         curl_setopt_array($ch, [
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_TIMEOUT => 3,
+            CURLOPT_TIMEOUT => 1,
             CURLOPT_POSTFIELDS => $this->queryData,
             CURLOPT_HTTPHEADER => [
                 'content-type: application/dns-message',
                 'accept: application/dns-message'
-            ]
+            ],
         ]);
-        $this->log("connect {$this->dohHost}");
+        $this->log("Connect {$this->dohHost}");
         $ret = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        if ($info['http_code'] == 0) {
+
+        $curlInfo = curl_getinfo($ch);
+        if ($curlInfo['http_code'] == 0) {
             $error = curl_error($ch) . '(' . curl_errno($ch) . ')';
             $this->log("Network Error: {$this->dohHost} $error");
             return $this->buildServerErrorData();
-        } else if ($info['http_code'] != 200) {
-            $this->log("Connect {$this->dohHost} Error: HTTP {$info['http_code']}");
+        } else if ($curlInfo['http_code'] != 200) {
+            $this->log("Connect {$this->dohHost} Error: HTTP {$curlInfo['http_code']}");
             return $this->buildServerErrorData();
         }
         if ($ret) {
@@ -310,12 +309,12 @@ class DnsQuery
             $this->cacheQueryRecord($ret);
             return $ret;
         }
+        $this->log("Connect {$this->dohHost}  Unknow Error");
         return $this->buildServerErrorData();;
     }
 
     public function cacheQueryRecord($data)
     {
-        $this->saveData('A', $data);
         $record = $this->parseData($data);
     }
 
@@ -344,6 +343,7 @@ class DnsQuery
     }
     public function __destruct()
     {
+        $this->log("Request End");
         fclose($this->logfp);
     }
 }
