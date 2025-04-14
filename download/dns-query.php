@@ -102,6 +102,7 @@ class DnsQuery
     }
     public function saveData($t, $data)
     {
+        return;
         file_put_contents(RDIR . '/data/dns.' . $t, $data);
     }
 
@@ -343,7 +344,6 @@ class DnsQuery
     }
     public function __destruct()
     {
-        $this->log("Request End");
         fclose($this->logfp);
     }
 }
