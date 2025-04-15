@@ -25,7 +25,8 @@ class DnsQuery
         'CF' => [
             'github.com',
             'google.com',
-            'gstatic.com'
+            'gstatic.com',
+            'elastic.co'
         ]
     ];
     const DNS_HOSTS = [
@@ -113,8 +114,15 @@ class DnsQuery
     public function dnsClient()
     {
         $packet = $this->parseDNSPackage($this->queryData, $qstate);
-        self::log('Query Packet: state:', $qstate, ':data:', $packet);
+
         $this->queryName = $packet['questions'];
+
+        $ret = $this->getCache();
+        if($ret) {
+            header("Content-Length: " . strlen($ret));
+            echo $ret;
+        }
+
         $this->switchDns();
         header('Content-Type: application/dns-message', true);
 
@@ -123,16 +131,33 @@ class DnsQuery
         } else {
             $ret = $this->TcpUdpClient($body, $responseSize);
         }
-        $this->saveData('A', $body);
+
         if (!$ret) {
             $body = $this->buildServerErrorData();
         } else {
-            $packet = $this->parseDNSPackage($body, $astate);
-            self::log("Answer Packet:state:", $astate, ':data:', $packet);
+            if(count($this->queryName) == 1) {
+                $this->cacheResult($body);
+            }
+            //$packet = $this->parseDNSPackage($body, $astate);
         }
 
         header("Content-Length: " . $responseSize);
         echo $body;
+    }
+
+    public function getCache()
+    {
+        $type = self::RR_TYPE[$this->queryName[0]['type']] . '-' . $this->queryName[0]['name'];
+        if(file_exists(RDIR . '/data/dns.' . $type)) {
+            return file_get_contents(RDIR . '/data/dns.' . $type);
+        }
+        return '';
+    }
+
+    public function cacheResult($body)
+    {
+        $type = self::RR_TYPE[$this->queryName[0]['type']] . '-' . $this->queryName[0]['name'];
+        $this->saveData($type, $body);
     }
 
     public static function bset($bit, $size)
@@ -221,7 +246,7 @@ class DnsQuery
         $authorityOffset = $packet['questionCount'] + $packet['answerCount'];
         $additionalOffset = $count - $packet['additionalCount'];
         $i = $start;
-        $this->log("playloadSize $queryDataLen");
+
         for ($rrs = 0; $rrs < $count; $rrs++) {
 
             if ($i > $queryDataLen) {
