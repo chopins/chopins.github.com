@@ -32,7 +32,6 @@ class DnsQuery
     const DNS_HOSTS = [
         'Default' => 'udp://127.0.0.53:53',
         'CF' => 'https://1.1.1.1/dns-query',
-        'CF' => 'https://dns.alidns.com/dns-query',
         'TX' => 'https://doh.pub/dns-query',
     ];
     const RR_CLASS = ['', 'IN', 'CS', 'CH', 'HS'];
@@ -81,7 +80,7 @@ class DnsQuery
     public function __construct()
     {
         self::$requestDatetime = new DateTime();
-        self::$logfp = fopen(RDIR . '/logs/dns.log-' . date('Y-m-d'), 'wb');
+        self::$logfp = fopen(RDIR . '/logs/dns.log-' . date('Y-m-d'), 'ab');
         if (PHP_SAPI != 'cli') {
             if ($_SERVER['HTTP_ACCEPT'] == 'application/dns-message') {
                 $this->accept = 'dns-msg';
@@ -95,6 +94,7 @@ class DnsQuery
             } else {
                 $this->queryData = file_get_contents("php://input");
             }
+            $this->saveData('Q', $this->queryData);
             $this->dnsClient();
         }
     }
@@ -118,7 +118,7 @@ class DnsQuery
         $this->queryName = $packet['questions'];
 
         $ret = $this->getCache();
-        if($ret) {
+        if ($ret) {
             header("Content-Length: " . strlen($ret));
             echo $ret;
             return;
@@ -126,17 +126,22 @@ class DnsQuery
 
         $this->switchDns();
         header('Content-Type: application/dns-message', true);
-
-        if ($this->enableDOH) {
-            $ret = $this->DOHClient($body, $responseSize, $responseInfo);
-        } else {
-            $ret = $this->TcpUdpClient($body, $responseSize);
-        }
+        do {
+            if ($this->enableDOH) {
+                $ret = $this->DOHClient($body, $responseSize, $responseInfo);
+            } else {
+                $ret = $this->TcpUdpClient($body, $responseSize);
+            }
+            if(!$ret) {
+                $this->dnsHost = self::DNS_HOSTS['Default'];
+                $this->enableDOH = false;
+            }
+        } while (!$ret);
 
         if (!$ret) {
             $body = $this->buildServerErrorData();
         } else {
-            if(count($this->queryName) == 1) {
+            if (count($this->queryName) == 1) {
                 $this->cacheResult($body);
             }
             //$packet = $this->parseDNSPackage($body, $astate);
@@ -146,13 +151,34 @@ class DnsQuery
         echo $body;
     }
 
+    public function getMinTTL($packet)
+    {
+        $min = 36000;
+        foreach ($packet['answers'] as $answer) {
+            if ($answer['type'] == 1 || $answer['type'] == '28') {
+                if ($answer['ttl'] < $min) {
+                    $min = $answer['ttl'];
+                }
+            }
+        }
+        return $min;
+    }
+
     public function getCache()
     {
         $type = self::RR_TYPE[$this->queryName[0]['type']] . '-' . $this->queryName[0]['name'];
-        if(file_exists(RDIR . '/data/dns.' . $type)) {
-            return file_get_contents(RDIR . '/data/dns.' . $type);
+        $file = RDIR . '/data/dns.' . $type;
+        if (file_exists($file)) {
+            $data = file_get_contents($file);
+            $packet = $this->parseDNSPackage($data);
+            $min = $this->getMinTTL($packet);
+            if (filemtime($file) + $min < time()) {
+                unlink($file);
+                return false;
+            }
+            return pack('n', $this->transId) . substr($data, 2);
         }
-        return '';
+        return false;
     }
 
     public function cacheResult($body)
@@ -220,7 +246,7 @@ class DnsQuery
         }
         $len  = $bitSize[$format[0]];
         if (strlen($format) > 1) {
-            $len = $len * substr($format,1);
+            $len = $len * substr($format, 1);
         }
         $offset += $len;
         return $ret;
@@ -252,7 +278,7 @@ class DnsQuery
 
             if ($i > $queryDataLen) {
                 $parseStatus = false;
-                self::log("read pos $i >= data len $queryDataLen ");
+                self::log("OutRangeCheck:read pos $i >= data len $queryDataLen ");
                 break;
             }
             $name = self::getDomainFromOffset($queryData, $i);
@@ -297,7 +323,7 @@ class DnsQuery
             $start = $i;
         }
         if ($queryDataLen != $i) {
-            self::log("read pos $i != data len $queryDataLen ");
+            self::log("EndCheck, Last pos $i != data len $queryDataLen ");
             $parseStatus = false;
         }
         return $packet;
@@ -310,7 +336,7 @@ class DnsQuery
             foreach ($domain as $name) {
                 if (str_ends_with($this->queryName[0]['name'], $name)) {
                     $this->dnsHost = self::DNS_HOSTS[$dns];
-                    self::log('Switch Dns:', $this->dohHost);
+                    self::log('Switch Dns:', $this->dnsHost);
                     return true;
                 }
             }
@@ -332,7 +358,7 @@ class DnsQuery
         if (stream_socket_sendto($fp, $this->queryData)) {
             do {
                 $response .=  stream_socket_recvfrom($fp, 512);
-                if(strlen($response) < 512) {
+                if (strlen($response) < 512) {
                     break;
                 }
                 $this->parseDNSPackage($response, $parseStatus);
@@ -386,9 +412,8 @@ class DnsQuery
 
     public function buildServerErrorData()
     {
-        $result = $this->transId;
         $flag  = (1 < 15) | 2;
-        $h = [$flag, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $h = [$this->transId, $flag, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         $result .= pack('n*', ...$h);
         return $result;
     }
@@ -412,15 +437,4 @@ class DnsQuery
         fwrite(self::$logfp, implode('', self::$logs));
         fclose(self::$logfp);
     }
-}
-
-try {
-    $q = new DnsQuery;
-} catch(Throwable $e) {
-    DnsQuery::log($e->getTraceAsString());
-}
-if (PHP_SAPI == 'cli') {
-    $data = file_get_contents('./data/dns.A');
-    $r = $q->parseDNSPackage($data);
-    print_r($r);
 }
