@@ -121,6 +121,7 @@ class DnsQuery
         if($ret) {
             header("Content-Length: " . strlen($ret));
             echo $ret;
+            return;
         }
 
         $this->switchDns();
