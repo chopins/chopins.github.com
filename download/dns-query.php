@@ -10,7 +10,7 @@ class DnsQuery
     public $accept = 'json';
     public $requestType = 'json';
     public $transId = '';
-    public $rrtype = 'ANY';
+    public $rrtype = self::RR_ANY;
     public $rropcode = 0;
     public $unsupport = false;
     public $queryName = [];
@@ -39,49 +39,105 @@ class DnsQuery
         'CF' => 'https://1.1.1.1/dns-query',
         'TX' => 'https://doh.pub/dns-query',
     ];
-    const RR_CLASS = ['', 'IN', 'CS', 'CH', 'HS'];
+    const P_H_ID = 1;
+    const P_H_FLAG = self::P_H_ID + 1;
+    const P_H_QUESTION = self::P_H_FLAG + 1;
+    const P_H_ANSWER = self::P_H_QUESTION + 1;
+    const P_H_AUTHORITY = self::P_H_ANSWER + 1;
+    const P_H_ADDITIONAL = self::P_H_AUTHORITY + 1;
+    const P_QUERIES = self::P_H_ADDITIONAL + 1;
+    const P_ANSWERS = self::P_QUERIES + 1;
+    const P_AUTHORITY = self::P_ANSWERS + 1;
+    const P_ADDITIONAL = self::P_AUTHORITY + 1;
+    const P_RR_NAME = self::P_ADDITIONAL + 1;
+    const P_RR_TYPE = self::P_RR_NAME + 1;
+    const P_RR_CLASS = self::P_RR_TYPE + 1;
+    const P_RR_OPT_UDP_SIZE = self::P_RR_CLASS;
+    const P_RR_TTL = self::P_RR_CLASS + 1;
+    const P_RR_OPT_RCODE = self::P_RR_TTL;
+    const P_RR_DATA_LEN = self::P_RR_TTL + 1;
+    const P_RR_DATA = self::P_RR_DATA_LEN + 1;
+
+    const CLASS_IN = 1;
+    const CLASS_CS = 2;
+    const CLASS_CH = 3;
+    const CLASS_HS = 4;
+    const RR_ANY = 0;
+    const RR_A = 1;
+    const RR_NS = 2;
+    const RR_MD = 3;
+    const RR_MF = 4;
+    const RR_CNAME = 5;
+    const RR_SOV = 6;
+    const RR_MB = 7;
+    const RR_MG = 8;
+    const RR_MR = 9;
+    const RR_NULL = 10;
+    const RR_WKS = 11;
+    const RR_PTR = 12;
+    const RR_HINFO = 13;
+    const RR_MINFO = 14;
+    const RR_MX = 15;
+    const RR_TXT = 16;
+    const RR_AAAA = 28;
+    const RR_SRV = 33;
+    const RR_MAPTR = 35;
+    const RR_APL = 36;
+    const RR_DSIG = 37;
+    const RR_DNAME = 39;
+    const RR_OPT = 41;
+    const RR_DS = 43;
+    const RR_RRSIG = 46;
+    const RR_DNSKEY = 48;
+    const RR_CDS = 59;
+    const RR_OPENPGPKEY = 61;
+    const RR_SVCB = 65;
+    const RR_HTTPS = 66;
+    const RR_CAA = 257;
     const RR_TYPE = [
-        'ANY',
-        'A',
-        'NS',
-        'MD',
-        'MF',
-        'CNAME',
-        'SOA',
-        'MB',
-        'MG',
-        'MR',
-        'NULL',
-        'WKS',
-        'PTR',
-        'HINFO',
-        'MINFO',
-        'MX',
-        'TXT', //16
-        28 => 'AAAA',
-        33 => 'SRV',
-        '',
-        'NAPTR',
-        'APL',
-        'DSIG',
-        '',
-        'DNAME',
-        '',
-        'OPT',
-        '',
-        'DS',
-        '',
-        '',
-        'RRSIG',
-        '',
-        'DNSKEY', //48
-        59 => 'CDS',
-        61 => 'OPENPGPKEY',
-        65 => 'SVCB',
-        'HTTPS',
-        255 => '255',
-        257 => 'CAA'
+        self::RR_ANY,
+        self::RR_A,
+        self::RR_NS,
+        self::RR_MD,
+        self::RR_MF,
+        self::RR_CNAME,
+        self::RR_SOV,
+        self::RR_MB,
+        self::RR_MG,
+        self::RR_MR,
+        self::RR_NULL,
+        self::RR_WKS,
+        self::RR_PTR,
+        self::RR_HINFO,
+        self::RR_MINFO,
+        self::RR_MX,
+        self::RR_TXT, //16
+        self::RR_AAAA,
+        self::RR_SRV,
+        self::RR_MAPTR,
+        self::RR_APL,
+        self::RR_DSIG,
+        self::RR_DNAME,
+        self::RR_OPT,
+        self::RR_DS,
+        self::RR_RRSIG,
+        self::RR_DNSKEY,
+        self::RR_CDS,
+        self::RR_OPENPGPKEY,
+        self::RR_SVCB,
+        self::RR_HTTPS,
+        self::RR_CAA,
     ];
+
+    public const G_CACHE_NAME_TYPE = [
+        self::RR_A,
+        self::RR_NS,
+        self::RR_CNAME,
+        self::RR_MX,
+        self::RR_AAAA,
+        self::RR_HTTPS,
+    ];
+    const G_RR_DATA_NAME = [self::RR_CNAME, self::RR_MX, self::RR_NS];
     public function __construct()
     {
         self::$requestDatetime = new DateTime();
@@ -120,8 +176,8 @@ class DnsQuery
     public function dnsClient()
     {
         $packet = $this->parseDNSPackage($this->queryData, $qstate);
-        $this->transId = $packet['transId'];
-        $this->queryName = $packet['questions'];
+        $this->transId = $packet[self::P_H_ID];
+        $this->queryName = $packet[self::P_QUERIES];
 
         $ret = $this->getCache($packet);
 
@@ -161,10 +217,10 @@ class DnsQuery
     public function getMinTTL($packet)
     {
         $min = 36000;
-        foreach ($packet['answers'] as $answer) {
-            if ($answer['type'] == 1 || $answer['type'] == '28') {
-                if ($answer['ttl'] < $min) {
-                    $min = $answer['ttl'];
+        foreach ($packet[self::P_ANSWERS] as $answer) {
+            if ($answer[self::P_RR_TYPE] == self::RR_A || $answer[self::P_RR_TYPE] == self::RR_AAAA) {
+                if ($answer[self::P_RR_TTL] < $min) {
+                    $min = $answer[self::P_RR_TTL];
                 }
             }
         }
@@ -177,7 +233,7 @@ class DnsQuery
         if ($this->localServer($localRecord, $queryPacket)) {
             return $localRecord;
         }
-        $type = self::RR_TYPE[$this->queryName[0]['type']] . '-' . $this->queryName[0]['name'];
+        $type = $this->queryName[0][self::P_RR_TYPE] . '-' . $this->queryName[0][self::P_RR_NAME];
         $file = RDIR . '/data/dns.' . $type;
         if (file_exists($file)) {
             $data = file_get_contents($file);
@@ -196,32 +252,136 @@ class DnsQuery
         if (count($this->queryName) > 1) {
             return false;
         }
-        $type = $this->queryName[0]['type'];
-        if ($type != 1) {
+        $type = $this->queryName[0][self::P_RR_TYPE];
+        if ($type != self::RR_A) {
             return false;
         }
-        $name = $this->queryName[0]['name'];
+        $name = $this->queryName[0][self::P_RR_NAME];
         if (isset($this->localRR[$name][$type])) {
-            $recordData = $this->buildDNSResponse($this->localRR[$name][$type], $type, $queryPacket);
+            $recordData = $this->buildDNS1AResponse($this->localRR[$name][$type], $type, $queryPacket);
             return true;
         }
         return false;
     }
 
-    public function buildDNSResponse($recordList, $type, $queryPacket)
+    public function buildName($labelist, $name, &$rLabels = null)
     {
-        $binary = '';
-        foreach ($queryPacket['questions'] as $question) {
-            $questionDomain = $question['name'];
-            $labels = explode('.', $question['name']);
-            $domain = '';
-            foreach ($labels as $label) {
-                $domain .= chr(strlen($label)) . $label;
+        $labels = explode('.', $name);
+        $rLabels = array_reverse($labels, true);
+        $ptrMaxLen = 0;
+        $ptrName = '';
+        foreach ($labelist as $name => $ls) {
+            $ptrLen = 0;
+            $findNum = 0;
+            foreach ($rLabels as $i => $label) {
+                if (current($ls['ls']) === $label) {
+                    $ptrLen += strlen($label) + 1;
+                } else {
+                    break;
+                }
+                if (next($ls['ls']) === false) {
+                    break;
+                }
             }
-            $domain .= "\0";
-            $domain .= pack('n2', $question['type'], $question['class']);
-            $binary .= $domain;
+            if ($ptrLen > $ptrMaxLen) {
+                $ptrMaxLen = $ptrLen;
+                $ptrName = $name;
+            }
         }
+
+        $binary = '';
+        if ($ptrName) {
+            $ptrAdd = substr($ptrName, 0, -1 * $ptrMaxLen);
+            $preLen = $ptrAdd ? strlen($ptrAdd) + 1 : 0;
+            $ptrPos = $labelist[$ptrName]['pos'] + $preLen;
+
+            $realLabels = explode('.', substr($name, 0, -1 * $ptrMaxLen));
+            foreach ($realLabels as $l) {
+                $binary .= chr(strlen($l)) . $l;
+            }
+            $binary .= "\xc0" . chr($ptrPos);
+        } else { //没有指针
+            foreach ($labels as $l) {
+                $binary .= chr(strlen($l)) . $l;
+            }
+            $binary .= "\0";
+        }
+        return $binary;
+    }
+
+    public function buildDNSResponse($packet)
+    {
+        $labelist = [];
+        $nextPos = 0;
+        foreach ($packet as $zone => $answer) {
+            foreach ($answer as $a) {
+                $binary = $this->buildName($labelist, $a[self::P_RR_NAME], $rLabels);
+
+                $binary .= pack('n2', $a[self::P_RR_TYPE], $a[self::P_RR_CLASS]);
+                $binary .= $this->buildRRData($zone, $a);
+                $namePos = $nextPos;
+                $nextPos += strlen($binary);
+                if (in_array($a[self::P_RR_TYPE], self::G_CACHE_NAME_TYPE)) {
+                    $labelist[$a[self::P_RR_NAME]] = ['ls' => $rLabels, 'pos' => $namePos];
+                }
+            }
+        }
+        return $binary;
+    }
+
+    public function buildRRDala($zone, $a)
+    {
+        if ($zone == self::P_QUERIES) {
+            return '';
+        }
+        $rType = $a[self::P_RR_TYPE];
+        $binary = '';
+
+        $binary .= pack('N', $a[self::P_RR_TTL]);
+
+        if ($rType == self::RR_A) {
+            $binary .= pack('n', 4);
+            $binary .= pack('N', ip2long($a[self::P_RR_DATA]));
+        } else if ($rType == self::RR_AAAA) {
+            $binary .= pack('n', 8);
+            $binary .= pack('n8', hexdec(str_replace(':', $a[self::P_RR_DATA])));
+        } else if (in_array($rType, self::G_RR_DATA_NAME)) {
+            $name = rtrim($this->buildName($labelist, $a[self::P_RR_DATA]), "\0");
+            $binary .= pack('n', strlen($name));
+            $binary .= $name;
+        }
+
+        return $binary;
+    }
+
+    public function buildQuestionsZone($queryPacket)
+    {
+        $startOffset = 12;
+        $binary = '';
+        foreach ($queryPacket[self::P_QUERIES] as $i => $question) {
+            $labels = explode('.', $question[self::P_RR_NAME]);
+
+            $domain = [];
+            foreach ($labels as $k => $label) {
+                $ptrPos = strpos($binary, $label);
+                if ($ptrPos !== false) {
+                    $domain[] = "\xc0" . chr($ptrPos - 1 + $startOffset);
+                }
+                $domain[] = chr(strlen($label)) . $label;
+            }
+
+            $domain[] = "\0";
+            $domain[] = pack('n2', $question[self::P_RR_TYPE], $question[self::P_RR_CLASS]);
+            $binary .= join('', $domain);
+        }
+        return $binary;
+    }
+
+    public function buildDNS1AResponse($recordList, $type, $queryPacket)
+    {
+
+        $binary = $this->buildQuestionsZone($queryPacket);
+
         foreach ($recordList as $record) {
             $domain = "\xc0\x0c";
             $domain .= pack('n2', 1, 1);
@@ -236,17 +396,17 @@ class DnsQuery
         if ($queryPacket['flags']['rd']) {
             $flag |= 1 << 8;
         }
-        if(strlen($binary) + 12 > $queryPacket['additional'][0]['payload-size']) {
+        if (strlen($binary) + 12 > $queryPacket[self::P_ADDITIONAL][0][self::P_RR_OPT_UDP_SIZE]) {
             $flag |= 1 << 9;
         }
-        $headers = [$this->transId, $flag, $queryPacket['questionCount'], count($recordList), 0, 1];
+        $headers = [$this->transId, $flag, $queryPacket[self::P_H_ANSWER], count($recordList), 0, 1];
 
         return pack("n*", ...$headers) . $binary;
     }
 
     public function cacheResult($body)
     {
-        $type = self::RR_TYPE[$this->queryName[0]['type']] . '-' . $this->queryName[0]['name'];
+        $type = $this->queryName[0]['type'] . '-' . $this->queryName[0]['name'];
         $this->saveData($type, $body);
     }
 
@@ -326,21 +486,21 @@ class DnsQuery
         $parseStatus = true;
         $headers = self::unpack('n6', $queryData);
         $packet = [];
-        $packet['transId'] = $headers[1];
-        $packet['flags'] = $this->parseFlags($headers[2]);
-        $packet['questionCount'] = $headers[3];
-        $packet['answerCount'] = $headers[4];
-        $packet['authorityCount'] = $headers[5];
-        $packet['additionalCount'] = $headers[6];
-        $packet['questions'] = [];
-        $packet['answers'] = [];
-        $packet['authority'] = [];
-        $packet['additional'] = [];
+        $packet[self::P_H_ID] = $headers[1];
+        $packet[self::P_H_FLAG] = $this->parseFlags($headers[2]);
+        $packet[self::P_H_QUESTION] = $headers[3];
+        $packet[self::P_H_ANSWER] = $headers[4];
+        $packet[self::P_H_AUTHORITY] = $headers[5];
+        $packet[self::P_H_ADDITIONAL] = $headers[6];
+        $packet[self::P_QUERIES] = [];
+        $packet[self::P_ANSWERS] = [];
+        $packet[self::P_AUTHORITY] = [];
+        $packet[self::P_ADDITIONAL] = [];
         $start = 12;
         $queryDataLen = strlen($queryData);
-        $count = $packet['questionCount'] + $packet['answerCount'] + $packet['authorityCount'] + $packet['additionalCount'];
-        $authorityOffset = $packet['questionCount'] + $packet['answerCount'];
-        $additionalOffset = $count - $packet['additionalCount'];
+        $count = $packet[self::P_H_ANSWER] + $packet[self::P_H_ANSWER] + $packet[self::P_H_AUTHORITY] + $packet[self::P_H_ADDITIONAL];
+        $authorityOffset = $packet[self::P_H_ANSWER] + $packet[self::P_H_ANSWER];
+        $additionalOffset = $count - $packet[self::P_H_ADDITIONAL];
         $i = $start;
 
         for ($rrs = 0; $rrs < $count; $rrs++) {
@@ -353,40 +513,40 @@ class DnsQuery
             $name = self::getDomainFromOffset($queryData, $i);
 
             $rrtype = self::unpack('n2', $queryData, $i);
-            $queryName = ['name' => $name, 'type' => $rrtype[1], 'class' => $rrtype[2]];
-            $typeName = self::RR_TYPE[$queryName['type']];
+            $queryName = [self::P_RR_NAME => $name, self::P_RR_TYPE => $rrtype[1], self::P_RR_CLASS => $rrtype[2]];
+            $typeName = $queryName[self::P_RR_TYPE];
 
-            if ($rrs >= $packet['questionCount']) {
+            if ($rrs >= $packet[self::P_H_ANSWER]) {
                 $ttl = self::unpack('N', $queryData, $i)[1];
-                $queryName['ttl'] = $ttl;
+                $queryName[self::P_RR_TTL] = $ttl;
                 $RDLen = self::unpack('n', $queryData, $i)[1];
 
-                if ($typeName == 'OPT') {
-                    $queryName['payload-size'] = $queryName['class'];
-                    $queryName['rcode-flags'] = $queryName['ttl'];
+                if ($typeName == self::RR_OPT) {
+                    $queryName[self::P_RR_OPT_UDP_SIZE] = $queryName[self::P_RR_CLASS];
+                    $queryName[self::P_RR_OPT_RCODE] = $queryName[self::P_RR_TTL];
                 }
-                $queryName['rdlen'] = $RDLen;
+                $queryName[self::P_RR_DATA_LEN] = $RDLen;
 
-                if (in_array($typeName, ['CNAME', 'MX', 'NS', 'TXT'])) {
+                if (in_array($typeName, self::G_RR_DATA_NAME)) {
                     $data = self::getDomainFromOffset($queryData, $i, $RDLen);
-                } else if ($typeName == 'A') {
+                } else if ($typeName == self::RR_A) {
                     $data = long2ip(self::unpack('N', $queryData, $i)[1]);
-                } else if ($typeName == 'AAAA') {
+                } else if ($typeName == self::RR_AAAA) {
                     $data = self::toIPv6($queryData, $i);
                 } else {
                     $data = self::unpack("H{$RDLen}", $queryData, $i);
                 }
-                $queryName['rdata'] = $data;
+                $queryName[self::P_RR_DATA] = $data;
             }
 
-            if ($packet['additionalCount'] && $rrs >= $additionalOffset) {
-                $packet['additional'][] = $queryName;
-            } else if ($packet['authorityCount'] && $rrs >= $authorityOffset) {
-                $packet['authority'][] = $queryName;
-            } else if ($packet['answerCount'] && $rrs >= $packet['questionCount']) {
-                $packet['answers'][] = $queryName;
+            if ($packet[self::P_H_ADDITIONAL] && $rrs >= $additionalOffset) {
+                $packet[self::P_ADDITIONAL][] = $queryName;
+            } else if ($packet[self::P_H_AUTHORITY] && $rrs >= $authorityOffset) {
+                $packet[self::P_AUTHORITY][] = $queryName;
+            } else if ($packet[self::P_H_ANSWER] && $rrs >= $packet[self::P_H_ANSWER]) {
+                $packet[self::P_ANSWERS][] = $queryName;
             } else {
-                $packet['questions'][] = $queryName;
+                $packet[self::P_QUERIES][] = $queryName;
             }
 
             $start = $i;
@@ -403,7 +563,7 @@ class DnsQuery
         self::log('Query:', $this->queryName);
         foreach (self::$domainDns as $dns => $domain) {
             foreach ($domain as $name) {
-                if (str_ends_with($this->queryName[0]['name'], $name)) {
+                if (str_ends_with($this->queryName[0][self::P_RR_NAME], $name)) {
                     $this->dnsHost = self::DNS_HOSTS[$dns];
                     self::log('Switch Dns:', $this->dnsHost);
                     return true;
