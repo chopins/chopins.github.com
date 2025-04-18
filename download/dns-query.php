@@ -18,6 +18,11 @@ class DnsQuery
     public $dnsHost = self::DNS_HOSTS['Default'];
     public $enableDOH = true;
     public $timeout = 3;
+    public $localRR = [
+        'host.godaddy.com' => [
+            1 => ['35.154.51.163', '65.2.72.240']
+        ],
+    ];
     private static $logfp;
     public static $logs = [];
     public static $requestDatetime;
@@ -94,7 +99,8 @@ class DnsQuery
             } else {
                 $this->queryData = file_get_contents("php://input");
             }
-            $this->saveData('Q', $this->queryData);
+            // $this->saveData('Q', $this->queryData);
+            header('Content-Type: application/dns-message', true);
             $this->dnsClient();
         }
     }
@@ -114,10 +120,11 @@ class DnsQuery
     public function dnsClient()
     {
         $packet = $this->parseDNSPackage($this->queryData, $qstate);
-
+        $this->transId = $packet['transId'];
         $this->queryName = $packet['questions'];
 
-        $ret = $this->getCache();
+        $ret = $this->getCache($packet);
+
         if ($ret) {
             header("Content-Length: " . strlen($ret));
             echo $ret;
@@ -125,14 +132,14 @@ class DnsQuery
         }
 
         $this->switchDns();
-        header('Content-Type: application/dns-message', true);
+
         do {
             if ($this->enableDOH) {
                 $ret = $this->DOHClient($body, $responseSize, $responseInfo);
             } else {
                 $ret = $this->TcpUdpClient($body, $responseSize);
             }
-            if(!$ret) {
+            if (!$ret) {
                 $this->dnsHost = self::DNS_HOSTS['Default'];
                 $this->enableDOH = false;
             }
@@ -164,8 +171,12 @@ class DnsQuery
         return $min;
     }
 
-    public function getCache()
+    public function getCache($queryPacket)
     {
+        $localRecord = '';
+        if ($this->localServer($localRecord, $queryPacket)) {
+            return $localRecord;
+        }
         $type = self::RR_TYPE[$this->queryName[0]['type']] . '-' . $this->queryName[0]['name'];
         $file = RDIR . '/data/dns.' . $type;
         if (file_exists($file)) {
@@ -180,6 +191,58 @@ class DnsQuery
         }
         return false;
     }
+    public function localServer(&$recordData, $queryPacket)
+    {
+        if (count($this->queryName) > 1) {
+            return false;
+        }
+        $type = $this->queryName[0]['type'];
+        if ($type != 1) {
+            return false;
+        }
+        $name = $this->queryName[0]['name'];
+        if (isset($this->localRR[$name][$type])) {
+            $recordData = $this->buildDNSResponse($this->localRR[$name][$type], $type, $queryPacket);
+            return true;
+        }
+        return false;
+    }
+
+    public function buildDNSResponse($recordList, $type, $queryPacket)
+    {
+        $binary = '';
+        foreach ($queryPacket['questions'] as $question) {
+            $questionDomain = $question['name'];
+            $labels = explode('.', $question['name']);
+            $domain = '';
+            foreach ($labels as $label) {
+                $domain .= chr(strlen($label)) . $label;
+            }
+            $domain .= "\0";
+            $domain .= pack('n2', $question['type'], $question['class']);
+            $binary .= $domain;
+        }
+        foreach ($recordList as $record) {
+            $domain = "\xc0\x0c";
+            $domain .= pack('n2', 1, 1);
+            $domain .= pack('N', 3600);
+            $domain .= pack('n', 4);
+            $domain .= pack('N', ip2long($record));
+            $binary .= $domain;
+        }
+        $binary .= "\0" . pack('n2', 41, 1480) . pack('N', 0) . pack('n', 0);
+
+        $flag = 1 << 15;
+        if ($queryPacket['flags']['rd']) {
+            $flag |= 1 << 8;
+        }
+        if(strlen($binary) + 12 > $queryPacket['additional'][0]['payload-size']) {
+            $flag |= 1 << 9;
+        }
+        $headers = [$this->transId, $flag, $queryPacket['questionCount'], count($recordList), 0, 1];
+
+        return pack("n*", ...$headers) . $binary;
+    }
 
     public function cacheResult($body)
     {
@@ -190,6 +253,12 @@ class DnsQuery
     public static function bset($bit, $size)
     {
         return ($bit & (1 << $size)) > 0 ? 1 : 0;
+    }
+
+    public function buildFlags()
+    {
+        $flags = [];
+        $flags['qr'] = $bit << 15;
     }
 
     public function parseFlags($bit)
