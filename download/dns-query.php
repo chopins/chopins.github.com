@@ -52,11 +52,15 @@ class DnsQuery
     const P_RR_NAME = self::P_ADDITIONAL + 1;
     const P_RR_TYPE = self::P_RR_NAME + 1;
     const P_RR_CLASS = self::P_RR_TYPE + 1;
-    const P_RR_OPT_UDP_SIZE = self::P_RR_CLASS;
     const P_RR_TTL = self::P_RR_CLASS + 1;
-    const P_RR_OPT_RCODE = self::P_RR_TTL;
     const P_RR_DATA_LEN = self::P_RR_TTL + 1;
     const P_RR_DATA = self::P_RR_DATA_LEN + 1;
+
+    const P_RR_OPT_RCODE = self::P_RR_TTL;
+    const P_RR_OPT_UDP_SIZE = self::P_RR_CLASS;
+    const P_RR_OPT_E_V = self::P_RR_OPT_RCODE + 1;
+    const P_RR_OPT_Z = self::P_RR_OPT_E_V + 1;
+    const P_RR_OPT_DATA = self::P_RR_OPT_Z + 1;
 
     const CLASS_IN = 1;
     const CLASS_CS = 2;
@@ -258,7 +262,28 @@ class DnsQuery
         }
         $name = $this->queryName[0][self::P_RR_NAME];
         if (isset($this->localRR[$name][$type])) {
-            $recordData = $this->buildDNS1AResponse($this->localRR[$name][$type], $type, $queryPacket);
+            $packet = [];
+            $packet[self::P_QUERIES] = $queryPacket[self::P_QUERIES];
+            $packet[self::P_ANSWERS] = [];
+            foreach ($this->localRR[$name][$type] as $r) {
+                $packet[self::P_ANSWERS][] = [
+                    self::P_RR_NAME => $name,
+                    self::P_RR_TYPE => $type,
+                    self::P_RR_CLASS => 1,
+                    self::P_RR_TTL => 3600,
+                    self::P_RR_DATA => $r
+                ];
+            }
+            $packet[self::P_ADDITIONAL] = [
+                self::P_RR_NAME => "\0",
+                self::P_RR_TYPE => self::RR_OPT,
+                self::P_RR_OPT_UDP_SIZE => 1480,
+                self::P_RR_OPT_RCODE => 0,
+                self::P_RR_OPT_E_V => 0,
+                self::P_RR_OPT_Z => 0,
+                self::P_RR_OPT_DATA => '',
+            ];
+            $recordData = $this->buildDNSResponse($packet);
             return true;
         }
         return false;
@@ -274,12 +299,12 @@ class DnsQuery
             $ptrLen = 0;
             $findNum = 0;
             foreach ($rLabels as $i => $label) {
-                if (current($ls['ls']) === $label) {
+                if (current($ls[0]) === $label) {
                     $ptrLen += strlen($label) + 1;
                 } else {
                     break;
                 }
-                if (next($ls['ls']) === false) {
+                if (next($ls[0]) === false) {
                     break;
                 }
             }
@@ -293,7 +318,7 @@ class DnsQuery
         if ($ptrName) {
             $ptrAdd = substr($ptrName, 0, -1 * $ptrMaxLen);
             $preLen = $ptrAdd ? strlen($ptrAdd) + 1 : 0;
-            $ptrPos = $labelist[$ptrName]['pos'] + $preLen;
+            $ptrPos = $labelist[$ptrName][1] + $preLen;
 
             $realLabels = explode('.', substr($name, 0, -1 * $ptrMaxLen));
             foreach ($realLabels as $l) {
@@ -312,28 +337,28 @@ class DnsQuery
     public function buildDNSResponse($packet)
     {
         $labelist = [];
-        $nextPos = 0;
+        $offset = 12;
+        $binary = '';
         foreach ($packet as $zone => $answer) {
             foreach ($answer as $a) {
-                $binary = $this->buildName($labelist, $a[self::P_RR_NAME], $rLabels);
+                $rbinary = $this->buildName($labelist, $a[self::P_RR_NAME], $rLabels);
 
-                $binary .= pack('n2', $a[self::P_RR_TYPE], $a[self::P_RR_CLASS]);
-                $binary .= $this->buildRRData($zone, $a);
-                $namePos = $nextPos;
-                $nextPos += strlen($binary);
-                if (in_array($a[self::P_RR_TYPE], self::G_CACHE_NAME_TYPE)) {
-                    $labelist[$a[self::P_RR_NAME]] = ['ls' => $rLabels, 'pos' => $namePos];
+                $rbinary .= pack('n2', $a[self::P_RR_TYPE], $a[self::P_RR_CLASS]);
+                if ($zone != self::P_QUERIES) {
+                    $rbinary .= $this->buildRRData($labelist, $a, strlen($rbinary));
                 }
+                if (in_array($a[self::P_RR_TYPE], self::G_CACHE_NAME_TYPE)) {
+                    $labelist[$a[self::P_RR_NAME]] = [$rLabels, $offset];
+                }
+                $offset += strlen($rbinary);
             }
+            $binary .= $rbinary;
         }
         return $binary;
     }
 
-    public function buildRRDala($zone, $a)
+    public function buildRRDala(&$labelist, $a, $offset)
     {
-        if ($zone == self::P_QUERIES) {
-            return '';
-        }
         $rType = $a[self::P_RR_TYPE];
         $binary = '';
 
@@ -346,9 +371,18 @@ class DnsQuery
             $binary .= pack('n', 8);
             $binary .= pack('n8', hexdec(str_replace(':', $a[self::P_RR_DATA])));
         } else if (in_array($rType, self::G_RR_DATA_NAME)) {
-            $name = rtrim($this->buildName($labelist, $a[self::P_RR_DATA]), "\0");
+            $name = rtrim($this->buildName($labelist, $a[self::P_RR_DATA], $rLabels), "\0");
             $binary .= pack('n', strlen($name));
             $binary .= $name;
+            $labelist[$a[self::P_RR_DATA]] = [$rLabels, $offset + 6];
+        } else if ($rType == self::RR_OPT) {
+            $binary .= pack('N', $a[self::P_RR_OPT_E_V]);
+            $binary .= pack('n', $a[self::P_RR_OPT_Z]);
+            $optDataLen = strlen($a[self::P_RR_OPT_DATA]);
+            $binary .= pack('n', $optDataLen);
+            if ($optDataLen > 0) {
+                $binary .= $a[self::P_RR_OPT_DATA];
+            }
         }
 
         return $binary;
