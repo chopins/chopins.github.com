@@ -39,8 +39,18 @@ class DnsQuery
         'CF' => 'https://1.1.1.1/dns-query',
         'TX' => 'https://doh.pub/dns-query',
     ];
-    const P_H_ID = 1;
+    const S_NAME_END = "\0";
+    const S_PTR = "\xc0";
+    const P_H_ID = 0;
     const P_H_FLAG = self::P_H_ID + 1;
+    const P_H_FLAG_QR = 0;
+    const P_H_FLAG_OPCODE = self::P_H_FLAG_QR + 1;
+    const P_H_FLAG_AA = self::P_H_FLAG_OPCODE + 1;
+    const P_H_FLAG_TC = self::P_H_FLAG_AA + 1;
+    const P_H_FLAG_RD = self::P_H_FLAG_TC + 1;
+    const P_H_FLAG_RA = self::P_H_FLAG_RD + 1;
+    const P_H_FLAG_Z = self::P_H_FLAG_RA + 1;
+    const P_H_FLAG_RCODE = self::P_H_FLAG_Z + 1;
     const P_H_QUESTION = self::P_H_FLAG + 1;
     const P_H_ANSWER = self::P_H_QUESTION + 1;
     const P_H_AUTHORITY = self::P_H_ANSWER + 1;
@@ -56,10 +66,11 @@ class DnsQuery
     const P_RR_DATA_LEN = self::P_RR_TTL + 1;
     const P_RR_DATA = self::P_RR_DATA_LEN + 1;
 
-    const P_RR_OPT_RCODE = self::P_RR_TTL;
     const P_RR_OPT_UDP_SIZE = self::P_RR_CLASS;
+    const P_RR_OPT_RCODE = self::P_RR_TTL;
     const P_RR_OPT_E_V = self::P_RR_OPT_RCODE + 1;
-    const P_RR_OPT_Z = self::P_RR_OPT_E_V + 1;
+    const P_RR_OPT_DO = self::P_RR_OPT_E_V + 1;
+    const P_RR_OPT_Z = self::P_RR_OPT_DO + 1;
     const P_RR_OPT_DATA = self::P_RR_OPT_Z + 1;
 
     const CLASS_IN = 1;
@@ -144,6 +155,7 @@ class DnsQuery
     const G_RR_DATA_NAME = [self::RR_CNAME, self::RR_MX, self::RR_NS];
     public function __construct()
     {
+        register_shutdown_function([$this, 'shutdown']);
         self::$requestDatetime = new DateTime();
         self::$logfp = fopen(RDIR . '/logs/dns.log-' . date('Y-m-d'), 'ab');
         if (PHP_SAPI != 'cli') {
@@ -159,7 +171,7 @@ class DnsQuery
             } else {
                 $this->queryData = file_get_contents("php://input");
             }
-            // $this->saveData('Q', $this->queryData);
+            $this->saveData('Q', $this->queryData);
             header('Content-Type: application/dns-message', true);
             $this->dnsClient();
         }
@@ -179,13 +191,15 @@ class DnsQuery
 
     public function dnsClient()
     {
+        self::log("Parse Query:");
         $packet = $this->parseDNSPackage($this->queryData, $qstate);
         $this->transId = $packet[self::P_H_ID];
         $this->queryName = $packet[self::P_QUERIES];
-
+        self::log('Query:', $this->queryName);
         $ret = $this->getCache($packet);
 
         if ($ret) {
+            $this->saveData("A", $ret);
             header("Content-Length: " . strlen($ret));
             echo $ret;
             return;
@@ -251,6 +265,34 @@ class DnsQuery
         }
         return false;
     }
+    public static function initPacketArray()
+    {
+        return [
+            self::P_H_ID => 0,
+            self::P_H_FLAG => 0,
+            self::P_H_QUESTION => 0,
+            self::P_H_ANSWER => 0,
+            self::P_H_AUTHORITY => 0,
+            self::P_H_ADDITIONAL => 0,
+            self::P_QUERIES => [],
+            self::P_ANSWERS => [],
+            self::P_AUTHORITY => [],
+            self::P_ADDITIONAL => [],
+        ];
+    }
+    public static function initHeadFlags()
+    {
+        return [
+            self::P_H_FLAG_QR => 1,
+            self::P_H_FLAG_OPCODE => 0,
+            self::P_H_FLAG_AA => 0,
+            self::P_H_FLAG_TC => 0,
+            self::P_H_FLAG_RD => 0,
+            self::P_H_FLAG_RA => 0,
+            self::P_H_FLAG_Z => 0,
+            self::P_H_FLAG_RCODE => 0
+        ];
+    }
     public function localServer(&$recordData, $queryPacket)
     {
         if (count($this->queryName) > 1) {
@@ -261,10 +303,11 @@ class DnsQuery
             return false;
         }
         $name = $this->queryName[0][self::P_RR_NAME];
+        $UDPSize = $queryPacket[self::P_ADDITIONAL][0][self::P_RR_OPT_UDP_SIZE];
         if (isset($this->localRR[$name][$type])) {
-            $packet = [];
+            $packet = self::initPacketArray();
             $packet[self::P_QUERIES] = $queryPacket[self::P_QUERIES];
-            $packet[self::P_ANSWERS] = [];
+
             foreach ($this->localRR[$name][$type] as $r) {
                 $packet[self::P_ANSWERS][] = [
                     self::P_RR_NAME => $name,
@@ -274,16 +317,24 @@ class DnsQuery
                     self::P_RR_DATA => $r
                 ];
             }
-            $packet[self::P_ADDITIONAL] = [
-                self::P_RR_NAME => "\0",
+            $packet[self::P_ADDITIONAL][] = [
+                self::P_RR_NAME => self::S_NAME_END,
                 self::P_RR_TYPE => self::RR_OPT,
-                self::P_RR_OPT_UDP_SIZE => 1480,
+                self::P_RR_OPT_UDP_SIZE => 65494,
                 self::P_RR_OPT_RCODE => 0,
                 self::P_RR_OPT_E_V => 0,
+                self::P_RR_OPT_DO => 0,
                 self::P_RR_OPT_Z => 0,
                 self::P_RR_OPT_DATA => '',
             ];
-            $recordData = $this->buildDNSResponse($packet);
+
+            $flags = self::initHeadFlags();
+            $flags[self::P_H_FLAG_QR] = 1;
+            $flags[self::P_H_FLAG_OPCODE] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_OPCODE];
+            $flags[self::P_H_FLAG_RD] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_RD];
+            $flags[self::P_H_FLAG_RA] =1;
+
+            $recordData = $this->buildDNSResponse($flags, $packet, $UDPSize);
             return true;
         }
         return false;
@@ -291,6 +342,9 @@ class DnsQuery
 
     public function buildName($labelist, $name, &$rLabels = null)
     {
+        if ($name == self::S_NAME_END) {
+            return $name;
+        }
         $labels = explode('.', $name);
         $rLabels = array_reverse($labels, true);
         $ptrMaxLen = 0;
@@ -321,20 +375,23 @@ class DnsQuery
             $ptrPos = $labelist[$ptrName][1] + $preLen;
 
             $realLabels = explode('.', substr($name, 0, -1 * $ptrMaxLen));
+            self::log("$name ptr pos: $ptrPos " . dechex($ptrPos));
             foreach ($realLabels as $l) {
-                $binary .= chr(strlen($l)) . $l;
+                if (!empty($l)) {
+                    $binary .= chr(strlen($l)) . $l;
+                }
             }
-            $binary .= "\xc0" . chr($ptrPos);
+            $binary .= self::S_PTR . chr($ptrPos);
         } else { //没有指针
             foreach ($labels as $l) {
                 $binary .= chr(strlen($l)) . $l;
             }
-            $binary .= "\0";
+            $binary .= self::S_NAME_END;
         }
         return $binary;
     }
 
-    public function buildDNSResponse($packet)
+    public function buildDNSResponse($flagArray, $packet, $UDPSize)
     {
         $labelist = [];
         $offset = 12;
@@ -345,19 +402,34 @@ class DnsQuery
 
                 $rbinary .= pack('n2', $a[self::P_RR_TYPE], $a[self::P_RR_CLASS]);
                 if ($zone != self::P_QUERIES) {
-                    $rbinary .= $this->buildRRData($labelist, $a, strlen($rbinary));
+                    $rbinary .= $this->buildRRData($labelist, $a, $offset + strlen($rbinary));
                 }
                 if (in_array($a[self::P_RR_TYPE], self::G_CACHE_NAME_TYPE)) {
                     $labelist[$a[self::P_RR_NAME]] = [$rLabels, $offset];
                 }
                 $offset += strlen($rbinary);
+                $binary .= $rbinary;
             }
-            $binary .= $rbinary;
         }
-        return $binary;
+
+        if (strlen($binary) + 12 > $UDPSize) {
+            $flagArray[self::P_H_FLAG_TC] = 1;
+        }
+
+        $flag = $this->setFlags($flagArray);
+        $headers = [
+            $this->transId,
+            $flag,
+            count($packet[self::P_QUERIES]),
+            count($packet[self::P_ANSWERS]),
+            count($packet[self::P_AUTHORITY]),
+            count($packet[self::P_ADDITIONAL])
+        ];
+
+        return pack("n*", ...$headers) . $binary;
     }
 
-    public function buildRRDala(&$labelist, $a, $offset)
+    public function buildRRData(&$labelist, $a, $offset)
     {
         $rType = $a[self::P_RR_TYPE];
         $binary = '';
@@ -371,71 +443,22 @@ class DnsQuery
             $binary .= pack('n', 8);
             $binary .= pack('n8', hexdec(str_replace(':', $a[self::P_RR_DATA])));
         } else if (in_array($rType, self::G_RR_DATA_NAME)) {
-            $name = rtrim($this->buildName($labelist, $a[self::P_RR_DATA], $rLabels), "\0");
+            $name = rtrim($this->buildName($labelist, $a[self::P_RR_DATA], $rLabels), self::S_NAME_END);
             $binary .= pack('n', strlen($name));
             $binary .= $name;
             $labelist[$a[self::P_RR_DATA]] = [$rLabels, $offset + 6];
         } else if ($rType == self::RR_OPT) {
-            $binary .= pack('N', $a[self::P_RR_OPT_E_V]);
-            $binary .= pack('n', $a[self::P_RR_OPT_Z]);
+            $binary = pack('C2', $a[self::P_RR_OPT_RCODE], $a[self::P_RR_OPT_E_V]);
+            $binary .= pack('n', ($a[self::P_RR_OPT_DO]<<15)|$a[self::P_RR_OPT_Z]);
             $optDataLen = strlen($a[self::P_RR_OPT_DATA]);
             $binary .= pack('n', $optDataLen);
             if ($optDataLen > 0) {
                 $binary .= $a[self::P_RR_OPT_DATA];
             }
+            $this->saveData('OPT', $binary);
         }
 
         return $binary;
-    }
-
-    public function buildQuestionsZone($queryPacket)
-    {
-        $startOffset = 12;
-        $binary = '';
-        foreach ($queryPacket[self::P_QUERIES] as $i => $question) {
-            $labels = explode('.', $question[self::P_RR_NAME]);
-
-            $domain = [];
-            foreach ($labels as $k => $label) {
-                $ptrPos = strpos($binary, $label);
-                if ($ptrPos !== false) {
-                    $domain[] = "\xc0" . chr($ptrPos - 1 + $startOffset);
-                }
-                $domain[] = chr(strlen($label)) . $label;
-            }
-
-            $domain[] = "\0";
-            $domain[] = pack('n2', $question[self::P_RR_TYPE], $question[self::P_RR_CLASS]);
-            $binary .= join('', $domain);
-        }
-        return $binary;
-    }
-
-    public function buildDNS1AResponse($recordList, $type, $queryPacket)
-    {
-
-        $binary = $this->buildQuestionsZone($queryPacket);
-
-        foreach ($recordList as $record) {
-            $domain = "\xc0\x0c";
-            $domain .= pack('n2', 1, 1);
-            $domain .= pack('N', 3600);
-            $domain .= pack('n', 4);
-            $domain .= pack('N', ip2long($record));
-            $binary .= $domain;
-        }
-        $binary .= "\0" . pack('n2', 41, 1480) . pack('N', 0) . pack('n', 0);
-
-        $flag = 1 << 15;
-        if ($queryPacket['flags']['rd']) {
-            $flag |= 1 << 8;
-        }
-        if (strlen($binary) + 12 > $queryPacket[self::P_ADDITIONAL][0][self::P_RR_OPT_UDP_SIZE]) {
-            $flag |= 1 << 9;
-        }
-        $headers = [$this->transId, $flag, $queryPacket[self::P_H_ANSWER], count($recordList), 0, 1];
-
-        return pack("n*", ...$headers) . $binary;
     }
 
     public function cacheResult($body)
@@ -449,23 +472,42 @@ class DnsQuery
         return ($bit & (1 << $size)) > 0 ? 1 : 0;
     }
 
-    public function buildFlags()
+    public function setFlags($flags)
     {
-        $flags = [];
-        $flags['qr'] = $bit << 15;
+        if ($flags[self::P_H_FLAG_QR]) {
+            $flag = 1 << 15;
+        }
+        if($flags[self::P_H_FLAG_OPCODE]) {
+            $flag |= $flags[self::P_H_FLAG_OPCODE] << 11;
+        }
+        if($flags[self::P_H_FLAG_AA]) {
+            $flag |= 1<< 10;
+        }
+        if($flags[self::P_H_FLAG_TC]) {
+            $flag |= 1<< 9;
+        }
+        if ($flags[self::P_H_FLAG_RD]) {
+            $flag |= 1 << 8;
+        }
+        if ($flags[self::P_H_FLAG_RA]) {
+            $flag |= 1 << 7;
+        }
+        if ($flags[self::P_H_FLAG_RCODE]) {
+            $flag |= $flags[self::P_H_FLAG_RCODE];
+        }
+        return $flag;
     }
 
     public function parseFlags($bit)
     {
-        $flags = [];
-        $flags['qr'] = self::bset($bit, 15);
-        $flags['opcode'] = $flags['qr'] ? (($bit >> 11) ^ 16) : ($bit >> 11);
-        $flags['aa'] = self::bset($bit, 10);
-        $flags['tc'] = self::bset($bit, 9);
-        $flags['rd'] = self::bset($bit, 8);
-        $flags['ra'] = self::bset($bit, 7);
-        $flags['z'] = 0;
-        $flags['rcode'] = $bit & 15;
+        $flags = self::initHeadFlags();
+        $flags[self::P_H_FLAG_QR] = self::bset($bit, 15);
+        $flags[self::P_H_FLAG_OPCODE] = $flags[self::P_H_FLAG_QR] ? (($bit >> 11) ^ 16) : ($bit >> 11);
+        $flags[self::P_H_FLAG_AA] = self::bset($bit, 10);
+        $flags[self::P_H_FLAG_TC] = self::bset($bit, 9);
+        $flags[self::P_H_FLAG_RD] = self::bset($bit, 8);
+        $flags[self::P_H_FLAG_RA] = self::bset($bit, 7);
+        $flags[self::P_H_FLAG_RCODE] = $bit & 15;
         return $flags;
     }
 
@@ -474,11 +516,11 @@ class DnsQuery
         $start = $i;
         $labels = [];
         do {
-            if ($queryData[$i] == "\0") {
+            if ($queryData[$i] == self::S_NAME_END) {
                 $i++;
                 break;
             }
-            if ($queryData[$i] == "\xc0") {
+            if ($queryData[$i] == self::S_PTR) {
                 $i++;
                 $ptrOffset = ord($queryData[$i]);
                 $labels[] = self::getDomainFromOffset($queryData, $ptrOffset);
@@ -505,7 +547,7 @@ class DnsQuery
         try {
             $ret = unpack($format, $string, $offset);
         } catch (ValueError $e) {
-            self::log("Offset:$offset", $e->getTraceAsString());
+            self::log("Offset:$offset", $e->__toString());
         }
         $len  = $bitSize[$format[0]];
         if (strlen($format) > 1) {
@@ -519,41 +561,37 @@ class DnsQuery
     {
         $parseStatus = true;
         $headers = self::unpack('n6', $queryData);
-        $packet = [];
+        $packet = self::initPacketArray();
         $packet[self::P_H_ID] = $headers[1];
         $packet[self::P_H_FLAG] = $this->parseFlags($headers[2]);
         $packet[self::P_H_QUESTION] = $headers[3];
         $packet[self::P_H_ANSWER] = $headers[4];
         $packet[self::P_H_AUTHORITY] = $headers[5];
         $packet[self::P_H_ADDITIONAL] = $headers[6];
-        $packet[self::P_QUERIES] = [];
-        $packet[self::P_ANSWERS] = [];
-        $packet[self::P_AUTHORITY] = [];
-        $packet[self::P_ADDITIONAL] = [];
-        $start = 12;
-        $queryDataLen = strlen($queryData);
-        $count = $packet[self::P_H_ANSWER] + $packet[self::P_H_ANSWER] + $packet[self::P_H_AUTHORITY] + $packet[self::P_H_ADDITIONAL];
-        $authorityOffset = $packet[self::P_H_ANSWER] + $packet[self::P_H_ANSWER];
-        $additionalOffset = $count - $packet[self::P_H_ADDITIONAL];
-        $i = $start;
 
+        $queryDataLen = strlen($queryData);
+        $count = $packet[self::P_H_QUESTION] + $packet[self::P_H_ANSWER] + $packet[self::P_H_AUTHORITY] + $packet[self::P_H_ADDITIONAL];
+        $authorityOffset = $packet[self::P_H_QUESTION] + $packet[self::P_H_ANSWER];
+        $additionalOffset = $count - $packet[self::P_H_ADDITIONAL];
+
+        $pos = 12;
         for ($rrs = 0; $rrs < $count; $rrs++) {
 
-            if ($i > $queryDataLen) {
+            if ($pos > $queryDataLen) {
                 $parseStatus = false;
-                self::log("OutRangeCheck:read pos $i >= data len $queryDataLen ");
+                self::log("OutRangeCheck:read pos $pos >= data len $queryDataLen ");
                 break;
             }
-            $name = self::getDomainFromOffset($queryData, $i);
+            $name = self::getDomainFromOffset($queryData, $pos);
 
-            $rrtype = self::unpack('n2', $queryData, $i);
+            $rrtype = self::unpack('n2', $queryData, $pos);
             $queryName = [self::P_RR_NAME => $name, self::P_RR_TYPE => $rrtype[1], self::P_RR_CLASS => $rrtype[2]];
             $typeName = $queryName[self::P_RR_TYPE];
 
-            if ($rrs >= $packet[self::P_H_ANSWER]) {
-                $ttl = self::unpack('N', $queryData, $i)[1];
+            if ($rrs >= $packet[self::P_H_QUESTION]) {
+                $ttl = self::unpack('N', $queryData, $pos)[1];
                 $queryName[self::P_RR_TTL] = $ttl;
-                $RDLen = self::unpack('n', $queryData, $i)[1];
+                $RDLen = self::unpack('n', $queryData, $pos)[1];
 
                 if ($typeName == self::RR_OPT) {
                     $queryName[self::P_RR_OPT_UDP_SIZE] = $queryName[self::P_RR_CLASS];
@@ -562,13 +600,13 @@ class DnsQuery
                 $queryName[self::P_RR_DATA_LEN] = $RDLen;
 
                 if (in_array($typeName, self::G_RR_DATA_NAME)) {
-                    $data = self::getDomainFromOffset($queryData, $i, $RDLen);
+                    $data = self::getDomainFromOffset($queryData, $pos, $RDLen);
                 } else if ($typeName == self::RR_A) {
-                    $data = long2ip(self::unpack('N', $queryData, $i)[1]);
+                    $data = long2ip(self::unpack('N', $queryData, $pos)[1]);
                 } else if ($typeName == self::RR_AAAA) {
-                    $data = self::toIPv6($queryData, $i);
+                    $data = self::toIPv6($queryData, $pos);
                 } else {
-                    $data = self::unpack("H{$RDLen}", $queryData, $i);
+                    $data = self::unpack("H{$RDLen}", $queryData, $pos);
                 }
                 $queryName[self::P_RR_DATA] = $data;
             }
@@ -577,16 +615,14 @@ class DnsQuery
                 $packet[self::P_ADDITIONAL][] = $queryName;
             } else if ($packet[self::P_H_AUTHORITY] && $rrs >= $authorityOffset) {
                 $packet[self::P_AUTHORITY][] = $queryName;
-            } else if ($packet[self::P_H_ANSWER] && $rrs >= $packet[self::P_H_ANSWER]) {
+            } else if ($packet[self::P_H_ANSWER] && $rrs >= $packet[self::P_H_QUESTION]) {
                 $packet[self::P_ANSWERS][] = $queryName;
             } else {
                 $packet[self::P_QUERIES][] = $queryName;
             }
-
-            $start = $i;
         }
-        if ($queryDataLen != $i) {
-            self::log("EndCheck, Last pos $i != data len $queryDataLen ");
+        if ($queryDataLen != $pos) {
+            self::log("EndCheck, Last pos $pos != data len $queryDataLen ");
             $parseStatus = false;
         }
         return $packet;
@@ -594,7 +630,6 @@ class DnsQuery
 
     public function switchDns()
     {
-        self::log('Query:', $this->queryName);
         foreach (self::$domainDns as $dns => $domain) {
             foreach ($domain as $name) {
                 if (str_ends_with($this->queryName[0][self::P_RR_NAME], $name)) {
@@ -699,5 +734,12 @@ class DnsQuery
     {
         fwrite(self::$logfp, implode('', self::$logs));
         fclose(self::$logfp);
+    }
+
+    public function shutdown()
+    {
+        if (count(self::$logs) > 0) {
+            $this->__destruct();
+        }
     }
 }
