@@ -71,7 +71,23 @@ class DnsQuery
     const P_RR_OPT_E_V = self::P_RR_OPT_RCODE + 1;
     const P_RR_OPT_DO = self::P_RR_OPT_E_V + 1;
     const P_RR_OPT_Z = self::P_RR_OPT_DO + 1;
-    const P_RR_OPT_DATA = self::P_RR_OPT_Z + 1;
+    const P_RR_OPT_OPTION = self::P_RR_OPT_Z + 1;
+    const P_RR_OPT_OPTION_CODE = 0;
+    const P_RR_OPT_OPTION_DATA = self::P_RR_OPT_OPTION_CODE + 1;
+
+    const P_RR_HTTPS_PRIORITY = self::P_RR_TTL + 1;
+    const P_RR_HTTPS_TARGET_NAME = self::P_RR_HTTPS_PRIORITY + 1;
+    const P_RR_HTTPS_PARAMS = self::P_RR_HTTPS_TARGET_NAME + 1;
+    const P_RR_HTTPS_PARAMS_KEY = 0;
+    const P_RR_HTTPS_PARAMS_VALUE = 1;
+
+    const RR_HTTPS_MANDATORY = 0;
+    const RR_HTTPS_ALPN = 1;
+    const RR_HTTPS_NO_DEFAULT_ALPN = 2;
+    const RR_HTTPS_PORT = 3;
+    const RR_HTTPS_IPV4HINT = 4;
+    const RR_HTTPS_ECH = 5;
+    const RR_HTTPS_IPV6HINT = 6;
 
     const CLASS_IN = 1;
     const CLASS_CS = 2;
@@ -325,14 +341,14 @@ class DnsQuery
                 self::P_RR_OPT_E_V => 0,
                 self::P_RR_OPT_DO => 0,
                 self::P_RR_OPT_Z => 0,
-                self::P_RR_OPT_DATA => '',
+                self::P_RR_OPT_OPTION => [],
             ];
 
             $flags = self::initHeadFlags();
             $flags[self::P_H_FLAG_QR] = 1;
             $flags[self::P_H_FLAG_OPCODE] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_OPCODE];
             $flags[self::P_H_FLAG_RD] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_RD];
-            $flags[self::P_H_FLAG_RA] =1;
+            $flags[self::P_H_FLAG_RA] = 1;
 
             $recordData = $this->buildDNSResponse($flags, $packet, $UDPSize);
             return true;
@@ -340,7 +356,7 @@ class DnsQuery
         return false;
     }
 
-    public function buildName($labelist, $name, &$rLabels = null)
+    public function buildName($labelist, $name, &$rLabels = null, $unend = false)
     {
         if ($name == self::S_NAME_END) {
             return $name;
@@ -386,7 +402,9 @@ class DnsQuery
             foreach ($labels as $l) {
                 $binary .= chr(strlen($l)) . $l;
             }
-            $binary .= self::S_NAME_END;
+            if (!$unend) {
+                $binary .= self::S_NAME_END;
+            }
         }
         return $binary;
     }
@@ -441,24 +459,86 @@ class DnsQuery
             $binary .= pack('N', ip2long($a[self::P_RR_DATA]));
         } else if ($rType == self::RR_AAAA) {
             $binary .= pack('n', 8);
-            $binary .= pack('n8', hexdec(str_replace(':', $a[self::P_RR_DATA])));
+            $binary .= self::ipv6long($a[self::P_RR_DATA]);
         } else if (in_array($rType, self::G_RR_DATA_NAME)) {
-            $name = rtrim($this->buildName($labelist, $a[self::P_RR_DATA], $rLabels), self::S_NAME_END);
+            $name = $this->buildName($labelist, $a[self::P_RR_DATA], $rLabels, true);
             $binary .= pack('n', strlen($name));
             $binary .= $name;
             $labelist[$a[self::P_RR_DATA]] = [$rLabels, $offset + 6];
         } else if ($rType == self::RR_OPT) {
             $binary = pack('C2', $a[self::P_RR_OPT_RCODE], $a[self::P_RR_OPT_E_V]);
-            $binary .= pack('n', ($a[self::P_RR_OPT_DO]<<15)|$a[self::P_RR_OPT_Z]);
-            $optDataLen = strlen($a[self::P_RR_OPT_DATA]);
-            $binary .= pack('n', $optDataLen);
-            if ($optDataLen > 0) {
-                $binary .= $a[self::P_RR_OPT_DATA];
+            $binary .= pack('n', ($a[self::P_RR_OPT_DO] << 15) | $a[self::P_RR_OPT_Z]);
+            if (empty($a[self::P_RR_OPT_OPTION])) {
+                $binary .= pack('n', 0);
+            } else {
+                $optionBinary = '';
+                foreach ($a[self::P_RR_OPT_OPTION] as $option) {
+                    $optionBinary .= pack('n2', $option[self::P_RR_OPT_OPTION_CODE], strlen($option[self::P_RR_OPT_OPTION_DATA]));
+                    $optionBinary .= $option[self::P_RR_OPT_OPTION_DATA];
+                }
+                $binary .= pack('n', strlen($optionBinary)) . $optionBinary;
             }
-            $this->saveData('OPT', $binary);
+        } else if ($rType == self::RR_HTTPS) {
+            $svcHttpsBinary = pack('n', $a[self::P_RR_HTTPS_PRIORITY]);
+            $svcHttpsBinary .= $this->buildName($labelist, $a[self::P_RR_HTTPS_TARGET_NAME], null, true);
+            foreach ($a[self::P_RR_HTTPS_PARAMS] as $param) {
+                $svcHttpsBinary .= pack('n', $param[self::P_RR_HTTPS_PARAMS_KEY]);
+                if ($param[self::P_RR_HTTPS_PARAMS_KEY] ==  self::RR_HTTPS_NO_DEFAULT_ALPN) {
+                    $svcHttpsBinary .= pack('n', 0);
+                    continue;
+                } else if (
+                    $param[self::P_RR_HTTPS_PARAMS_KEY] == self::RR_HTTPS_MANDATORY
+                    || $param[self::P_RR_HTTPS_PARAMS_KEY] == self::RR_HTTPS_PORT
+                ) {
+                    $paramValue = pack('n*', ...$param[self::P_RR_HTTPS_PARAMS_KEY]);
+                    $svcHttpsBinary .= pack('n', strlen($paramValue)) . $paramValue;
+                    continue;
+                } else if ($param[self::P_RR_HTTPS_PARAMS_KEY] == self::RR_HTTPS_ECH) {
+                    $echconfig = $this->buildECHConfig($param[self::P_RR_HTTPS_PARAMS_VALUE]);
+                    $svcHttpsBinary .= pack("n", strlen($echbinary)) . $echconfig;
+                    continue;
+                }
+                $paramValue = '';
+                foreach ($param[self::P_RR_HTTPS_PARAMS_VALUE] as $v) {
+                    switch ($param[self::P_RR_HTTPS_PARAMS_KEY]) {
+                        case self::RR_HTTPS_ALPN:
+                            $paramValue .= chr(strlen($v)) . $v;
+                            break;
+                        case self::RR_HTTPS_IPV4HINT:
+                            $paramValue .= ip2long($v);
+                            break;
+                        case self::RR_HTTPS_IPV6HINT:
+                            $paramValue .= self::ipv6long($v);
+                            break;
+                    }
+                }
+                $svcHttpsBinary .= pack('n', strlen($paramValue)) . $paramValue;
+            }
+            $binary .= pack('n', strlen($svcHttpsBinary)) . $svcHttpsBinary;
         }
 
         return $binary;
+    }
+
+    public function buildECHConfig($value)
+    {
+        $id = pack('n2', 0xfe0d); //version
+        $binary = chr($value['configId']) . pack('n2', $value['kemId'], strlen($value['pubKey'])) . $value['pubKey'];
+        $binary .= pack('n', count($value['ciphers']) * 4);
+        foreach ($value['ciphers'] as $cipher) {
+            $binary .= pack('n2', $cipher['kdfId'], $cipher['aeadId']);
+        }
+        $binary .= chr($value['maxNameLen']) . chr(strlen($value['pubName'])) . $value['pubName'];
+        if ($value['extensions']) {
+            foreach ($value['extensions'] as $ext) {
+                $binary .= pack('n', $ext['type'], strlen($ext['data']));
+                $binary .= $ext['data'];
+            }
+        } else {
+            $binary .= pack('n', 0);
+        }
+        $data = $id . pack('n', strlen($binary)) . $binary;
+        return pack('n', strlen($data)) . $data;
     }
 
     public function cacheResult($body)
@@ -477,14 +557,14 @@ class DnsQuery
         if ($flags[self::P_H_FLAG_QR]) {
             $flag = 1 << 15;
         }
-        if($flags[self::P_H_FLAG_OPCODE]) {
+        if ($flags[self::P_H_FLAG_OPCODE]) {
             $flag |= $flags[self::P_H_FLAG_OPCODE] << 11;
         }
-        if($flags[self::P_H_FLAG_AA]) {
-            $flag |= 1<< 10;
+        if ($flags[self::P_H_FLAG_AA]) {
+            $flag |= 1 << 10;
         }
-        if($flags[self::P_H_FLAG_TC]) {
-            $flag |= 1<< 9;
+        if ($flags[self::P_H_FLAG_TC]) {
+            $flag |= 1 << 9;
         }
         if ($flags[self::P_H_FLAG_RD]) {
             $flag |= 1 << 8;
@@ -537,7 +617,11 @@ class DnsQuery
         } while (($i - $start) < $maxLen && isset($queryData[$i]));
         return join('.', $labels);
     }
-    public static function toIPv6($data, &$i)
+    public static function ipv6long($ipv6)
+    {
+        return pack('n8', hexdec(str_replace(':', $ipv6)));
+    }
+    public static function long2ipv6($data, &$i)
     {
         return  join(':', array_map('dechex', self::unpack('n8', $data, $i)));
     }
@@ -604,7 +688,7 @@ class DnsQuery
                 } else if ($typeName == self::RR_A) {
                     $data = long2ip(self::unpack('N', $queryData, $pos)[1]);
                 } else if ($typeName == self::RR_AAAA) {
-                    $data = self::toIPv6($queryData, $pos);
+                    $data = self::long2ipv6($queryData, $pos);
                 } else {
                     $data = self::unpack("H{$RDLen}", $queryData, $pos);
                 }
