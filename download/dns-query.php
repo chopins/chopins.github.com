@@ -39,6 +39,43 @@ class DnsQuery
         'CF' => 'https://1.1.1.1/dns-query',
         'TX' => 'https://doh.pub/dns-query',
     ];
+
+    /**
+     * https://www.rfc-editor.org/rfc/rfc9180.html#name-kem-ids
+     * KEM IDs:
+     * 0x0000 	Reserved
+     * 0x0010 	DHKEM(P-256, HKDF-SHA256)
+     * 0x0011 	DHKEM(P-384, HKDF-SHA384)
+     * 0x0012 	DHKEM(P-521, HKDF-SHA512)
+     * 0x0020 	DHKEM(X25519, HKDF-SHA256
+     * 0x0021 	DHKEM(X448, HKDF-SHA512)
+     *
+     * https://www.rfc-editor.org/rfc/rfc9180.html#name-kdf-ids
+     * KDF IDs:
+     * 0x0000 	Reserved
+     * 0x0001 	HKDF-SHA256
+     * 0x0002 	HKDF-SHA384
+     * 0x0003 	HKDF-SHA512
+     *
+     * https://www.rfc-editor.org/rfc/rfc9180.html#name-aead-ids
+     * AEAD IDs:
+     * 0x0000 	Reserved
+     * 0x0001 	AES-128-GCM
+     * 0x0002 	AES-256-GCM
+     * 0x0003 	ChaCha20Poly1305
+     * 0xFFFF 	Export-only
+     */
+    const ECH_TPL = [
+        'configId' => 1,//random
+        'kemId' => 32,
+        'pubKey' => '',
+        'ciphers' => [
+            ['kdfId' => 1, 'aeadId' => 1],
+        ],
+        'maxNameLen' => 0,
+        'pubName' => '',
+        'extensions' => [], // ['type'=> '', 'data' => ]
+    ];
     const S_NAME_END = "\0";
     const S_PTR = "\xc0";
     const P_H_ID = 0;
