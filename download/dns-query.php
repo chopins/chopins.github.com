@@ -322,8 +322,10 @@ class DnsQuery
             $min = $this->getMinTTL($packet);
             if (filemtime($file) + $min < time()) {
                 unlink($file);
+                self::log($this->queryName[0][self::P_RR_NAME] . " cache expired");
                 return false;
             }
+            self::log($this->queryName[0][self::P_RR_NAME] . ' use cache');
             return pack('n', $this->transId) . substr($data, 2);
         }
         return false;
@@ -358,19 +360,18 @@ class DnsQuery
     }
     public function localServer(&$recordData, $queryPacket)
     {
-        if (count($this->queryName) > 1) {
-            return false;
-        }
         $type = $this->queryName[0][self::P_RR_TYPE];
-        if ($type != self::RR_A) {
-            return false;
-        }
         $name = $this->queryName[0][self::P_RR_NAME];
         $UDPSize = $queryPacket[self::P_ADDITIONAL][0][self::P_RR_OPT_UDP_SIZE];
-        if (isset(self::$LOCAL_RR_LIST[$name][$type])) {
-            $packet = self::initPacketArray();
-            $packet[self::P_QUERIES] = $queryPacket[self::P_QUERIES];
 
+        if (!isset(self::$LOCAL_RR_LIST[$name][$type])) {
+            return false;
+        }
+        $packet = self::initPacketArray();
+        $packet[self::P_QUERIES] = $queryPacket[self::P_QUERIES];
+        foreach ($this->queryName as $query) {
+            $name = $query[self::P_RR_NAME];
+            $type = $query[self::P_RR_TYPE];
             foreach (self::$LOCAL_RR_LIST[$name][$type] as $r) {
                 $packet[self::P_ANSWERS][] = [
                     self::P_RR_NAME => $name,
@@ -380,27 +381,30 @@ class DnsQuery
                     self::P_RR_DATA => $r
                 ];
             }
-            $packet[self::P_ADDITIONAL][] = [
-                self::P_RR_NAME => self::S_NAME_END,
-                self::P_RR_TYPE => self::RR_OPT,
-                self::P_RR_OPT_UDP_SIZE => 65494,
-                self::P_RR_OPT_RCODE => 0,
-                self::P_RR_OPT_E_V => 0,
-                self::P_RR_OPT_DO => 0,
-                self::P_RR_OPT_Z => 0,
-                self::P_RR_OPT_OPTION => [],
-            ];
-
-            $flags = self::initHeadFlags();
-            $flags[self::P_H_FLAG_QR] = 1;
-            $flags[self::P_H_FLAG_OPCODE] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_OPCODE];
-            $flags[self::P_H_FLAG_RD] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_RD];
-            $flags[self::P_H_FLAG_RA] = 1;
-
-            $recordData = $this->buildDNSResponse($flags, $packet, $UDPSize);
-            return true;
         }
-        return false;
+        if(empty($packet[self::P_ANSWERS])) {
+            return false;
+        }
+
+        $packet[self::P_ADDITIONAL][] = [
+            self::P_RR_NAME => self::S_NAME_END,
+            self::P_RR_TYPE => self::RR_OPT,
+            self::P_RR_OPT_UDP_SIZE => 65494,
+            self::P_RR_OPT_RCODE => 0,
+            self::P_RR_OPT_E_V => 0,
+            self::P_RR_OPT_DO => 0,
+            self::P_RR_OPT_Z => 0,
+            self::P_RR_OPT_OPTION => [],
+        ];
+
+        $flags = self::initHeadFlags();
+        $flags[self::P_H_FLAG_QR] = 1;
+        $flags[self::P_H_FLAG_OPCODE] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_OPCODE];
+        $flags[self::P_H_FLAG_RD] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_RD];
+        $flags[self::P_H_FLAG_RA] = 1;
+
+        $recordData = $this->buildDNSResponse($flags, $packet, $UDPSize);
+        return true;
     }
 
     public function buildName($labelist, $name, &$rLabels = null, $unend = false)
