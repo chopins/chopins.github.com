@@ -204,7 +204,7 @@ class DnsQuery
     public function __construct()
     {
         if (!defined('RDIR')) {
-            define('RDIR', dirname(realpath($_SERVER['SCRIPT_NAME'])));
+            define('RDIR', dirname($_SERVER['SCRIPT_FILENAME']));
         }
         register_shutdown_function([$this, 'shutdown']);
         self::$requestDatetime = new DateTime();
