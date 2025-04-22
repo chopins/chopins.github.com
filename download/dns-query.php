@@ -804,6 +804,7 @@ class DnsQuery
     {
         $ch = curl_init($this->dnsHost);
         curl_setopt_array($ch, [
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => $this->timeout,
@@ -813,6 +814,11 @@ class DnsQuery
                 'accept: application/dns-message'
             ],
         ]);
+
+        if(function_exists('curl_share_init_persistent')) {
+            $sh = curl_share_init_persistent([CURL_LOCK_DATA_DNS, CURL_LOCK_DATA_CONNECT, CURL_LOCK_DATA_SSL_SESSION]);
+            curl_setopt($ch, CURLOPT_SHARE, $sh);
+        }
 
         $response = curl_exec($ch);
 
