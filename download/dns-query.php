@@ -224,7 +224,6 @@ class DnsQuery
             } else {
                 $this->queryData = file_get_contents("php://input");
             }
-            $this->saveData('Q', $this->queryData);
             header('Content-Type: application/dns-message', true);
             $this->dnsClient();
         }
@@ -248,10 +247,9 @@ class DnsQuery
         $this->transId = $packet[self::P_H_ID];
         $this->queryName = $packet[self::P_QUERIES];
         self::log('Query:', $this->queryName);
-        $ret = $this->getCache($packet);
+        $ret = $this->getDNSCache($packet);
 
         if ($ret) {
-            $this->saveData("A", $ret);
             header("Content-Length: " . strlen($ret));
             echo $ret;
             return;
@@ -275,7 +273,7 @@ class DnsQuery
             $body = $this->buildServerErrorData();
         } else {
             if (count($this->queryName) == 1) {
-                $this->cacheResult($body);
+                $this->cacheDNSRecord($body);
             }
             //$packet = $this->parseDNSPackage($body, $astate);
         }
@@ -297,7 +295,13 @@ class DnsQuery
         return $min;
     }
 
-    public function getCache($queryPacket)
+    public function cacheDNSRecord($body)
+    {
+        $type = $this->queryName[0][self::P_RR_TYPE] . '-' . $this->queryName[0][self::P_RR_NAME];
+        $this->saveData($type, $body);
+    }
+
+    public function getDNSCache($queryPacket)
     {
         $localRecord = '';
         if ($this->localServer($localRecord, $queryPacket)) {
@@ -577,12 +581,6 @@ class DnsQuery
         return pack('n', strlen($data)) . $data;
     }
 
-    public function cacheResult($body)
-    {
-        $type = $this->queryName[0]['type'] . '-' . $this->queryName[0]['name'];
-        $this->saveData($type, $body);
-    }
-
     public static function bset($bit, $size)
     {
         return ($bit & (1 << $size)) > 0 ? 1 : 0;
@@ -759,7 +757,7 @@ class DnsQuery
                 }
             }
         }
-        $this->enableDOH = str_starts_with($this->dnsHost, 'https');
+        $this->enableDOH = str_starts_with($this->dnsHost, 'https://');
         return true;
     }
 
