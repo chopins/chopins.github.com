@@ -244,7 +244,6 @@ class DnsQuery
 
     public function dnsClient()
     {
-        self::log("Parse Query:");
         $packet = $this->parseDNSPackage($this->queryData, $qstate);
         $this->transId = $packet[self::P_H_ID];
         $this->queryName = $packet[self::P_QUERIES];
@@ -428,7 +427,7 @@ class DnsQuery
             $ptrPos = $labelist[$ptrName][1] + $preLen;
 
             $realLabels = explode('.', substr($name, 0, -1 * $ptrMaxLen));
-            self::log("$name ptr pos: $ptrPos " . dechex($ptrPos));
+
             foreach ($realLabels as $l) {
                 if (!empty($l)) {
                     $binary .= chr(strlen($l)) . $l;
@@ -767,7 +766,6 @@ class DnsQuery
 
     public function TcpUdpClient(&$response, &$responseSize)
     {
-        self::log("DNSConncet:Connect {$this->dnsHost}");
         $fp = stream_socket_client($this->dnsHost, $errno, $error, $this->timeout);
         if (!$fp) {
             self::log("Network Error: {$this->dnsHost} $error($errno)");
@@ -786,7 +784,6 @@ class DnsQuery
                 }
             } while (false);
             $responseSize = strlen($response);
-            self::log("Connect {$this->dnsHost} Success");
             fclose($fp);
             return true;
         }
@@ -807,7 +804,7 @@ class DnsQuery
                 'accept: application/dns-message'
             ],
         ]);
-        self::log("DOH:Connect {$this->dnsHost}");
+
         $response = curl_exec($ch);
 
         $responseInfo = curl_getinfo($ch);
@@ -821,7 +818,6 @@ class DnsQuery
             return false;
         }
         if ($ret) {
-            self::log("Query From {$this->dnsHost} Success");
             return true;
         }
         self::log("Connect {$this->dnsHost}  Unknow Error");
