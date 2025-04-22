@@ -204,8 +204,16 @@ class DnsQuery
     public function __construct()
     {
         if (!defined('RDIR')) {
-            define('RDIR', dirname($_SERVER['SCRIPT_FILENAME']));
+            define('RDIR', dirname(realpath($_SERVER['SCRIPT_FILENAME'])));
         }
+
+        if (!is_dir(RDIR . '/logs')) {
+            mkdir(RDIR . '/logs');
+        }
+        if (!is_dir(RDIR . '/data')) {
+            mkdir(RDIR . '/data');
+        }
+
         register_shutdown_function([$this, 'shutdown']);
         self::$requestDatetime = new DateTime();
         self::$logfp = fopen(RDIR . '/logs/dns.log-' . date('Y-m-d'), 'ab');
