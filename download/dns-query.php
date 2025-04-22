@@ -1,37 +1,4 @@
 <?php
-ini_set('error_reporting', 0);
-ini_set('log_errors', 1);
-ini_set("html_errors", 0);
-ini_set('display_errors', 1);
-define('RDIR', __DIR__);
-ini_set('error_log', RDIR . '/logs/php-error.logs');
-
-if (!defined('DNS_HOSTS')) {
-    define('DNS_HOSTS', [
-        'Default' => 'udp://127.0.0.53:53',
-        'CF' => 'https://1.1.1.1/dns-query',
-        'TX' => 'https://doh.pub/dns-query',
-    ]);
-}
-if (!defined('LOCAL_RR_LIST')) {
-    define('LOCAL_RR_LIST', [
-        'host.godaddy.com' => [
-            self::RR_A => ['35.154.51.163', '65.2.72.240']
-        ],
-    ]);
-}
-
-if (!defined('DNS_DOMAIN_MAP')) {
-    define('DNS_DOMAIN_MAP',  [
-        'CF' => [
-            'github.com',
-            'google.com',
-            'gstatic.com',
-            'elastic.co'
-        ]
-    ]);
-}
-
 class DnsQuery
 {
     public $accept = 'json';
@@ -221,6 +188,7 @@ class DnsQuery
     const G_RR_DATA_NAME = [self::RR_CNAME, self::RR_MX, self::RR_NS];
     public function __construct()
     {
+        self::initConst();
         register_shutdown_function([$this, 'shutdown']);
         self::$requestDatetime = new DateTime();
         self::$logfp = fopen(RDIR . '/logs/dns.log-' . date('Y-m-d'), 'ab');
@@ -239,6 +207,39 @@ class DnsQuery
             }
             header('Content-Type: application/dns-message', true);
             $this->dnsClient();
+        }
+    }
+
+    public static function initConst()
+    {
+        if(!defined('RDIR')) {
+            define('RDIR', dirname(realpath($_SERVER['SCRIPT_NAME'])));
+        }
+
+        if (!defined('DNS_HOSTS')) {
+            define('DNS_HOSTS', [
+                'Default' => 'udp://127.0.0.53:53',
+                'CF' => 'https://1.1.1.1/dns-query',
+                'TX' => 'https://doh.pub/dns-query',
+            ]);
+        }
+        if (!defined('LOCAL_RR_LIST')) {
+            define('LOCAL_RR_LIST', [
+                'host.godaddy.com' => [
+                    self::RR_A => ['35.154.51.163', '65.2.72.240']
+                ],
+            ]);
+        }
+
+        if (!defined('DNS_DOMAIN_MAP')) {
+            define('DNS_DOMAIN_MAP',  [
+                'CF' => [
+                    'github.com',
+                    'google.com',
+                    'gstatic.com',
+                    'elastic.co'
+                ]
+            ]);
         }
     }
     public static function log(...$datas)
