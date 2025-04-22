@@ -20,7 +20,7 @@ class DnsQuery
     public $timeout = 3;
     public $localRR = [
         'host.godaddy.com' => [
-            1 => ['35.154.51.163', '65.2.72.240']
+            self::RR_A => ['35.154.51.163', '65.2.72.240']
         ],
     ];
     private static $logfp;
