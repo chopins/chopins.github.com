@@ -16,9 +16,24 @@ class DnsQuery
     private static $logfp;
     public static $logs = [];
     public static $requestDatetime;
-    const DNS_DOMAIN_MAP = DNS_DOMAIN_MAP;
-    const LOCAL_RR_LIST = LOCAL_RR_LIST;
-    const DNS_HOSTS = DNS_HOSTS;
+    public static $DNS_DOMAIN_MAP = [
+        'CF' => [
+            'github.com',
+            'google.com',
+            'gstatic.com',
+            'elastic.co'
+        ]
+    ];
+    public static $LOCAL_RR_LIST = [
+        'host.godaddy.com' => [
+            self::RR_A => ['35.154.51.163', '65.2.72.240']
+        ],
+    ];
+    public static $DNS_HOSTS = [
+        'Default' => 'udp://127.0.0.53:53',
+        'CF' => 'https://1.1.1.1/dns-query',
+        'TX' => 'https://doh.pub/dns-query',
+    ];
 
     /**
      * https://www.rfc-editor.org/rfc/rfc9180.html#name-kem-ids
@@ -188,7 +203,9 @@ class DnsQuery
     const G_RR_DATA_NAME = [self::RR_CNAME, self::RR_MX, self::RR_NS];
     public function __construct()
     {
-        self::initConst();
+        if (!defined('RDIR')) {
+            define('RDIR', dirname(realpath($_SERVER['SCRIPT_NAME'])));
+        }
         register_shutdown_function([$this, 'shutdown']);
         self::$requestDatetime = new DateTime();
         self::$logfp = fopen(RDIR . '/logs/dns.log-' . date('Y-m-d'), 'ab');
@@ -210,38 +227,6 @@ class DnsQuery
         }
     }
 
-    public static function initConst()
-    {
-        if(!defined('RDIR')) {
-            define('RDIR', dirname(realpath($_SERVER['SCRIPT_NAME'])));
-        }
-
-        if (!defined('DNS_HOSTS')) {
-            define('DNS_HOSTS', [
-                'Default' => 'udp://127.0.0.53:53',
-                'CF' => 'https://1.1.1.1/dns-query',
-                'TX' => 'https://doh.pub/dns-query',
-            ]);
-        }
-        if (!defined('LOCAL_RR_LIST')) {
-            define('LOCAL_RR_LIST', [
-                'host.godaddy.com' => [
-                    self::RR_A => ['35.154.51.163', '65.2.72.240']
-                ],
-            ]);
-        }
-
-        if (!defined('DNS_DOMAIN_MAP')) {
-            define('DNS_DOMAIN_MAP',  [
-                'CF' => [
-                    'github.com',
-                    'google.com',
-                    'gstatic.com',
-                    'elastic.co'
-                ]
-            ]);
-        }
-    }
     public static function log(...$datas)
     {
         $msg = '';
@@ -278,7 +263,7 @@ class DnsQuery
                 $ret = $this->TcpUdpClient($body, $responseSize);
             }
             if (!$ret) {
-                $this->dnsHost = self::DNS_HOSTS['Default'];
+                $this->dnsHost = self::$DNS_HOSTS['Default'];
                 $this->enableDOH = false;
             }
         } while (!$ret);
@@ -374,11 +359,11 @@ class DnsQuery
         }
         $name = $this->queryName[0][self::P_RR_NAME];
         $UDPSize = $queryPacket[self::P_ADDITIONAL][0][self::P_RR_OPT_UDP_SIZE];
-        if (isset(self::LOCAL_RR_LIST[$name][$type])) {
+        if (isset(self::$LOCAL_RR_LIST[$name][$type])) {
             $packet = self::initPacketArray();
             $packet[self::P_QUERIES] = $queryPacket[self::P_QUERIES];
 
-            foreach (self::LOCAL_RR_LIST[$name][$type] as $r) {
+            foreach (self::$LOCAL_RR_LIST[$name][$type] as $r) {
                 $packet[self::P_ANSWERS][] = [
                     self::P_RR_NAME => $name,
                     self::P_RR_TYPE => $type,
@@ -762,10 +747,10 @@ class DnsQuery
 
     public function switchDns()
     {
-        foreach (self::DNS_DOMAIN_MAP as $dns => $domain) {
+        foreach (self::$DNS_DOMAIN_MAP as $dns => $domain) {
             foreach ($domain as $name) {
                 if (str_ends_with($this->queryName[0][self::P_RR_NAME], $name)) {
-                    $this->dnsHost = self::DNS_HOSTS[$dns];
+                    $this->dnsHost = self::$DNS_HOSTS[$dns];
                     self::log('Switch Dns:', $this->dnsHost);
                     return true;
                 }
