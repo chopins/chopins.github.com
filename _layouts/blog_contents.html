@@ -8,11 +8,10 @@
         <link href="/style.css" type="text/css" rel="stylesheet" />
         <link rel="stylesheet" href="//yandex.st/highlightjs/7.3/styles/default.min.css">
 
-            <title>{{page.title}} - Szopen Xiao - Toknot Framework</title>
+            <title>{{page.title}} - Toknot</title>
     </head>
     <body>
         <header>
-            <h1><a href="http://toknot.com/blog.html">Szopen Xiao</a></h1>
              <ul>
                  <li><a href="/blog.html">全部</a></li>
                 {% for category in site.categories %}
@@ -28,7 +27,7 @@
         <div class="container">
         <section>
             <h2 class="blog-title">{{page.title}}</h2>
-           
+
             <p class="blog-base-info">{{ page.date | date:  "%Y-%m-%d"  }}</p>
             <div id="content">
                 {{ content }}
@@ -55,7 +54,7 @@
         </section>
         </div>
         <footer>
-            <div style="float:right;"><a href="http://page.toknot.com/">Toknot工具</a> 
+            <div style="float:right;"><a href="http://page.toknot.com/">Toknot工具</a>
         </div>
             <p>
                 Copyright © 2010–2014 Szopen Xiao All rights reserved.

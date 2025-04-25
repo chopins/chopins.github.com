@@ -9,11 +9,10 @@
         <meta name="description" content="API documentation generator for PHP 5.3+" />
         <meta name="keywords" content="framework, php, web, development" />
         <link href="/style.css" type="text/css" rel="stylesheet" />
-        <title>全部文章 - Szopen Xiao - Toknot Framework</title>
+        <title>全部文章 - Toknot Framework</title>
     </head>
     <body>
         <header>
-            <h1>Szopen Xiao</h1>
             <ul>
             {% for category in site.categories %}
             {% if category[0] != "category" %}
@@ -30,7 +29,7 @@
             <h2>全部文章</h2>
             <div>
 {% assign start = 0 %}
-                <p>{% for post in site.posts %} 
+                <p>{% for post in site.posts %}
                 {% if post.group != page.group %}
                 {% capture this_year %}
                 {{ post.date | date: "%Y" }}
@@ -66,7 +65,7 @@
         </section>
         </div>
         <footer>
-            <div style="float:right;"><a href="http://page.toknot.com/">Toknot工具</a> 
+            <div style="float:right;"><a href="http://page.toknot.com/">Toknot工具</a>
         </div>
             <p>
                 Copyright © 2010–2014 Szopen Xiao All rights reserved.
