@@ -221,7 +221,7 @@ class DnsQuery
             if ($_SERVER['HTTP_ACCEPT'] == 'application/dns-message') {
                 $this->accept = 'dns-msg';
             }
-            if ($_SERVER['HTTP_CONTENT_TYPE'] == 'application/dns-message') {
+            if (isset($_SERVER['HTTP_CONTENT_TYPE']) && $_SERVER['HTTP_CONTENT_TYPE'] == 'application/dns-message') {
                 $this->requestType = 'dns-msg';
             }
 
