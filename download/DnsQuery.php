@@ -1,8 +1,7 @@
 <?php
 class DnsQuery
 {
-    public $accept = 'json';
-    public $requestType = 'json';
+
     public $transId = '';
     public $rrtype = self::RR_ANY;
     public $rropcode = 0;
@@ -11,7 +10,7 @@ class DnsQuery
     public $queryData = '';
     public $dnsHost = 'udp://127.0.0.53:53';
     public $enableDOH = true;
-    public $timeout = 3;
+    public $timeout = 10;
 
     private static $logfp;
     public static $logs = [];
@@ -34,203 +33,53 @@ class DnsQuery
         'CF' => 'https://1.1.1.1/dns-query',
         'TX' => 'https://doh.pub/dns-query',
     ];
+    public static $BASE64_DNS_HOST = [];
 
-    /**
-     * https://www.rfc-editor.org/rfc/rfc9180.html#name-kem-ids
-     * KEM IDs:
-     * 0x0000 	Reserved
-     * 0x0010 	DHKEM(P-256, HKDF-SHA256)
-     * 0x0011 	DHKEM(P-384, HKDF-SHA384)
-     * 0x0012 	DHKEM(P-521, HKDF-SHA512)
-     * 0x0020 	DHKEM(X25519, HKDF-SHA256
-     * 0x0021 	DHKEM(X448, HKDF-SHA512)
-     *
-     * https://www.rfc-editor.org/rfc/rfc9180.html#name-kdf-ids
-     * KDF IDs:
-     * 0x0000 	Reserved
-     * 0x0001 	HKDF-SHA256
-     * 0x0002 	HKDF-SHA384
-     * 0x0003 	HKDF-SHA512
-     *
-     * https://www.rfc-editor.org/rfc/rfc9180.html#name-aead-ids
-     * AEAD IDs:
-     * 0x0000 	Reserved
-     * 0x0001 	AES-128-GCM
-     * 0x0002 	AES-256-GCM
-     * 0x0003 	ChaCha20Poly1305
-     * 0xFFFF 	Export-only
-     */
-    const ECH_TPL = [
-        'configId' => 1, //random
-        'kemId' => 32,
-        'pubKey' => '',
-        'ciphers' => [
-            ['kdfId' => 1, 'aeadId' => 1],
-        ],
-        'maxNameLen' => 0,
-        'pubName' => '',
-        'extensions' => [], // ['type'=> '', 'data' => ]
-    ];
-    const S_NAME_END = "\0";
-    const S_PTR = "\xc0";
-    const P_H_ID = 0;
-    const P_H_FLAG = self::P_H_ID + 1;
-    const P_H_FLAG_QR = 0;
-    const P_H_FLAG_OPCODE = self::P_H_FLAG_QR + 1;
-    const P_H_FLAG_AA = self::P_H_FLAG_OPCODE + 1;
-    const P_H_FLAG_TC = self::P_H_FLAG_AA + 1;
-    const P_H_FLAG_RD = self::P_H_FLAG_TC + 1;
-    const P_H_FLAG_RA = self::P_H_FLAG_RD + 1;
-    const P_H_FLAG_Z = self::P_H_FLAG_RA + 1;
-    const P_H_FLAG_RCODE = self::P_H_FLAG_Z + 1;
-    const P_H_QUESTION = self::P_H_FLAG + 1;
-    const P_H_ANSWER = self::P_H_QUESTION + 1;
-    const P_H_AUTHORITY = self::P_H_ANSWER + 1;
-    const P_H_ADDITIONAL = self::P_H_AUTHORITY + 1;
-    const P_QUERIES = self::P_H_ADDITIONAL + 1;
-    const P_ANSWERS = self::P_QUERIES + 1;
-    const P_AUTHORITY = self::P_ANSWERS + 1;
-    const P_ADDITIONAL = self::P_AUTHORITY + 1;
-    const P_RR_NAME = self::P_ADDITIONAL + 1;
-    const P_RR_TYPE = self::P_RR_NAME + 1;
-    const P_RR_CLASS = self::P_RR_TYPE + 1;
-    const P_RR_TTL = self::P_RR_CLASS + 1;
-    const P_RR_DATA_LEN = self::P_RR_TTL + 1;
-    const P_RR_DATA = self::P_RR_DATA_LEN + 1;
-
-    const P_RR_OPT_UDP_SIZE = self::P_RR_CLASS;
-    const P_RR_OPT_RCODE = self::P_RR_TTL;
-    const P_RR_OPT_E_V = self::P_RR_OPT_RCODE + 1;
-    const P_RR_OPT_DO = self::P_RR_OPT_E_V + 1;
-    const P_RR_OPT_Z = self::P_RR_OPT_DO + 1;
-    const P_RR_OPT_OPTION = self::P_RR_OPT_Z + 1;
-    const P_RR_OPT_OPTION_CODE = 0;
-    const P_RR_OPT_OPTION_DATA = self::P_RR_OPT_OPTION_CODE + 1;
-
-    const P_RR_HTTPS_PRIORITY = self::P_RR_TTL + 1;
-    const P_RR_HTTPS_TARGET_NAME = self::P_RR_HTTPS_PRIORITY + 1;
-    const P_RR_HTTPS_PARAMS = self::P_RR_HTTPS_TARGET_NAME + 1;
-    const P_RR_HTTPS_PARAMS_KEY = 0;
-    const P_RR_HTTPS_PARAMS_VALUE = 1;
-
-    const RR_HTTPS_MANDATORY = 0;
-    const RR_HTTPS_ALPN = 1;
-    const RR_HTTPS_NO_DEFAULT_ALPN = 2;
-    const RR_HTTPS_PORT = 3;
-    const RR_HTTPS_IPV4HINT = 4;
-    const RR_HTTPS_ECH = 5;
-    const RR_HTTPS_IPV6HINT = 6;
-
-    const CLASS_IN = 1;
-    const CLASS_CS = 2;
-    const CLASS_CH = 3;
-    const CLASS_HS = 4;
-    const RR_ANY = 0;
-    const RR_A = 1;
-    const RR_NS = 2;
-    const RR_MD = 3;
-    const RR_MF = 4;
-    const RR_CNAME = 5;
-    const RR_SOV = 6;
-    const RR_MB = 7;
-    const RR_MG = 8;
-    const RR_MR = 9;
-    const RR_NULL = 10;
-    const RR_WKS = 11;
-    const RR_PTR = 12;
-    const RR_HINFO = 13;
-    const RR_MINFO = 14;
-    const RR_MX = 15;
-    const RR_TXT = 16;
-    const RR_AAAA = 28;
-    const RR_SRV = 33;
-    const RR_MAPTR = 35;
-    const RR_APL = 36;
-    const RR_DSIG = 37;
-    const RR_DNAME = 39;
-    const RR_OPT = 41;
-    const RR_DS = 43;
-    const RR_RRSIG = 46;
-    const RR_DNSKEY = 48;
-    const RR_CDS = 59;
-    const RR_OPENPGPKEY = 61;
-    const RR_SVCB = 65;
-    const RR_HTTPS = 66;
-    const RR_CAA = 257;
-    const RR_TYPE = [
-        self::RR_ANY,
-        self::RR_A,
-        self::RR_NS,
-        self::RR_MD,
-        self::RR_MF,
-        self::RR_CNAME,
-        self::RR_SOV,
-        self::RR_MB,
-        self::RR_MG,
-        self::RR_MR,
-        self::RR_NULL,
-        self::RR_WKS,
-        self::RR_PTR,
-        self::RR_HINFO,
-        self::RR_MINFO,
-        self::RR_MX,
-        self::RR_TXT, //16
-        self::RR_AAAA,
-        self::RR_SRV,
-        self::RR_MAPTR,
-        self::RR_APL,
-        self::RR_DSIG,
-        self::RR_DNAME,
-        self::RR_OPT,
-        self::RR_DS,
-        self::RR_RRSIG,
-        self::RR_DNSKEY,
-        self::RR_CDS,
-        self::RR_OPENPGPKEY,
-        self::RR_SVCB,
-        self::RR_HTTPS,
-        self::RR_CAA,
-    ];
-
-    public const G_CACHE_NAME_TYPE = [
-        self::RR_A,
-        self::RR_NS,
-        self::RR_CNAME,
-        self::RR_MX,
-        self::RR_AAAA,
-        self::RR_HTTPS,
-    ];
-    const G_RR_DATA_NAME = [self::RR_CNAME, self::RR_MX, self::RR_NS];
     public function __construct()
     {
+        header('cache-control: no-cache,no-store');
         if (!defined('RDIR')) {
             define('RDIR', dirname(realpath($_SERVER['SCRIPT_FILENAME'])));
         }
-
+        if(isset(self::$DNS_HOSTS['Default'])) {
+            $this->dnsHost = self::$DNS_HOSTS['Default'];
+        }
         if (!is_dir(RDIR . '/logs')) {
             mkdir(RDIR . '/logs');
         }
         if (!is_dir(RDIR . '/data')) {
             mkdir(RDIR . '/data');
         }
-
+        date_default_timezone_set('Asia/Shanghai');
         register_shutdown_function([$this, 'shutdown']);
         self::$requestDatetime = new DateTime();
         self::$logfp = fopen(RDIR . '/logs/dns.log-' . date('Y-m-d'), 'ab');
-        if (PHP_SAPI != 'cli') {
-            if ($_SERVER['HTTP_ACCEPT'] == 'application/dns-message') {
-                $this->accept = 'dns-msg';
-            }
-            if (isset($_SERVER['HTTP_CONTENT_TYPE']) && $_SERVER['HTTP_CONTENT_TYPE'] == 'application/dns-message') {
-                $this->requestType = 'dns-msg';
-            }
+        if (!self::$logfp) {
+            echo 'open log error:' . RDIR . '/logs/dns.log-' . date('Y-m-d');
+        }
 
-            if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-                $this->queryData = $this->base64_decode($_GET['dns']);
+        if (PHP_SAPI != 'cli') {
+            if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['dns'])) {
+                $this->queryData = $this->base64url_decode($_GET['dns']);
             } else {
                 $this->queryData = file_get_contents("php://input");
+                $ctype = '';
+                if(isset($_SERVER['HTTP_CONTENT_TYPE'])) {
+                    $ctype = $_SERVER['HTTP_CONTENT_TYPE'];
+                }elseif(isset($_SERVER['CONTENT_TYPE'])) {
+                    $ctype = $_SERVER['CONTENT_TYPE'];
+                }
+                if ($ctype == 'application/base64-dns-message') {
+                    $this->queryData = base64_decode($this->queryData);
+                }
             }
+            if (empty($this->queryData)) {
+                self::log("{$_SERVER['REQUEST_METHOD']}:query data empty");
+                return;
+            }
+
             header('Content-Type: application/dns-message', true);
+            $this->saveData('Q', $this->queryData);
             $this->dnsClient();
         }
     }
@@ -253,7 +102,7 @@ class DnsQuery
         $packet = $this->parseDNSPackage($this->queryData, $qstate);
         $this->transId = $packet[self::P_H_ID];
         $this->queryName = $packet[self::P_QUERIES];
-        self::log('Query:', $this->queryName);
+        // self::log('Query:', $this->queryName);
         $ret = $this->getDNSCache($packet);
 
         if ($ret) {
@@ -267,10 +116,12 @@ class DnsQuery
         do {
             if ($this->enableDOH) {
                 $ret = $this->DOHClient($body, $responseSize, $responseInfo);
+                self::saveData('A', $body);
             } else {
                 $ret = $this->TcpUdpClient($body, $responseSize);
             }
             if (!$ret) {
+                self::log("Query From $this->dnsHost Error, Switch " . self::$DNS_HOSTS['Default']);
                 $this->dnsHost = self::$DNS_HOSTS['Default'];
                 $this->enableDOH = false;
             }
@@ -291,7 +142,7 @@ class DnsQuery
 
     public function getMinTTL($packet)
     {
-        $min = 36000;
+        $min = 0;
         foreach ($packet[self::P_ANSWERS] as $answer) {
             if ($answer[self::P_RR_TYPE] == self::RR_A || $answer[self::P_RR_TYPE] == self::RR_AAAA) {
                 if ($answer[self::P_RR_TTL] < $min) {
@@ -318,6 +169,11 @@ class DnsQuery
         $file = RDIR . '/data/dns.' . $type;
         if (file_exists($file)) {
             $data = file_get_contents($file);
+            if (strlen($data) == 0) {
+                unlink($file);
+                return false;
+            }
+            self::log('check cache ttl');
             $packet = $this->parseDNSPackage($data);
             $min = $this->getMinTTL($packet);
             if (filemtime($file) + $min < time()) {
@@ -382,7 +238,7 @@ class DnsQuery
                 ];
             }
         }
-        if(empty($packet[self::P_ANSWERS])) {
+        if (empty($packet[self::P_ANSWERS])) {
             return false;
         }
 
@@ -675,6 +531,9 @@ class DnsQuery
         $bitSize = ['n' => 2, 'N' => 4, 'C' => 1, 'H' => 1];
         try {
             $ret = unpack($format, $string, $offset);
+            if (!$ret) {
+                throw new ValueError(error_get_last());
+            }
         } catch (ValueError $e) {
             self::log("Offset:$offset", $e->__toString());
         }
@@ -802,20 +661,21 @@ class DnsQuery
 
     public function DOHClient(&$response, &$responseSize, &$responseInfo)
     {
+        $isbas64 = in_array($this->dnsHost, self::$BASE64_DNS_HOST);
         $ch = curl_init($this->dnsHost);
         curl_setopt_array($ch, [
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => $this->timeout,
-            CURLOPT_POSTFIELDS => $this->queryData,
+            CURLOPT_POSTFIELDS => $isbas64 ? base64_encode($this->queryData) : $this->queryData,
             CURLOPT_HTTPHEADER => [
-                'content-type: application/dns-message',
+                $isbas64 ? 'content-type: application/base64-dns-message' : 'content-type: application/dns-message',
                 'accept: application/dns-message'
             ],
         ]);
 
-        if(function_exists('curl_share_init_persistent')) {
+        if (function_exists('curl_share_init_persistent')) {
             $sh = curl_share_init_persistent([CURL_LOCK_DATA_DNS, CURL_LOCK_DATA_CONNECT, CURL_LOCK_DATA_SSL_SESSION]);
             curl_setopt($ch, CURLOPT_SHARE, $sh);
         }
@@ -832,7 +692,11 @@ class DnsQuery
             self::log("Connect {$this->dnsHost} Error: HTTP {$responseInfo['http_code']}");
             return false;
         }
-        if ($ret) {
+        if ($responseSize < 12) {
+            self::log("Query {$this->dnsHost} Packet Size Error $responseSize");
+            return false;
+        }
+        if ($responseInfo['http_code'] == 200) {
             return true;
         }
         self::log("Connect {$this->dnsHost}  Unknow Error");
@@ -862,16 +726,179 @@ class DnsQuery
         }
         return base64_decode($data);
     }
-    public function __destruct()
-    {
-        fwrite(self::$logfp, implode('', self::$logs));
-        fclose(self::$logfp);
-    }
 
     public function shutdown()
     {
         if (count(self::$logs) > 0) {
-            $this->__destruct();
+            fwrite(self::$logfp, implode('', self::$logs));
+            fclose(self::$logfp);
         }
     }
+
+     /**
+     * https://www.rfc-editor.org/rfc/rfc9180.html#name-kem-ids
+     * KEM IDs:
+     * 0x0000 	Reserved
+     * 0x0010 	DHKEM(P-256, HKDF-SHA256)
+     * 0x0011 	DHKEM(P-384, HKDF-SHA384)
+     * 0x0012 	DHKEM(P-521, HKDF-SHA512)
+     * 0x0020 	DHKEM(X25519, HKDF-SHA256
+     * 0x0021 	DHKEM(X448, HKDF-SHA512)
+     *
+     * https://www.rfc-editor.org/rfc/rfc9180.html#name-kdf-ids
+     * KDF IDs:
+     * 0x0000 	Reserved
+     * 0x0001 	HKDF-SHA256
+     * 0x0002 	HKDF-SHA384
+     * 0x0003 	HKDF-SHA512
+     *
+     * https://www.rfc-editor.org/rfc/rfc9180.html#name-aead-ids
+     * AEAD IDs:
+     * 0x0000 	Reserved
+     * 0x0001 	AES-128-GCM
+     * 0x0002 	AES-256-GCM
+     * 0x0003 	ChaCha20Poly1305
+     * 0xFFFF 	Export-only
+     */
+    const ECH_TPL = [
+        'configId' => 1, //random
+        'kemId' => 32,
+        'pubKey' => '',
+        'ciphers' => [
+            ['kdfId' => 1, 'aeadId' => 1],
+        ],
+        'maxNameLen' => 0,
+        'pubName' => '',
+        'extensions' => [], // ['type'=> '', 'data' => ]
+    ];
+    const S_NAME_END = "\0";
+    const S_PTR = "\xc0";
+    const P_H_ID = 0;
+    const P_H_FLAG = self::P_H_ID + 1;
+    const P_H_FLAG_QR = 0;
+    const P_H_FLAG_OPCODE = self::P_H_FLAG_QR + 1;
+    const P_H_FLAG_AA = self::P_H_FLAG_OPCODE + 1;
+    const P_H_FLAG_TC = self::P_H_FLAG_AA + 1;
+    const P_H_FLAG_RD = self::P_H_FLAG_TC + 1;
+    const P_H_FLAG_RA = self::P_H_FLAG_RD + 1;
+    const P_H_FLAG_Z = self::P_H_FLAG_RA + 1;
+    const P_H_FLAG_RCODE = self::P_H_FLAG_Z + 1;
+    const P_H_QUESTION = self::P_H_FLAG + 1;
+    const P_H_ANSWER = self::P_H_QUESTION + 1;
+    const P_H_AUTHORITY = self::P_H_ANSWER + 1;
+    const P_H_ADDITIONAL = self::P_H_AUTHORITY + 1;
+    const P_QUERIES = self::P_H_ADDITIONAL + 1;
+    const P_ANSWERS = self::P_QUERIES + 1;
+    const P_AUTHORITY = self::P_ANSWERS + 1;
+    const P_ADDITIONAL = self::P_AUTHORITY + 1;
+    const P_RR_NAME = self::P_ADDITIONAL + 1;
+    const P_RR_TYPE = self::P_RR_NAME + 1;
+    const P_RR_CLASS = self::P_RR_TYPE + 1;
+    const P_RR_TTL = self::P_RR_CLASS + 1;
+    const P_RR_DATA_LEN = self::P_RR_TTL + 1;
+    const P_RR_DATA = self::P_RR_DATA_LEN + 1;
+
+    const P_RR_OPT_UDP_SIZE = self::P_RR_CLASS;
+    const P_RR_OPT_RCODE = self::P_RR_TTL;
+    const P_RR_OPT_E_V = self::P_RR_OPT_RCODE + 1;
+    const P_RR_OPT_DO = self::P_RR_OPT_E_V + 1;
+    const P_RR_OPT_Z = self::P_RR_OPT_DO + 1;
+    const P_RR_OPT_OPTION = self::P_RR_OPT_Z + 1;
+    const P_RR_OPT_OPTION_CODE = 0;
+    const P_RR_OPT_OPTION_DATA = self::P_RR_OPT_OPTION_CODE + 1;
+
+    const P_RR_HTTPS_PRIORITY = self::P_RR_TTL + 1;
+    const P_RR_HTTPS_TARGET_NAME = self::P_RR_HTTPS_PRIORITY + 1;
+    const P_RR_HTTPS_PARAMS = self::P_RR_HTTPS_TARGET_NAME + 1;
+    const P_RR_HTTPS_PARAMS_KEY = 0;
+    const P_RR_HTTPS_PARAMS_VALUE = 1;
+
+    const RR_HTTPS_MANDATORY = 0;
+    const RR_HTTPS_ALPN = 1;
+    const RR_HTTPS_NO_DEFAULT_ALPN = 2;
+    const RR_HTTPS_PORT = 3;
+    const RR_HTTPS_IPV4HINT = 4;
+    const RR_HTTPS_ECH = 5;
+    const RR_HTTPS_IPV6HINT = 6;
+
+    const CLASS_IN = 1;
+    const CLASS_CS = 2;
+    const CLASS_CH = 3;
+    const CLASS_HS = 4;
+    const RR_ANY = 0;
+    const RR_A = 1;
+    const RR_NS = 2;
+    const RR_MD = 3;
+    const RR_MF = 4;
+    const RR_CNAME = 5;
+    const RR_SOV = 6;
+    const RR_MB = 7;
+    const RR_MG = 8;
+    const RR_MR = 9;
+    const RR_NULL = 10;
+    const RR_WKS = 11;
+    const RR_PTR = 12;
+    const RR_HINFO = 13;
+    const RR_MINFO = 14;
+    const RR_MX = 15;
+    const RR_TXT = 16;
+    const RR_AAAA = 28;
+    const RR_SRV = 33;
+    const RR_MAPTR = 35;
+    const RR_APL = 36;
+    const RR_DSIG = 37;
+    const RR_DNAME = 39;
+    const RR_OPT = 41;
+    const RR_DS = 43;
+    const RR_RRSIG = 46;
+    const RR_DNSKEY = 48;
+    const RR_CDS = 59;
+    const RR_OPENPGPKEY = 61;
+    const RR_SVCB = 65;
+    const RR_HTTPS = 66;
+    const RR_CAA = 257;
+    const RR_TYPE = [
+        self::RR_ANY,
+        self::RR_A,
+        self::RR_NS,
+        self::RR_MD,
+        self::RR_MF,
+        self::RR_CNAME,
+        self::RR_SOV,
+        self::RR_MB,
+        self::RR_MG,
+        self::RR_MR,
+        self::RR_NULL,
+        self::RR_WKS,
+        self::RR_PTR,
+        self::RR_HINFO,
+        self::RR_MINFO,
+        self::RR_MX,
+        self::RR_TXT, //16
+        self::RR_AAAA,
+        self::RR_SRV,
+        self::RR_MAPTR,
+        self::RR_APL,
+        self::RR_DSIG,
+        self::RR_DNAME,
+        self::RR_OPT,
+        self::RR_DS,
+        self::RR_RRSIG,
+        self::RR_DNSKEY,
+        self::RR_CDS,
+        self::RR_OPENPGPKEY,
+        self::RR_SVCB,
+        self::RR_HTTPS,
+        self::RR_CAA,
+    ];
+
+    public const G_CACHE_NAME_TYPE = [
+        self::RR_A,
+        self::RR_NS,
+        self::RR_CNAME,
+        self::RR_MX,
+        self::RR_AAAA,
+        self::RR_HTTPS,
+    ];
+    const G_RR_DATA_NAME = [self::RR_CNAME, self::RR_MX, self::RR_NS];
 }
