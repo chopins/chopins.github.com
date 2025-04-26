@@ -173,7 +173,7 @@ class DnsQuery
                 unlink($file);
                 return false;
             }
-            self::log('check cache ttl');
+
             $packet = $this->parseDNSPackage($data);
             $min = $this->getMinTTL($packet);
             if (filemtime($file) + $min < time()) {
