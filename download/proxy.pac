@@ -1,12 +1,13 @@
-const PROXY = [
-    "github.com"
+const SOCKS = [
+    "github.com",
+    "addons.mozilla.org"
 ];
 
 
 function FindProxyForURL(url, host) {
-    for(let domain of PROXY) {
+    for(let domain of SOCKS) {
         if(dnsDomainIs(host, domain)) {
-            return "PROXY 127.0.0.1:5520";
+            return "SOCKS 127.0.0.1:5520";
         }
     }
     return "DIRECT";
