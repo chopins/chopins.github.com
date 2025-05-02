@@ -41,7 +41,7 @@ class DnsQuery
         if (!defined('RDIR')) {
             define('RDIR', dirname(realpath($_SERVER['SCRIPT_FILENAME'])));
         }
-        if(isset(self::$DNS_HOSTS['Default'])) {
+        if (isset(self::$DNS_HOSTS['Default'])) {
             $this->dnsHost = self::$DNS_HOSTS['Default'];
         }
         if (!is_dir(RDIR . '/logs')) {
@@ -64,9 +64,9 @@ class DnsQuery
             } else {
                 $this->queryData = file_get_contents("php://input");
                 $ctype = '';
-                if(isset($_SERVER['HTTP_CONTENT_TYPE'])) {
+                if (isset($_SERVER['HTTP_CONTENT_TYPE'])) {
                     $ctype = $_SERVER['HTTP_CONTENT_TYPE'];
-                }elseif(isset($_SERVER['CONTENT_TYPE'])) {
+                } elseif (isset($_SERVER['CONTENT_TYPE'])) {
                     $ctype = $_SERVER['CONTENT_TYPE'];
                 }
                 if ($ctype == 'application/base64-dns-message') {
@@ -386,23 +386,23 @@ class DnsQuery
                 $binary .= pack('n', strlen($optionBinary)) . $optionBinary;
             }
         } else if ($rType == self::RR_HTTPS) {
-            $svcHttpsBinary = pack('n', $a[self::P_RR_HTTPS_PRIORITY]);
-            $svcHttpsBinary .= $this->buildName($labelist, $a[self::P_RR_HTTPS_TARGET_NAME], null, true);
+            $svcbHttpsBinary = pack('n', $a[self::P_RR_HTTPS_PRIORITY]);
+            $svcbHttpsBinary .= $this->buildName($labelist, $a[self::P_RR_HTTPS_TARGET_NAME], null, true);
             foreach ($a[self::P_RR_HTTPS_PARAMS] as $param) {
-                $svcHttpsBinary .= pack('n', $param[self::P_RR_HTTPS_PARAMS_KEY]);
+                $svcbHttpsBinary .= pack('n', $param[self::P_RR_HTTPS_PARAMS_KEY]);
                 if ($param[self::P_RR_HTTPS_PARAMS_KEY] ==  self::RR_HTTPS_NO_DEFAULT_ALPN) {
-                    $svcHttpsBinary .= pack('n', 0);
+                    $svcbHttpsBinary .= pack('n', 0);
                     continue;
                 } else if (
                     $param[self::P_RR_HTTPS_PARAMS_KEY] == self::RR_HTTPS_MANDATORY
                     || $param[self::P_RR_HTTPS_PARAMS_KEY] == self::RR_HTTPS_PORT
                 ) {
                     $paramValue = pack('n*', ...$param[self::P_RR_HTTPS_PARAMS_KEY]);
-                    $svcHttpsBinary .= pack('n', strlen($paramValue)) . $paramValue;
+                    $svcbHttpsBinary .= pack('n', strlen($paramValue)) . $paramValue;
                     continue;
                 } else if ($param[self::P_RR_HTTPS_PARAMS_KEY] == self::RR_HTTPS_ECH) {
                     $echconfig = $this->buildECHConfig($param[self::P_RR_HTTPS_PARAMS_VALUE]);
-                    $svcHttpsBinary .= pack("n", strlen($echbinary)) . $echconfig;
+                    $svcbHttpsBinary .= pack("n", strlen($echbinary)) . $echconfig;
                     continue;
                 }
                 $paramValue = '';
@@ -446,6 +446,21 @@ class DnsQuery
         }
         $data = $id . pack('n', strlen($binary)) . $binary;
         return pack('n', strlen($data)) . $data;
+    }
+
+    public static function selfSignECH($domain)
+    {
+        if(function_exists('sodium_crypto_box_keypair')) {
+            $x25519 = sodium_crypto_box_keypair();
+        }
+
+        $key = openssl_pkey_new([
+           'private_key_type' => OPENSSL_KEYTYPE_EC,
+           'curve_name' => 'Curve25519'
+        ]);
+        $pubKeyPem = openssl_pkey_get_details($key)['key'];
+        print_r($pubKeyPem);
+
     }
 
     public static function bset($bit, $size)
@@ -735,7 +750,7 @@ class DnsQuery
         }
     }
 
-     /**
+    /**
      * https://www.rfc-editor.org/rfc/rfc9180.html#name-kem-ids
      * KEM IDs:
      * 0x0000 	Reserved
@@ -760,6 +775,13 @@ class DnsQuery
      * 0x0003 	ChaCha20Poly1305
      * 0xFFFF 	Export-only
      */
+    const ECC_NAME_ID = [
+        'prime256v1' => 0x0010,
+        'secp384r1' => 0x0011,
+        'secp521r1' => 0x0012,
+        'x25519' => 0x0020,
+        'X448' => 0x0021,
+    ];
     const ECH_TPL = [
         'configId' => 1, //random
         'kemId' => 32,
