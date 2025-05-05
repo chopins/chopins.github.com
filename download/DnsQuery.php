@@ -11,6 +11,7 @@ class DnsQuery
     public $dnsHost = 'udp://127.0.0.53:53';
     public $enableDOH = true;
     public $timeout = 10;
+    public static $UDPSize = 65494;
 
     private static $logfp;
     public static $logs = [];
@@ -79,7 +80,6 @@ class DnsQuery
             }
 
             header('Content-Type: application/dns-message', true);
-            $this->saveData('Q', $this->queryData);
             $this->dnsClient();
         }
     }
@@ -97,9 +97,30 @@ class DnsQuery
         file_put_contents(RDIR . '/data/dns.' . $t, $data);
     }
 
+    public function querySelf($type, $name)
+    {
+        $flags = self::initHeadFlags();
+        $flags[self::P_H_FLAG_QR] = self::QR_QUERY;
+        $flags[self::P_H_FLAG_RD] = 1;
+        $packet = self::initPacketArray();
+        $packet[self::P_QUERIES] = [
+            [
+                self::P_RR_NAME => $name,
+                self::P_RR_TYPE => $type,
+                self::P_RR_CLASS => self::CLASS_IN,
+            ]
+        ];
+        $this->queryData = $this->buildDNSResponse($flags, $packet, self::$UDPSize);
+        $this->dnsClient();
+    }
+
     public function dnsClient()
     {
         $packet = $this->parseDNSPackage($this->queryData, $qstate);
+        if ($packet[self::P_H_FLAG][self::P_H_FLAG_OPCODE] != self::OP_QUERY) {
+            echo $this->buildNotImplementedData();
+            return;
+        }
         $this->transId = $packet[self::P_H_ID];
         $this->queryName = $packet[self::P_QUERIES];
         // self::log('Query:', $this->queryName);
@@ -189,12 +210,6 @@ class DnsQuery
     public static function initPacketArray()
     {
         return [
-            self::P_H_ID => 0,
-            self::P_H_FLAG => 0,
-            self::P_H_QUESTION => 0,
-            self::P_H_ANSWER => 0,
-            self::P_H_AUTHORITY => 0,
-            self::P_H_ADDITIONAL => 0,
             self::P_QUERIES => [],
             self::P_ANSWERS => [],
             self::P_AUTHORITY => [],
@@ -204,8 +219,8 @@ class DnsQuery
     public static function initHeadFlags()
     {
         return [
-            self::P_H_FLAG_QR => 1,
-            self::P_H_FLAG_OPCODE => 0,
+            self::P_H_FLAG_QR => self::QR_QUERY,
+            self::P_H_FLAG_OPCODE => self::OP_QUERY,
             self::P_H_FLAG_AA => 0,
             self::P_H_FLAG_TC => 0,
             self::P_H_FLAG_RD => 0,
@@ -218,11 +233,15 @@ class DnsQuery
     {
         $type = $this->queryName[0][self::P_RR_TYPE];
         $name = $this->queryName[0][self::P_RR_NAME];
-        $UDPSize = $queryPacket[self::P_ADDITIONAL][0][self::P_RR_OPT_UDP_SIZE];
-
+        if($queryPacket[self::P_ADDITIONAL]) {
+            $UDPSize = $queryPacket[self::P_ADDITIONAL][0][self::P_RR_OPT_UDP_SIZE];
+        } else {
+            $UDPSize = self::$UDPSize;
+        }
         if (!isset(self::$LOCAL_RR_LIST[$name][$type])) {
             return false;
         }
+
         $packet = self::initPacketArray();
         $packet[self::P_QUERIES] = $queryPacket[self::P_QUERIES];
         foreach ($this->queryName as $query) {
@@ -232,7 +251,7 @@ class DnsQuery
                 $packet[self::P_ANSWERS][] = [
                     self::P_RR_NAME => $name,
                     self::P_RR_TYPE => $type,
-                    self::P_RR_CLASS => 1,
+                    self::P_RR_CLASS => self::CLASS_IN,
                     self::P_RR_TTL => 3600,
                     self::P_RR_DATA => $r
                 ];
@@ -245,7 +264,7 @@ class DnsQuery
         $packet[self::P_ADDITIONAL][] = [
             self::P_RR_NAME => self::S_NAME_END,
             self::P_RR_TYPE => self::RR_OPT,
-            self::P_RR_OPT_UDP_SIZE => 65494,
+            self::P_RR_OPT_UDP_SIZE => self::$UDPSize,
             self::P_RR_OPT_RCODE => 0,
             self::P_RR_OPT_E_V => 0,
             self::P_RR_OPT_DO => 0,
@@ -254,7 +273,7 @@ class DnsQuery
         ];
 
         $flags = self::initHeadFlags();
-        $flags[self::P_H_FLAG_QR] = 1;
+        $flags[self::P_H_FLAG_QR] = self::QR_RESPONSE;
         $flags[self::P_H_FLAG_OPCODE] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_OPCODE];
         $flags[self::P_H_FLAG_RD] = $queryPacket[self::P_H_FLAG][self::P_H_FLAG_RD];
         $flags[self::P_H_FLAG_RA] = 1;
@@ -386,9 +405,12 @@ class DnsQuery
                 $binary .= pack('n', strlen($optionBinary)) . $optionBinary;
             }
         } else if ($rType == self::RR_HTTPS) {
-            $svcbHttpsBinary = pack('n', $a[self::P_RR_HTTPS_PRIORITY]);
-            $svcbHttpsBinary .= $this->buildName($labelist, $a[self::P_RR_HTTPS_TARGET_NAME], null, true);
-            foreach ($a[self::P_RR_HTTPS_PARAMS] as $param) {
+            $hv = $a[self::P_RR_DATA];
+            $svcbHttpsBinary = pack('n', $hv[self::P_RR_HTTPS_PRIORITY]);
+            $rl = null;
+
+            $svcbHttpsBinary .= $this->buildName($labelist, $hv[self::P_RR_HTTPS_TARGET_NAME], $_rl, true);
+            foreach ($hv[self::P_RR_HTTPS_PARAMS] as $param) {
                 $svcbHttpsBinary .= pack('n', $param[self::P_RR_HTTPS_PARAMS_KEY]);
                 if ($param[self::P_RR_HTTPS_PARAMS_KEY] ==  self::RR_HTTPS_NO_DEFAULT_ALPN) {
                     $svcbHttpsBinary .= pack('n', 0);
@@ -402,7 +424,7 @@ class DnsQuery
                     continue;
                 } else if ($param[self::P_RR_HTTPS_PARAMS_KEY] == self::RR_HTTPS_ECH) {
                     $echconfig = $this->buildECHConfig($param[self::P_RR_HTTPS_PARAMS_VALUE]);
-                    $svcbHttpsBinary .= pack("n", strlen($echbinary)) . $echconfig;
+                    $svcbHttpsBinary .= pack("n", strlen($echconfig)) . $echconfig;
                     continue;
                 }
                 $paramValue = '';
@@ -412,16 +434,16 @@ class DnsQuery
                             $paramValue .= chr(strlen($v)) . $v;
                             break;
                         case self::RR_HTTPS_IPV4HINT:
-                            $paramValue .= ip2long($v);
+                            $paramValue .= pack('N', ip2long($v));
                             break;
                         case self::RR_HTTPS_IPV6HINT:
                             $paramValue .= self::ipv6long($v);
                             break;
                     }
                 }
-                $svcHttpsBinary .= pack('n', strlen($paramValue)) . $paramValue;
+                $svcbHttpsBinary .= pack('n', strlen($paramValue)) . $paramValue;
             }
-            $binary .= pack('n', strlen($svcHttpsBinary)) . $svcHttpsBinary;
+            $binary .= pack('n', strlen($svcbHttpsBinary)) . $svcbHttpsBinary;
         }
 
         return $binary;
@@ -430,7 +452,7 @@ class DnsQuery
     public function buildECHConfig($value)
     {
         self::genHpke($value);
-        $id = pack('n2', 0xfe0d); //version
+        $id = pack('n', 0xfe0d); //version
         $binary = chr($value['configId']) . pack('n2', $value['kemId'], strlen($value['pubKey'])) . $value['pubKey'];
         $binary .= pack('n', count($value['ciphers']) * 4);
         foreach ($value['ciphers'] as $cipher) {
@@ -457,7 +479,7 @@ class DnsQuery
 
             $value['kemId'] = self::ECC_NAME_ID['x25519'][0];
             $value['pubKey'] = $kp_pubkey;
-            $value['ciphers'][] = ['kdfId' => self::ECC_NAME_ID['x25519'][1], 0x0002];
+            $value['ciphers'][] = ['kdfId' => self::ECC_NAME_ID['x25519'][1], 'aeadId' => 0x0002];
             return true;
         }
         $names = openssl_get_curve_names();
@@ -470,7 +492,7 @@ class DnsQuery
 
                 $value['kemId'] = self::ECC_NAME_ID[$n][0];
                 $value['pubKey'] = openssl_pkey_get_details($key)['ec']['x'];
-                $value['ciphers'][] = ['kdfId' => self::ECC_NAME_ID[$n][1], 0x0002];
+                $value['ciphers'][] = ['kdfId' => self::ECC_NAME_ID[$n][1], 'aeadId' => 0x0002];
                 return true;
             }
         }
@@ -484,6 +506,7 @@ class DnsQuery
 
     public function setFlags($flags)
     {
+        $flag = 0;
         if ($flags[self::P_H_FLAG_QR]) {
             $flag = 1 << 15;
         }
@@ -736,11 +759,17 @@ class DnsQuery
     public function buildServerErrorData()
     {
         $flag  = (1 < 15) | 2;
-        $h = [$this->transId, $flag, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $h = [$this->transId, $flag, 0, 0, 0, 0];
         $result .= pack('n*', ...$h);
         return $result;
     }
-
+    public function buildNotImplementedData()
+    {
+        $flag  = (1 < 15) | 5;
+        $h = [$this->transId, $flag, 0, 0, 0, 0];
+        $result .= pack('n*', ...$h);
+        return $result;
+    }
     public function base64url_encode($data)
     {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
@@ -804,7 +833,7 @@ class DnsQuery
             ['kdfId' => 1, 'aeadId' => 1],
         ],
         'maxNameLen' => 0,
-        'pubName' => '',//签发服务器公用域名
+        'pubName' => '', //签发服务器公用域名
         'extensions' => [], // ['type'=> '', 'data' => ]
     ];
     const S_NAME_END = "\0";
@@ -856,12 +885,30 @@ class DnsQuery
     const RR_HTTPS_IPV4HINT = 4;
     const RR_HTTPS_ECH = 5;
     const RR_HTTPS_IPV6HINT = 6;
-
+    /**
+     * see https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml
+     */
     const CLASS_IN = 1;
-    const CLASS_CS = 2;
+    const CLASS_Unassigned = 2;
     const CLASS_CH = 3;
     const CLASS_HS = 4;
-    const RR_ANY = 0;
+    const CLASS_NONE = 254;
+    const CLASS_ANY = 255;
+
+    const QR_QUERY = 0;
+    const QR_RESPONSE = 1;
+
+    const OP_QUERY = 0;
+    const OP_IQUERY = 1;
+    const OP_STATUS = 2;
+    const OP_Unassigned = 3;
+    const OP_NOTIFY = 4;
+    const OP_UPDATE = 5;
+    const OP_DSO = 5;
+    const OP_Unassigned_1 = 7;
+    const OP_Unassigned_2 = 15;
+
+    const RR_Reserved_0 = 0;
     const RR_A = 1;
     const RR_NS = 2;
     const RR_MD = 3;
@@ -878,55 +925,100 @@ class DnsQuery
     const RR_MINFO = 14;
     const RR_MX = 15;
     const RR_TXT = 16;
+    const RR_RP = 17;
+    const RR_AFSDB = 18;
+    const RR_X25 = 19;
+    const RR_ISDN = 20;
+    const RR_RT = 21;
+    const RR_NSAP = 22;
+    const RR_NSAP_PTR = 23;
+    const RR_SIG = 24;
+    const RR_KEY = 25;
+    const RR_PX = 26;
+    const RR_GPOS = 27;
     const RR_AAAA = 28;
+    const RR_LOC = 29;
+    const RR_NXT = 30;
+    const RR_EID = 31;
+    const RR_NIMLOC = 32;
     const RR_SRV = 33;
+    const RR_ATMA = 34;
     const RR_MAPTR = 35;
-    const RR_APL = 36;
-    const RR_DSIG = 37;
+    const RR_KX = 36;
+    const RR_CERT = 37;
+    const RR_A6 = 38;
     const RR_DNAME = 39;
+    const RR_SINK = 40;
     const RR_OPT = 41;
+    const RR_APL = 42;
     const RR_DS = 43;
+    const RR_SSHFP = 44;
+    const RR_IPSECKEY = 45;
     const RR_RRSIG = 46;
+    const RR_NSEC = 47;
     const RR_DNSKEY = 48;
+    const RR_DHCID = 49;
+    const RR_NSEC3 = 50;
+    const RR_NSEC3PARAM = 51;
+    const RR_TLSA = 52;
+    const RR_SMIMEA = 53;
+    const RR_Unassigned_1 = 54;
+    const RR_HIP = 55;
+    const RR_NINFO = 56;
+    const RR_RKEY = 57;
+    const RR_TALINK = 58;
     const RR_CDS = 59;
+    const RR_CDNSKEY = 60;
     const RR_OPENPGPKEY = 61;
-    const RR_SVCB = 65;
-    const RR_HTTPS = 66;
+    const RR_CSYNC = 62;
+    const RR_ZONEMD = 63;
+    const RR_SVCB = 64;
+    const RR_HTTPS = 65;
+    const RR_DSYNC = 66;
+    const RR_Unassigned_2 = 67;
+    const RR_Unassigned_3 = 98;
+    const RR_SPF = 99;
+    const RR_UINFO = 100;
+    const RR_UID = 101;
+    const RR_GID = 102;
+    const RR_UNSPEC = 103;
+    const RR_NID = 104;
+    const RR_L32 = 105;
+    const RR_L64 = 106;
+    const RR_LP = 107;
+    const RR_EUI48 = 108;
+    const RR_EUI64 = 109;
+    const RR_Unassigned_4 = 110;
+    const RR_Unassigned_5 = 127;
+    const RR_NXNAME = 128;
+    const RR_Unassigned_6 = 129;
+    const RR_Unassigned_7 = 248;
+    const RR_TKEY = 249;
+    const RR_TSIG = 250;
+    const RR_IXFR = 251;
+    const RR_AXFR = 252;
+    const RR_MAILB = 253;
+    const RR_MAILA = 254;
+    const RR_ANY = 255; // * record, A request for some or all records the server has available
+    const RR_URI = 256;
     const RR_CAA = 257;
-    const RR_TYPE = [
-        self::RR_ANY,
-        self::RR_A,
-        self::RR_NS,
-        self::RR_MD,
-        self::RR_MF,
-        self::RR_CNAME,
-        self::RR_SOV,
-        self::RR_MB,
-        self::RR_MG,
-        self::RR_MR,
-        self::RR_NULL,
-        self::RR_WKS,
-        self::RR_PTR,
-        self::RR_HINFO,
-        self::RR_MINFO,
-        self::RR_MX,
-        self::RR_TXT, //16
-        self::RR_AAAA,
-        self::RR_SRV,
-        self::RR_MAPTR,
-        self::RR_APL,
-        self::RR_DSIG,
-        self::RR_DNAME,
-        self::RR_OPT,
-        self::RR_DS,
-        self::RR_RRSIG,
-        self::RR_DNSKEY,
-        self::RR_CDS,
-        self::RR_OPENPGPKEY,
-        self::RR_SVCB,
-        self::RR_HTTPS,
-        self::RR_CAA,
-    ];
+    const RR_AVC = 258;
+    const RR_DOA = 259;
+    const RR_AMTRELAY = 260;
+    const RR_RESINFO = 261;
+    const RR_WALLET = 262;
+    const RR_CLA = 263;
+    const RR_IPN = 264;
+    const RR_Unassigned_8 = 265;
+    const RR_Unassigned_9 = 32767;
+    const RR_TA = 32768;
+    const RR_DLV = 32769;
+    const RR_Unassigned_10 = 32770;
+    const RR_Unassigned_11 = 65279;
+    const RR_Private_0 = 65280;
+    const RR_Private_1 = 65534;
+    const RR_Reserved_1 = 65535;
+
 
     public const G_CACHE_NAME_TYPE = [
         self::RR_A,
