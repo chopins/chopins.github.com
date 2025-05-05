@@ -55,7 +55,7 @@ function PUT(string $path, string|array|CURLStringFile $file, string|array $quer
     $obj = HTTP::init();
     if ($file instanceof CURLStringFile) {
         $data = $file->data;
-    } else if(is_string($file) && file_exists($file)){
+    } else if (is_string($file) && file_exists($file)) {
         $data = file_get_contents($file);
     } else {
         return $obj->custom('PUT', $path, $query, $file);
@@ -581,9 +581,9 @@ class HTTP
             $this->responseHeader[] = $h;
             return strlen($h);
         };
-        if(self::$requestHeader) {
-            foreach(self::$requestHeader as $hk => $hv) {
-                if(!is_numeric($hk)) {
+        if (self::$requestHeader) {
+            foreach (self::$requestHeader as $hk => $hv) {
+                if (!is_numeric($hk)) {
                     self::$requestHeader[] = "$hk: $hv";
                     unset(self::$requestHeader[$hk]);
                 }
@@ -594,13 +594,13 @@ class HTTP
         $this->currentCurlOptions[CURLOPT_CONNECTTIMEOUT] = self::$connectTimeout;
         $this->currentCurlOptions[CURLOPT_TIMEOUT] = self::$execTimeout;
 
-        if(self::$requestCookie) {
+        if (self::$requestCookie) {
             $this->currentCurlOptions[CURLOPT_COOKIE] = http_build_query(self::$requestCookie, '', ';');
         }
 
         $this->curl = curl_init($this->url);
         curl_setopt_array($this->curl, $this->currentCurlOptions);
-        if(self::$curlOptions ) {
+        if (self::$curlOptions) {
             curl_setopt_array($this->curl, self::$curlOptions);
         }
         $this->responseBody = curl_exec($this->curl);
@@ -694,7 +694,7 @@ class HTTP
 
     public function show(): HTTP
     {
-        if($this->isShow) {
+        if ($this->isShow) {
             return $this;
         }
         if (!$this->run) {
@@ -735,7 +735,7 @@ class HTTP
         }
         if ($nl && self::$isCLI) {
             echo PHP_EOL;
-        } else if(!self::$isCLI) {
+        } else if (!self::$isCLI) {
             echo '<br />';
         }
     }
@@ -958,8 +958,8 @@ class HTTP
         $msg = 'All requested and show';
         if (!HTTP::$showCount) {
             $msg =  'Exec ' . HTTP::$execCount . ' request  and no  output data' . PHP_EOL;
-        } else if(HTTP::$showCount != HTTP::$execCount) {
-            $msg = 'Exec ' . HTTP::$execCount . ' request  and ' . HTTP::$showCount .' show output' . PHP_EOL;
+        } else if (HTTP::$showCount != HTTP::$execCount) {
+            $msg = 'Exec ' . HTTP::$execCount . ' request  and ' . HTTP::$showCount . ' show output' . PHP_EOL;
         }
         if (!self::$isCLI) {
             echo "<h3>$msg</h3>";
@@ -969,7 +969,7 @@ class HTTP
         }
     }
 }
-if(PHP_SAPI == 'cli') {
+if (PHP_SAPI == 'cli') {
     return;
 }
 ?>
@@ -1001,7 +1001,8 @@ if(PHP_SAPI == 'cli') {
             margin: 5px;
         }
 
-        m,x {
+        m,
+        x {
             color: blue;
             font-weight: bold;
         }
@@ -1050,17 +1051,20 @@ if(PHP_SAPI == 'cli') {
         code div {
             margin-left: 20px;
         }
+
         body {
             margin-top: 50px;
         }
+
         body>h3 {
             position: fixed;
             top: 1px;
             background-color: #EEE;
             border: #000 solid 1px;
             padding: 4px;
-            color:green;
+            color: green;
         }
+
         x {
             font-weight: bold;
             margin: 0 2px;
@@ -1093,6 +1097,7 @@ if(PHP_SAPI == 'cli') {
                 t = t.slice(0, -5) + '</p>';
                 return '<m>{</m><div>' + t + '</div><m>}</m>,';
             } else if (typeof o == 'string') {
+                o = o.replaceAll("\r\n", '\\r\\n');
                 return '<t>"' + o + '"</t>,';
             } else {
                 return '<n>' + o + '</n>,';
