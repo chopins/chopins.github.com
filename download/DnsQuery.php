@@ -429,6 +429,7 @@ class DnsQuery
 
     public function buildECHConfig($value)
     {
+        self::genHpke($value);
         $id = pack('n2', 0xfe0d); //version
         $binary = chr($value['configId']) . pack('n2', $value['kemId'], strlen($value['pubKey'])) . $value['pubKey'];
         $binary .= pack('n', count($value['ciphers']) * 4);
@@ -448,19 +449,32 @@ class DnsQuery
         return pack('n', strlen($data)) . $data;
     }
 
-    public static function selfSignECH($domain)
+    public static function genHpke(&$value)
     {
-        if(function_exists('sodium_crypto_box_keypair')) {
-            $x25519 = sodium_crypto_box_keypair();
+        if (!function_exists('sodium_crypto_box_keypair')) {
+            $kp = sodium_crypto_kx_keypair();
+            $kp_pubkey = sodium_crypto_kx_publickey($kp);
+
+            $value['kemId'] = self::ECC_NAME_ID['x25519'][0];
+            $value['pubKey'] = $kp_pubkey;
+            $value['ciphers'][] = ['kdfId' => self::ECC_NAME_ID['x25519'][1], 0x0002];
+            return true;
         }
+        $names = openssl_get_curve_names();
+        foreach (self::ECC_NAME_ID as $n => $ids) {
+            if (in_array($n, $names)) {
+                $key = openssl_pkey_new([
+                    'private_key_type' => OPENSSL_KEYTYPE_EC,
+                    'curve_name' => $n,
+                ]);
 
-        $key = openssl_pkey_new([
-           'private_key_type' => OPENSSL_KEYTYPE_EC,
-           'curve_name' => 'Curve25519'
-        ]);
-        $pubKeyPem = openssl_pkey_get_details($key)['key'];
-        print_r($pubKeyPem);
-
+                $value['kemId'] = self::ECC_NAME_ID[$n][0];
+                $value['pubKey'] = openssl_pkey_get_details($key)['ec']['x'];
+                $value['ciphers'][] = ['kdfId' => self::ECC_NAME_ID[$n][1], 0x0002];
+                return true;
+            }
+        }
+        return false;
     }
 
     public static function bset($bit, $size)
@@ -776,11 +790,11 @@ class DnsQuery
      * 0xFFFF 	Export-only
      */
     const ECC_NAME_ID = [
-        'prime256v1' => 0x0010,
-        'secp384r1' => 0x0011,
-        'secp521r1' => 0x0012,
-        'x25519' => 0x0020,
-        'X448' => 0x0021,
+        'prime256v1' => [0x0010, 0x0001],
+        'secp384r1' => [0x0011, 0x0002],
+        'secp521r1' => [0x0012, 0x0003],
+        'x25519' => [0x0020, 0x0001],
+        'X448' => [0x0021, 0x0003],
     ];
     const ECH_TPL = [
         'configId' => 1, //random
@@ -790,7 +804,7 @@ class DnsQuery
             ['kdfId' => 1, 'aeadId' => 1],
         ],
         'maxNameLen' => 0,
-        'pubName' => '',
+        'pubName' => '',//签发服务器公用域名
         'extensions' => [], // ['type'=> '', 'data' => ]
     ];
     const S_NAME_END = "\0";
