@@ -1,5 +1,4 @@
 const SOCKS = [
-    "github.com",
     "addons.mozilla.org"
 ];
 
