@@ -449,6 +449,9 @@ class DnsQuery
         return $binary;
     }
 
+    /**
+     * https://datatracker.ietf.org/doc/draft-ietf-tls-esni/
+     */
     public function buildECHConfig($value)
     {
         self::genHpke($value);
