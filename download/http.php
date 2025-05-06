@@ -1064,7 +1064,10 @@ if (PHP_SAPI == 'cli') {
             padding: 4px;
             color: green;
         }
-
+        sub {
+            font-size: 10px;
+            color:#666;
+        }
         x {
             font-weight: bold;
             margin: 0 2px;
@@ -1097,7 +1100,9 @@ if (PHP_SAPI == 'cli') {
                 t = t.slice(0, -5) + '</p>';
                 return '<m>{</m><div>' + t + '</div><m>}</m>,';
             } else if (typeof o == 'string') {
-                o = o.replaceAll("\r\n", '\\r\\n');
+                o = o.replaceAll(/[\r\n\t]/img, function(m) {
+                    let a = {"\r" : '\\r', "\n" : '\\n', "\t" : '\\t'};
+                    return '<sub>'+ a[m]+'</sub>';});
                 return '<t>"' + o + '"</t>,';
             } else {
                 return '<n>' + o + '</n>,';
