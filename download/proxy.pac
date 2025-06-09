@@ -1,5 +1,7 @@
 const SOCKS = [
-    "addons.mozilla.org"
+    "addons.mozilla.org",
+    "godaddy.com",
+    "google.com"
 ];
 
 
