@@ -1,8 +1,11 @@
 <?php
-//define('DATA_ROOT', __DIR__);
-define('DATA_ROOT', '/home/chopin/Documents/csr/cert');
-define('CA_KEY_PASS', sha1('2025-06-12 -toknot-ca- key-pass-%KJD*#!0密钥空配民俗'));
+if(!defined('DATA_ROOT')) {
+    define('DATA_ROOT', dirname($_SERVER['SCRIPT_FILENAME']));
+}
 
+if(!defined('CA_KEY_PASS')) {
+    define('CA_KEY_PASS', sha1( $_SERVER['SCRIPT_FILENAME'] . 'toknot-ca- key-pass' . php_uname('n')));
+}
 class IssueCert
 {
     const CA_DATA = DATA_ROOT . '/CA';
@@ -151,6 +154,8 @@ class CertSubject
     public static function form()
     {
         echo <<<HTML
+        <html><head><title>Add</title></head>
+            <body>
         <form action="/" method="POST">
         <h3>Distinguished Name</h3>
         <div><label for="C">countryName</label><input name="C" type="text"></div>
@@ -165,9 +170,7 @@ class CertSubject
         <div><label for="dns[]">DNS</label><input name="dns[]" type="text"></div>
         <div><label for="dns[]">DNS</label><input name="dns[]" type="text"></div>
         <div><label for="dns[]">DNS</label><input name="dns[]" type="text"></div>
-        </form>
+        </form></body></html>
         HTML;
     }
 }
-
-new IssueCert;
