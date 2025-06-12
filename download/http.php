@@ -814,6 +814,17 @@ class HTTP
         if (!$this->httpCode) {
             self::RED(curl_error($this->curl), true);
         }
+        if (self::$showRequestHeader) {
+            foreach ($this->realRequestHeader as $i => $header) {
+                echo '<p>';
+                if (strpos($header, ':') === false) {
+                    self::GREEN($header, true);
+                } else {
+                    self::MAGENTA(str_replace(':', ':' . self::$colors['END'], $header), true);
+                }
+                echo '</p>';
+            }
+        }
         if (self::$showResponseHeader) {
             foreach ($this->responseHeader as $i => $header) {
                 echo '<p>';
@@ -955,7 +966,7 @@ class HTTP
         if ($this->curl instanceof CurlHandle) {
             curl_close($this->curl);
         }
-        $msg = 'All requested and show';
+        $msg = 'All requested and show' . PHP_EOL;
         if (!HTTP::$showCount) {
             $msg =  'Exec ' . HTTP::$execCount . ' request  and no  output data' . PHP_EOL;
         } else if (HTTP::$showCount != HTTP::$execCount) {
