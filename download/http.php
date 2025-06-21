@@ -134,8 +134,8 @@ class HTTP
     public static int $execCount = 0;
     public static int $showCount = 0;
     public static string $scriptFile = '';
-    public static array $htmlPageCssLink = [];
-    public static array $htmlPageJsSrc = [];
+    public static array $bootstrapCssLink = [];
+    public static array $bootstrapJsSrc = [];
     /**
      * @var string 用户名
      */
@@ -819,7 +819,7 @@ class HTTP
         }
         if (self::$showRequestHeader) {
             $id = 'showRequestHeaderCollapse-' . self::$execCount;
-            echo '<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">实际请求头</button><div class="collapse" id="' . $id . '"><ul class="list-group">';
+            echo '<a href="javascript:void(0)" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">实际请求头</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
             foreach ($this->realRequestHeader as $i => $header) {
                 if (!$header) {
                     continue;
@@ -836,7 +836,7 @@ class HTTP
         }
         if (self::$showResponseHeader) {
             $id = 'showResponseHeaderCollapse-' . self::$execCount;
-            echo '<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">响应头</button><div class="collapse" id="' . $id . '"><ul class="list-group">';
+            echo '<a href="javascript:void(0)" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">响应头</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
             foreach ($this->responseHeader as $i => $header) {
                 echo '<li class="list-group-item">';
                 $header = trim($header);
@@ -1101,13 +1101,13 @@ class HTTP
                     margin: 0 2px;
                 }
             </style>
-            <?php if (self::$htmlPageCssLink) {
-                foreach (self::$htmlPageCssLink as $link) {
+            <?php if (self::$bootstrapCssLink) {
+                foreach (self::$bootstrapCssLink as $link) {
                     echo '<link href="' . $link . '" type="text/css" rel="stylesheet" />';
                 }
             }
-            if (self::$htmlPageJsSrc) {
-                foreach (self::$htmlPageJsSrc as $src) {
+            if (self::$bootstrapJsSrc) {
+                foreach (self::$bootstrapJsSrc as $src) {
                     echo '<script src="' . $src . '" type="application/javascript"></script>';
                 }
             }
