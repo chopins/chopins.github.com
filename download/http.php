@@ -131,10 +131,25 @@ function TRACE(string $path, string|array $query = '')
  */
 class HTTP
 {
+    /**
+     * @var int 当前总执行次数
+     */
     public static int $execCount = 0;
+    /**
+     * @var int 当前显示的请求数量
+     */
     public static int $showCount = 0;
+    /**
+     * @var string API执行脚本文件，默认为 $_SERVER['SCRIPT_FILENAME']
+     */
     public static string $scriptFile = '';
+    /**
+     * @var array 网页显示时 bootstrap CSS 库文件，例如 bootstrap.min.css
+     */
     public static array $bootstrapCssLink = [];
+    /**
+     * @var array 网页显示时 bootstrap JS 库文件，例如 bootstrap.min.js
+     */
     public static array $bootstrapJsSrc = [];
     /**
      * @var string 用户名
