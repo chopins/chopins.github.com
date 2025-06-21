@@ -134,6 +134,8 @@ class HTTP
     public static int $execCount = 0;
     public static int $showCount = 0;
     public static string $scriptFile = '';
+    public static array $htmlPageCssLink = [];
+    public static array $htmlPageJsSrc = [];
     /**
      * @var string 用户名
      */
@@ -403,6 +405,7 @@ class HTTP
         }
         if (!isset(self::$obj)) {
             self::$obj = new static();
+            self::$obj->htmlPage();
         }
         self::$obj->reset();
         return self::$obj;
@@ -808,34 +811,43 @@ class HTTP
 
     protected function showHTML(): void
     {
-        echo '<hr />';
+        echo '<div class="accordion-item"><h2 class="accordion-header" id="commonConfigHeading"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#commonConfig" aria-expanded="true" aria-controls="commonConfig">';
         self::BLUE("{$this->method} {$this->url} ", true);
-
+        echo '</button></h2><div id="commonConfig" class="accordion-collapse collapse show" aria-labelledby="commonConfigHeading" data-bs-parent="#mainAccordion"><div class="accordion-body d-grid gap-2">';
         if (!$this->httpCode) {
             self::RED(curl_error($this->curl), true);
         }
         if (self::$showRequestHeader) {
+            $id = 'showRequestHeaderCollapse-' . self::$execCount;
+            echo '<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">实际请求头</button><div class="collapse" id="' . $id . '"><ul class="list-group">';
             foreach ($this->realRequestHeader as $i => $header) {
-                echo '<p>';
-                if (strpos($header, ':') === false) {
+                if (!$header) {
+                    continue;
+                }
+                echo '<li class="list-group-item">';
+                if (strpos($header, ':') === false && $header) {
                     self::GREEN($header, true);
                 } else {
-                    self::MAGENTA(str_replace(':', ':' . self::$colors['END'], $header), true);
+                    self::MAGENTA(str_replace(':', ':' . self::$colors['END'] . '<span>', $header), true);
                 }
-                echo '</p>';
+                echo '</li>';
             }
+            echo '</ul></div>';
         }
         if (self::$showResponseHeader) {
+            $id = 'showResponseHeaderCollapse-' . self::$execCount;
+            echo '<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">响应头</button><div class="collapse" id="' . $id . '"><ul class="list-group">';
             foreach ($this->responseHeader as $i => $header) {
-                echo '<p>';
+                echo '<li class="list-group-item">';
                 $header = trim($header);
-                if ($i == 0) {
+                if ($i == 0 && $header) {
                     self::GREEN($header);
                 } else {
                     self::MAGENTA(str_replace(':', ':' . self::$colors['END'] . '<span>', $header));
                 }
-                echo '</p>';
+                echo '</li>';
             }
+            echo '</ul></div>';
         }
         if (!$this->responseBody) {
             return;
@@ -844,6 +856,7 @@ class HTTP
         $content = $this->isJson ? $this->responseBody : str_ireplace(['&', '</script'], ['&amp;', '&lt;/script'], $this->responseBody);
         echo <<<HTML
         <script class="responseContent" type="text/plain" content-type="{$contentType}">{$content}</script>
+        </div></div></div>
         HTML;
     }
 
@@ -973,204 +986,229 @@ class HTTP
             $msg = 'Exec ' . HTTP::$execCount . ' request  and ' . HTTP::$showCount . ' show output' . PHP_EOL;
         }
         if (!self::$isCLI) {
-            echo "<h3>$msg</h3>";
-            echo '</body></html>';
+            echo "</div><h3>$msg</h3>";
+            echo '</div></body></html>';
         } else {
             self::GREEN($msg);
         }
     }
-}
-if (PHP_SAPI == 'cli') {
-    return;
-}
+
+    public function htmlPage()
+    {
+        if (PHP_SAPI == 'cli') {
+            return;
+        }
 ?>
-<!DOCTYPE html>
-<html>
+        <!DOCTYPE html>
+        <html>
 
-<head>
-    <title>API Request</title>
-    <style>
-        * {
-            font-size: 14px;
-        }
-
-        :root {
-            --pseudo-display: block;
-        }
-
-        html {
-            width: 99%;
-            word-break: break-all;
-        }
-
-        hr {
-            padding: 1px;
-            color: yellow;
-        }
-
-        p {
-            margin: 5px;
-        }
-
-        m,
-        x {
-            color: blue;
-            font-weight: bold;
-        }
-
-        t {
-            color: green;
-        }
-
-        n {
-            color: darkorchid;
-        }
-
-        .responseContent {
-            display: none;
-        }
-
-        code {
-            display: block;
-            background-color: #FAFAFA;
-            border: 1px solid #CCC;
-            padding: 5px;
-            font-family: "DejaVu Sans Mono", "Consolas", ui-monospace, monospace;
-            font-size-adjust: 0.5;
-            letter-spacing: 1px;
-        }
-
-        code button {
-            display: block;
-        }
-
-        code b {
-            color: navy;
-            margin-right: 10px;
-        }
-
-        code>div>div {
-            display: none;
-        }
-
-        code>div>div+m::before {
-            content: '......';
-            display: var(--pseudo-display);
-            margin-left: 20px;
-        }
-
-        code div {
-            margin-left: 20px;
-        }
-
-        body {
-            margin-top: 50px;
-        }
-
-        body>h3 {
-            position: fixed;
-            top: 1px;
-            background-color: #EEE;
-            border: #000 solid 1px;
-            padding: 4px;
-            color: green;
-        }
-        sub {
-            font-size: 10px;
-            color:#666;
-        }
-        x {
-            font-weight: bold;
-            margin: 0 2px;
-        }
-    </style>
-    <script>
-        const d = document;
-
-        function $(e) {
-            if (typeof e == 'function') {
-                d.addEventListener('DOMContentLoaded', e);
-            } else if (typeof e == 'string') {
-                return d.querySelectorAll(e);
-            } else {
-                return e;
-            }
-        }
-
-        function jsonview(o) {
-            let t = '';
-            if (o instanceof Array) {
-                if (o.length == 0) {
-                    return '<m>[]</m>,';
+        <head>
+            <title>API Request</title>
+            <style>
+                * {
+                    font-size: 14px;
                 }
-                for (let i in o) t += '<p><b>' + i + ':</b>' + jsonview(o[i]) + '</p>';
-                t = t.slice(0, -5) + '</p>';
-                return '<m>[</m><div>' + t + '</div><m>]</m>,';
-            } else if (o instanceof Object) {
-                for (let i in o) t += '<p><b>"' + i + '":</b>' + jsonview(o[i]) + '</p>';
-                t = t.slice(0, -5) + '</p>';
-                return '<m>{</m><div>' + t + '</div><m>}</m>,';
-            } else if (typeof o == 'string') {
-                o = o.replaceAll(/[\r\n\t]/img, function(m) {
-                    let a = {"\r" : '\\r', "\n" : '\\n', "\t" : '\\t'};
-                    return '<sub>'+ a[m]+'</sub>';});
-                return '<t>"' + o + '"</t>,';
-            } else {
-                return '<n>' + o + '</n>,';
-            }
-        }
 
-        function xmlview(o) {
-            let t = '';
-            for (let e of o.children) {
-                t += '<p><x>&lt;</x><m>' + e.tagName + '</m><x>&gt;</x>';
-                if (e.children.length > 0) {
-                    t += '<div>' + xmlview(e) + '</div>';
-                } else {
-                    t += '<t>' + e.innerHTML + '</t>';
+                :root {
+                    --pseudo-display: block;
                 }
-                t += '<x>&lt;/</x><m>' + e.tagName + '</m><x>&gt;</x></p>';
+
+                html {
+                    width: 99%;
+                    word-break: break-all;
+                }
+
+                hr {
+                    padding: 1px;
+                    color: yellow;
+                }
+
+                code p {
+                    margin: 0;
+                }
+
+                m,
+                x {
+                    color: blue;
+                    font-weight: bold;
+                }
+
+                t {
+                    color: green;
+                }
+
+                n {
+                    color: darkorchid;
+                }
+
+                .responseContent {
+                    display: none;
+                }
+
+                code {
+                    display: block;
+                    background-color: #FAFAFA;
+                    border: 1px solid #CCC;
+                    padding: 5px;
+                    font-family: "DejaVu Sans Mono", "Consolas", ui-monospace, monospace;
+                    font-size-adjust: 0.5;
+                    letter-spacing: 1px;
+                }
+
+                code button {
+                    display: block;
+                }
+
+                code b {
+                    color: navy;
+                    margin-right: 10px;
+                }
+
+                code>div>div {
+                    display: none;
+                }
+
+                code>div>div+m::before {
+                    content: '......';
+                    display: var(--pseudo-display);
+                    margin-left: 20px;
+                }
+
+                code div {
+                    margin-left: 20px;
+                }
+
+                body {
+                    margin-top: 50px;
+                }
+
+                body>h3 {
+                    position: fixed;
+                    top: 1px;
+                    background-color: #EEE;
+                    border: #000 solid 1px;
+                    padding: 4px;
+                    color: green;
+                }
+
+                sub {
+                    font-size: 10px;
+                    color: #666;
+                }
+
+                x {
+                    font-weight: bold;
+                    margin: 0 2px;
+                }
+            </style>
+            <?php if (self::$htmlPageCssLink) {
+                foreach (self::$htmlPageCssLink as $link) {
+                    echo '<link href="' . $link . '" type="text/css" rel="stylesheet" />';
+                }
             }
-            return t;
-        }
+            if (self::$htmlPageJsSrc) {
+                foreach (self::$htmlPageJsSrc as $src) {
+                    echo '<script src="' . $src . '" type="application/javascript"></script>';
+                }
+            }
+            ?>
+            <script>
+                const d = document;
 
-
-        $(function() {
-            $('.responseContent').forEach(function(e) {
-                let type = e.getAttribute('content-type');
-                let v = e.innerHTML;
-                let s = null;
-                if (type == 'json') {
-                    s = d.createElement('code');
-                    try {
-                        s.innerHTML = '<button>显示/隐藏</button>' + jsonview(JSON.parse(v)).slice(0, -1);
-                    } catch (e) {
-                        s.innerHTML = v;
+                function $(e) {
+                    if (typeof e == 'function') {
+                        d.addEventListener('DOMContentLoaded', e);
+                    } else if (typeof e == 'string') {
+                        return d.querySelectorAll(e);
+                    } else {
+                        return e;
                     }
-                } else if (type == 'xml') {
-                    s = d.createElement('code');
-                    let xml = v.replaceAll('&lt;/script', '</script').replaceAll('&amp;', '&');
-                    try {
-                        let dom = new DOMParser().parseFromString(xml, 'application/xml');
-                        s.innerHTML = '<button>显示/隐藏</button>' + xmlview(dom);
-                    } catch (e) {
-                        s.innerHTML = v;
-                    }
-                } else {
-                    s = d.createElement('iframe');
-                    s.width = "99%";
-                    s.height = "900";
-                    s.srcdoc = v.replaceAll('&lt;/script', '</script').replaceAll('&amp;', '&');
                 }
-                e.after(s);
-            });
-            $('code>button').forEach((c) => c.addEventListener('click', (e) => {
-                let k = e.target.parentNode.querySelector('div>div');
-                d.documentElement.style.setProperty('--pseudo-display', getComputedStyle(k).display);
-                k.style.display = k.style.display == 'block' ? 'none' : 'block';
-            }));
-        });
-    </script>
-</head>
 
-<body>
+                function jsonview(o) {
+                    let t = '';
+                    if (o instanceof Array) {
+                        if (o.length == 0) {
+                            return '<m>[]</m>,';
+                        }
+                        for (let i in o) t += '<p><b>' + i + ':</b>' + jsonview(o[i]) + '</p>';
+                        t = t.slice(0, -5) + '</p>';
+                        return '<m>[</m><div>' + t + '</div><m>]</m>,';
+                    } else if (o instanceof Object) {
+                        for (let i in o) t += '<p><b>"' + i + '":</b>' + jsonview(o[i]) + '</p>';
+                        t = t.slice(0, -5) + '</p>';
+                        return '<m>{</m><div>' + t + '</div><m>}</m>,';
+                    } else if (typeof o == 'string') {
+                        o = o.replaceAll(/[\r\n\t]/img, function(m) {
+                            let a = {
+                                "\r": '\\r',
+                                "\n": '\\n',
+                                "\t": '\\t'
+                            };
+                            return '<sub>' + a[m] + '</sub>';
+                        });
+                        return '<t>"' + o + '"</t>,';
+                    } else {
+                        return '<n>' + o + '</n>,';
+                    }
+                }
+
+                function xmlview(o) {
+                    let t = '';
+                    for (let e of o.children) {
+                        t += '<p><x>&lt;</x><m>' + e.tagName + '</m><x>&gt;</x>';
+                        if (e.children.length > 0) {
+                            t += '<div>' + xmlview(e) + '</div>';
+                        } else {
+                            t += '<t>' + e.innerHTML + '</t>';
+                        }
+                        t += '<x>&lt;/</x><m>' + e.tagName + '</m><x>&gt;</x></p>';
+                    }
+                    return t;
+                }
+
+
+                $(function() {
+                    $('.responseContent').forEach(function(e) {
+                        let type = e.getAttribute('content-type');
+                        let v = e.innerHTML;
+                        let s = null;
+                        if (type == 'json') {
+                            s = d.createElement('code');
+                            try {
+                                s.innerHTML = '<button class="btn btn-success dropdown-toggle">显示/隐藏</button><br />' + jsonview(JSON.parse(v)).slice(0, -1);
+                            } catch (e) {
+                                s.innerHTML = v;
+                            }
+                        } else if (type == 'xml') {
+                            s = d.createElement('code');
+                            let xml = v.replaceAll('&lt;/script', '</script').replaceAll('&amp;', '&');
+                            try {
+                                let dom = new DOMParser().parseFromString(xml, 'application/xml');
+                                s.innerHTML = '<button>显示/隐藏</button>' + xmlview(dom);
+                            } catch (e) {
+                                s.innerHTML = v;
+                            }
+                        } else {
+                            s = d.createElement('iframe');
+                            s.width = "99%";
+                            s.height = "900";
+                            s.srcdoc = v.replaceAll('&lt;/script', '</script').replaceAll('&amp;', '&');
+                        }
+                        e.after(s);
+                    });
+                    $('code>button').forEach((c) => c.addEventListener('click', (e) => {
+                        let k = e.target.parentNode.querySelector('div>div');
+                        d.documentElement.style.setProperty('--pseudo-display', getComputedStyle(k).display);
+                        k.style.display = k.style.display == 'block' ? 'none' : 'block';
+                    }));
+                });
+            </script>
+        </head>
+
+        <body>
+            <div class="container-fluid">
+                <div class="accordion" id="mainAccordion">
+            <?php
+        }
+    }
