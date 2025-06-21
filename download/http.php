@@ -819,7 +819,7 @@ class HTTP
         }
         if (self::$showRequestHeader) {
             $id = 'showRequestHeaderCollapse-' . self::$execCount;
-            echo '<a href="javascript:void(0)" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">实际请求头</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
+            echo '<a href="#a-'.$id.'" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '" id="a-'.$id.'">实际请求头</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
             foreach ($this->realRequestHeader as $i => $header) {
                 if (!$header) {
                     continue;
@@ -836,7 +836,7 @@ class HTTP
         }
         if (self::$showResponseHeader) {
             $id = 'showResponseHeaderCollapse-' . self::$execCount;
-            echo '<a href="javascript:void(0)" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '">响应头</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
+            echo '<a href="#a-'.$id.'" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '" id="a-'.$id.'">响应头</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
             foreach ($this->responseHeader as $i => $header) {
                 echo '<li class="list-group-item">';
                 $header = trim($header);
