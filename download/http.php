@@ -830,7 +830,7 @@ class HTTP
         self::BLUE("{$this->method} {$this->url} ", true);
         echo '</button></h2><div id="commonConfig" class="accordion-collapse collapse show" aria-labelledby="commonConfigHeading" data-bs-parent="#mainAccordion"><div class="accordion-body d-grid gap-2">';
         if (!$this->httpCode) {
-            self::RED(curl_error($this->curl), true);
+            '<div class="alert alert-danger" role="alert">'. curl_error($this->curl) . '</div>';
         }
         if (self::$showRequestHeader) {
             $id = 'showRequestHeaderCollapse-' . self::$execCount;
@@ -851,7 +851,7 @@ class HTTP
         }
         if (self::$showResponseHeader) {
             $id = 'showResponseHeaderCollapse-' . self::$execCount;
-            echo '<a href="#a-'.$id.'" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '" id="a-'.$id.'">响应头</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
+            echo '<a href="#a-'.$id.'" class="btn btn-outline-primary dropdown-toggle" role="button" data-bs-toggle="collapse" data-bs-target="#' . $id . '" aria-expanded="false" aria-controls="' . $id . '" id="a-'.$id.'">响应头：'.$this->httpCode .'</a><div class="collapse" id="' . $id . '"><ul class="list-group">';
             foreach ($this->responseHeader as $i => $header) {
                 echo '<li class="list-group-item">';
                 $header = trim($header);
@@ -1001,7 +1001,7 @@ class HTTP
             $msg = 'Exec ' . HTTP::$execCount . ' request  and ' . HTTP::$showCount . ' show output' . PHP_EOL;
         }
         if (!self::$isCLI) {
-            echo "</div><h3>$msg</h3>";
+            echo "</div><div class=\"alert alert-success\" role=\"alert\">$msg</div>";
             echo '</div></body></html>';
         } else {
             self::GREEN($msg);
@@ -1068,6 +1068,7 @@ class HTTP
                     font-family: "DejaVu Sans Mono", "Consolas", ui-monospace, monospace;
                     font-size-adjust: 0.5;
                     letter-spacing: 1px;
+                    white-space: pre;
                 }
 
                 code button {
