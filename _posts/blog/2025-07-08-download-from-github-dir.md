@@ -20,4 +20,4 @@ categories: blog
     git config --local remote.origin.partialclonefilter "blob:none tree:0"
     ```
 7. 定位到最新提交 `git fetch --depth=1 --filter=tree:0 origin master`
-8. 拉区代码 `git pull --depth=1  origin master`
+8. 拉区代码 `git checkout FETCH_HEAD`
